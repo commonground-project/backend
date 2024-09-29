@@ -1,10 +1,10 @@
-package com.example.CommonGroundBackend;
+package tw.commonground.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CommonGroundBackendApplicationTests {
+class BackendApplicationTests {
 
 	@Test
 	void contextLoads() {
