@@ -1,4 +1,6 @@
 FROM openjdk:21
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
+RUN addgroup -S spring && adduser -S spring -G spring
+WORKDIR /work/src
+COPY build/libs/*.jar app.jar
+USER spring:spring
 ENTRYPOINT ["java","-jar","/app.jar"]

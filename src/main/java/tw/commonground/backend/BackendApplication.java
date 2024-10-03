@@ -8,13 +8,22 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @RestController
 public class BackendApplication {
-
+  /**
+   * Handles requests to the root URL ("/") and returns a greeting message.
+   *
+   * @return A string greeting message.
+   */
   @RequestMapping("/")
   public String home() {
     return "Hello Docker World";
   }
 
-  public static void main(String[] args) {
+  /**
+   * The entry point of the application.
+   *
+   * @param args command-line arguments (if any)
+   */
+  public static void main(final String[] args) {
     SpringApplication.run(BackendApplication.class, args);
   }
 
