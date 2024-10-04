@@ -68,7 +68,7 @@ jobs:
           cache: gradle
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --no-daemon --build-cache
 
       - name: Build Docker image
         run: docker build --build-arg JAR_FILE=build/libs/*.jar -t springio/gs-spring-boot-docker .
