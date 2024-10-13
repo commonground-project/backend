@@ -53,7 +53,7 @@ jobs:
             megalinter-reports
             mega-linter.log
 
-  project-build:
+  Project-Build:
     needs: megalinter
     runs-on: ubuntu-latest
 
@@ -71,5 +71,21 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --no-daemon --build-cache
 
-      - name: Build Docker image
-        run: docker build --build-arg JAR_FILE=build/libs/*.jar -t springio/gs-spring-boot-docker .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          build-args: |
+            JAR_FILE=build/libs/*.jar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: |
+            commongrondproject/backend:${{ github.ref_name }}
+            commongrondproject/backend:${{ github.sha }}
