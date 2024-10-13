@@ -75,7 +75,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
       - name: Build Docker image
         uses: docker/build-push-action@v6
@@ -87,3 +87,4 @@ jobs:
           push: true
           tags: |
             commongrondproject/backend:${{ github.ref_name }}
+            commongrondproject/backend:${{ github.sha }}
