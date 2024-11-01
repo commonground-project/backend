@@ -101,9 +101,10 @@ jobs:
           echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-#      - name: SSH to Dev
-#        run: |
-#          ssh -i ~/.ssh/id_rsa gh-runner@192.168.80.21 'docker run -d --name pr-${{ github.event.number }} -p ${{ github.event.number }}00 commongroundproject/backend:pr-${{ github.event.number }}'
-#
-#      - name: Clear up
-#        run: rm -f ~/.ssh/id_rsa
+      - name: Deploy image
+        run: |
+          export ENV='${{ github.event.number }}'
+          ssh -o SendEnv=ENV -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+
+      - name: Clear up
+        run: rm ~/.ssh/id_rsa
