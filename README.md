@@ -4,18 +4,18 @@
 
 ### Linting
 
-This project uses [MegaLinter](https://nvuillam.github.io/megalinter) to lint the codebase. To run the linter, use the
+This project uses [MegaLinter](https://megalinter.io/) to lint the codebase. To run the linter, use the
 following command:
 
 ```sh
 make lint
 ```
 
-It will start a docker container and run the linter on the codebase.
+This command will start a Docker container to run the linter against the codebase.
 
 ### Testing
 
-To run the tests, use the following command:
+To execute tests, use the command below:
 
 ```sh
 make test
