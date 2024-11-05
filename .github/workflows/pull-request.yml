@@ -2,9 +2,6 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -14,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  megalinter:
+  Magalinter:
     name: MegaLinter
     runs-on: ubuntu-latest
     permissions:
@@ -53,7 +50,7 @@ jobs:
             megalinter-reports
             mega-linter.log
 
-  project-build:
+  Project-Build:
     runs-on: ubuntu-latest
 
     steps:
@@ -70,5 +67,45 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --no-daemon --build-cache
 
-      - name: Build Docker image
-        run: docker build --build-arg JAR_FILE=build/libs/*.jar -t springio/gs-spring-boot-docker .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: |
+            commongroundproject/backend:pr-${{ github.event.number }}
+            commongroundproject/backend:${{ github.sha }}
+          context: .
+
+  Deploy-Snapshot:
+    needs: Project-Build
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy image
+        run: |
+          export MODE='Snapshot'
+          export ENV='${{ github.event.number }}'
+          ssh -o SendEnv=MODE -o SendEnv=ENV -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+
+      - name: Clear up
+        run: rm ~/.ssh/id_rsa

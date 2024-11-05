@@ -5,16 +5,15 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+    tags:
+      - v*
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
-  megalinter:
+  Magalinter:
     name: MegaLinter
     runs-on: ubuntu-latest
     permissions:
@@ -53,8 +52,8 @@ jobs:
             megalinter-reports
             mega-linter.log
 
-  project-build:
-    needs: megalinter
+  Project-Build:
+    needs: Magalinter
     runs-on: ubuntu-latest
 
     steps:
@@ -71,5 +70,69 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --no-daemon --build-cache
 
-      - name: Build Docker image
-        run: docker build --build-arg JAR_FILE=build/libs/*.jar -t springio/gs-spring-boot-docker .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        if: ${{ contains(github.ref, 'ref/tags/') }}
+        with:
+          build-args: |
+            JAR_FILE=build/libs/*.jar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: |
+            commongrondproject/backend:${{ github.ref_name }}
+            commongrondproject/backend:${{ github.sha }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        if: ${{ !(contains(github.ref, 'ref/tags/')) }}
+        with:
+          build-args: |
+            JAR_FILE=build/libs/*.jar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: |
+            commongrondproject/backend:dev-${{ github.ref_name }}
+            commongrondproject/backend:${{ github.sha }}
+
+  Deploy:
+    needs: [Project-Build, Magalinter]
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy Dev
+        if: ${{ !(contains(github.ref, 'ref/tags/')) }}
+        run: |
+          export MODE='Dev'
+          export ENV='${{ github.event.number }}'
+          export NAME='dev-${{ github.ref_name }}'
+          ssh -o SendEnv=MODE -o SendEnv=NAME -o SendEnv=ENV -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+
+      - name: Deploy Stage
+        if: ${{ (contains(github.ref, 'ref/tags/')) }}
+        run: |
+          export MODE='Stage'
+          export NAME='dev-${{ github.ref_name }}'
+          ssh -o SendEnv=MODE -o SendEnv=NAME -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+
+      - name: Clear up
+        run: rm ~/.ssh/id_rsa
