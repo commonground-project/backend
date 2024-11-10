@@ -104,6 +104,7 @@ jobs:
           tags: |
             commongrondproject/backend:dev-${{ github.ref_name }}
             commongrondproject/backend:${{ github.sha }}
+          context: .
 
   Deploy:
     needs: [Project-Build, MagaLinter]
