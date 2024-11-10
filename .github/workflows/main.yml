@@ -91,6 +91,7 @@ jobs:
           tags: |
             commongrondproject/backend:${{ github.ref_name }}
             commongrondproject/backend:${{ github.sha }}
+          context: .
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v6
@@ -104,6 +105,7 @@ jobs:
           tags: |
             commongrondproject/backend:dev-${{ github.ref_name }}
             commongrondproject/backend:${{ github.sha }}
+          context: .
 
   Deploy:
     needs: [Project-Build, MagaLinter]
