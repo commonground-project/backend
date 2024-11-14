@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.user;
+package tw.commonground.backend.service.user.dto;
 
 
 import lombok.Getter;

@@ -20,6 +20,8 @@ public class UserEntity {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     private String username;
+
+    @Column(unique = true)
     private String email;
     private String nickname;
     private byte[] profileImage;
