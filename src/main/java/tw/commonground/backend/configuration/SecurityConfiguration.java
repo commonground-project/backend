@@ -36,8 +36,6 @@ public class SecurityConfiguration {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,16 +46,16 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/login")
-                        .clientRegistrationRepository(clientRegistrationRepository)
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(this.oauth2UserService())
                                 .userAuthoritiesMapper(this.userAuthoritiesMapper())
                         )
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/api/oauth2")
+                        )
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
-                        .logoutSuccessUrl("/api/login")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 );
@@ -83,7 +81,7 @@ public class SecurityConfiguration {
         };
     }
 
-
+    // for test
     private GrantedAuthoritiesMapper userAuthoritiesMapper() {
         return (authorities) -> {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();

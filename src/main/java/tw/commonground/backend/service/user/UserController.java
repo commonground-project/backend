@@ -21,20 +21,14 @@ public class UserController {
 
     @GetMapping("/api/user")
     public List<UserEntity> getUser() {
-        return userService.getUser();
+        return userService.getUser();   // spec no id
     }
 
-    @PostMapping("/api/setup/complete")
+    @PostMapping("/api/setup")
     public ResponseEntity<?> completeSetup(@RequestBody UserSetupRequest setupRequest, @AuthenticationPrincipal OAuth2User principal) {
         String result = userService.completeSetup(setupRequest, principal);
         return ResponseEntity.ok(result);
     }
 
-//    @GetMapping("/users/{id}")
-//    public String getUserHomePage(@PathVariable Long userId, Model model) {
-//        UserEntity user = userService.getUserById(userId);
-//        model.addAttribute("user", user);
-//        return "user/home";
-//    }
 
 }

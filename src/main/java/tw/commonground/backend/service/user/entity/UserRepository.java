@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE UserEntity u SET u.email = :email, u.role = :role WHERE u.id = :id")
-    void updateById(@Param("id") Long id, @Param("email") String email, @Param("role") String role);
+//    @Modifying
+//    @Transactional
+//    @Query("UPDATE UserEntity u SET u.email = :email, u.role = :role WHERE u.id = :id")
+//    void updateById(@Param("id") Long id, @Param("email") String email, @Param("role") String role);
 
 
     Optional<UserEntity> findByEmail(String email);

@@ -31,9 +31,9 @@ public class UserService {
         UserEntity user = new UserEntity();
         user.setEmail(email);
         user.setProfileImageUrl(profileImageUrl);
-        updateRoleAndSynchronize(user, "ROLE_SETUP_REQUIRED");
-        // when user is created, they are required to set up their account
+        user.setRole("ROLE_SETUP_REQUIRED");
         userRepository.save(user);
+        roleSynchronize(user);
         return user.getId().toString(); // return the user's ID
     }
 
@@ -64,13 +64,11 @@ public class UserService {
         }
     }
 
-    public void updateRoleAndSynchronize(UserEntity user, String newRole) {
-        user.setRole(newRole);
-        userRepository.save(user);
+    public void roleSynchronize(UserEntity user) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        List<GrantedAuthority> updatedAuthorities = Collections.singletonList(new SimpleGrantedAuthority(newRole));
+        List<GrantedAuthority> updatedAuthorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
 
-        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(   // use oauth2
                 auth.getPrincipal(),
                 auth.getCredentials(),
                 updatedAuthorities
@@ -103,10 +101,10 @@ public class UserService {
             UserEntity user = userEntityOptional.get();
             user.setUsername(setupRequest.getUsername());
             user.setNickname(setupRequest.getNickname());
-            user.setEmail(setupRequest.getEmail());
-            user.setProfileImage(setupRequest.getProfileImage());
-            updateRoleAndSynchronize(user, "ROLE_USER");
+            user.setRole("ROLE_USER");
             userRepository.save(user);
+            roleSynchronize(user);
+
             return "User setup completed successfully.";
         } else {
             throw new EmailNotFoundException(email);
