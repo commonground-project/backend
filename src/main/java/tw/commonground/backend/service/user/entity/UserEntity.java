@@ -24,6 +24,8 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
     private String nickname;
+    @Lob
+    @Column(name="profileImage", columnDefinition="BLOB")
     private byte[] profileImage;
     private String role;
 

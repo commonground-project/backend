@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import tw.commonground.backend.service.user.dto.UserResponse;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
@@ -37,36 +38,54 @@ public class UserService {
         return user.getId().toString(); // return the user's ID
     }
 
-    public UserDetails loadUserByEmail(String email) throws EmailNotFoundException {
+    public UserResponse loadUserByEmail(String email) throws EmailNotFoundException {
         Optional<UserEntity> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
             UserEntity userEntity = user.get();
-            return User.builder()
-                    .username(userEntity.getUsername())
-                    .roles(userEntity.getRole())
-                    .build();
+            return new UserResponse(
+                    userEntity.getUsername(),
+                    userEntity.getNickname(),
+                    userEntity.getEmail(),
+                    userEntity.getProfileImage(),
+                    userEntity.getRole()
+            );
         } else {
             throw new EmailNotFoundException(email);
         }
     }
 
-    public UserDetails loadUserById(Long id) throws IdNotFoundException {
+    public UserResponse loadUserById(Long id) throws IdNotFoundException {
         Optional<UserEntity> user = userRepository.findById(id);
         if (user.isPresent()) {
             UserEntity userEntity = user.get();
-            // because user has type Optional<UserEntity>, we can't directly access the properties of the UserEntity
-            return User.builder()
-                    .username(userEntity.getUsername())
-                    .roles(userEntity.getRole())
-                    .build();
+            return new UserResponse(
+                    userEntity.getUsername(),
+                    userEntity.getNickname(),
+                    userEntity.getEmail(),
+                    userEntity.getProfileImage(),
+                    userEntity.getRole()
+            );
         } else {
             throw new IdNotFoundException(id);
         }
     }
 
     public void roleSynchronize(UserEntity user) {
+        System.out.println("Role synchronized");
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<GrantedAuthority> updatedAuthorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
+
+        if (auth == null) { // initial authentication
+            Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                    user.getEmail(),  // user's email as principal
+                    null,             // Google OAuth2 no password
+                    Collections.singletonList(new SimpleGrantedAuthority(user.getRole()))
+            );
+            SecurityContextHolder.getContext().setAuthentication(newAuth);
+            System.out.println("Initial authentication set for first login.");
+            return;
+        }
 
         Authentication newAuth = new UsernamePasswordAuthenticationToken(   // use oauth2
                 auth.getPrincipal(),
@@ -75,6 +94,8 @@ public class UserService {
         );
         SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
+
+
 
     @Secured("ROLE_ADMIN")
     public List<UserEntity> getUser() {
@@ -106,6 +127,17 @@ public class UserService {
             roleSynchronize(user);
 
             return "User setup completed successfully.";
+        } else {
+            throw new EmailNotFoundException(email);
+        }
+    }
+
+    public UserEntity getMe(OAuth2User principal) {
+        String email = principal.getAttribute("email");
+        Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
+
+        if (userEntityOptional.isPresent()) {
+            return userEntityOptional.get();
         } else {
             throw new EmailNotFoundException(email);
         }

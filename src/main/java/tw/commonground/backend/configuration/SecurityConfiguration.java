@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -41,14 +42,13 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/setup/**").hasRole("SET_UP_REQUIRED")
+                        .requestMatchers("/api/setup/**").hasRole("SETUP_REQUIRED")
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(this.oauth2UserService())
-                                .userAuthoritiesMapper(this.userAuthoritiesMapper())
                         )
                         .authorizationEndpoint(authorization -> authorization
                                 .baseUri("/api/oauth2")
@@ -59,7 +59,6 @@ public class SecurityConfiguration {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                 );
-
         return http.build();
     }
 
@@ -71,34 +70,29 @@ public class SecurityConfiguration {
             String email = user.getAttribute("email");
             String profileImageUrl = user.getAttribute("picture");
             String id;
+
+            ArrayList<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
             if (!userService.isEmailRegistered(email)) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_SETUP_REQUIRED"));
                 id = userService.createUser(email, profileImageUrl);
+                System.out.println("User created with ID: " + id);
             } else {
                 id = userService.getUserIdByEmail(email);
             }
-
-            return new DefaultOAuth2User(user.getAuthorities(), user.getAttributes(), "sub");
+            return new DefaultOAuth2User(authorities, user.getAttributes(), "sub");
         };
     }
 
-    // for test
-    private GrantedAuthoritiesMapper userAuthoritiesMapper() {
-        return (authorities) -> {
-            Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-            mappedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            return mappedAuthorities;
-        };
-    }
 
     @Component
-    public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+    public static class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         @Override
         public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                             Authentication authentication) throws IOException, ServletException {
             if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SETUP_REQUIRED"))) {
                 setDefaultTargetUrl("/api/setup");
             } else {
-                setDefaultTargetUrl("/api/home");
+                setDefaultTargetUrl("/api");
             }
             super.onAuthenticationSuccess(request, response, authentication);
         }
