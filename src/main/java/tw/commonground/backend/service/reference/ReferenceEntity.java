@@ -3,11 +3,10 @@ package tw.commonground.backend.service.reference;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "Reference")
@@ -20,19 +19,19 @@ public class ReferenceEntity {
 
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
-    @CreatedBy
+    @CreatedDate
     @Column(nullable = false)
     private LocalDateTime createAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String url;
 
-    @Column(nullable = false)
+    @Column
     private String favicon;
 
-    @Column(nullable = false)
+    @Column
     private String title;
 
 }

@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.fact;
+package tw.commonground.backend.service.fact.entity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
