@@ -1,12 +1,14 @@
-package tw.commonground.backend.service.fact;
+package tw.commonground.backend.service.fact.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import tw.commonground.backend.service.reference.ReferenceEntity;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -23,7 +25,7 @@ public class FactEntity {
     private UUID id;
 
     @CreatedDate
-    @Column(nullable=false)
+    @Column(nullable = false)
     private LocalDateTime createAt;
 
     @LastModifiedDate
@@ -33,14 +35,16 @@ public class FactEntity {
     @Column
     private LocalDateTime deletedAt;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String title;
 
     // TODO: Waiting User Entity
-    @Column(nullable=false)
+    @Column(nullable = false)
     private Long authorId;
 
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String authorName;
 
+    @ManyToMany
+    private Set<ReferenceEntity> references;
 }
