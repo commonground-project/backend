@@ -59,7 +59,7 @@ public class UserController {
     }
 
     @PostMapping("/api/setup")
-    @PreAuthorize("hasRole('SET_UP_REQUIRED')")
+    @PreAuthorize("hasRole('SETUP_REQUIRED')")
     public ResponseEntity<?> completeSetup(@RequestBody UserSetupRequest setupRequest, @AuthenticationPrincipal OAuth2User principal) {
         String result = userService.completeSetup(setupRequest, principal);
         return ResponseEntity.ok(result);
@@ -68,12 +68,6 @@ public class UserController {
     @PutMapping("/api/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok("Logout successful");
-    }
-
-
-    @GetMapping("/api/auth/google/url")
-    public ResponseEntity<String> getGoogleAuthUrl() {
-        return ResponseEntity.ok("https://accounts.google.com/o/oauth2/auth?client_id=...&redirect_uri=...");
     }
 
 
