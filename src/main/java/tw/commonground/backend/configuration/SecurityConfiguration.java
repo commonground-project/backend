@@ -105,7 +105,6 @@ public class SecurityConfiguration {
 
                         UserInitRequest userInitRequest = UserInitRequest.builder()
                                 .email(email)
-                                .username(user.getAttribute("name"))
                                 .profileImageUrl(profileImageUrl)
                                 .build();
 

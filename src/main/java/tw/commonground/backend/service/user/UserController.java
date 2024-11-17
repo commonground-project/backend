@@ -1,9 +1,10 @@
 package tw.commonground.backend.service.user;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.user.dto.UserMapper;
 import tw.commonground.backend.service.user.dto.UserResponse;
@@ -50,18 +51,18 @@ public class UserController {
     }
 
     @GetMapping("/api/users/me")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal OAuth2User principal) {
-        UserEntity userEntity = userService.getMe(principal);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal DefaultOAuth2User user) {
+        UserEntity userEntity = userService.getMe(user.getName());
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/api/setup")
-    @PreAuthorize("hasRole('SETUP_REQUIRED')")
-    public ResponseEntity<String> completeSetup(@RequestBody UserSetupRequest setupRequest, @AuthenticationPrincipal OAuth2User principal) {
-        String result = userService.completeSetup(setupRequest, principal);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<UserResponse> userSetup(@Valid @RequestBody UserSetupRequest setupRequest, @AuthenticationPrincipal DefaultOAuth2User user) {
+        UserEntity userEntity = userService.completeSetup(setupRequest, user.getName());
+        UserResponse response = UserMapper.toResponse(userEntity);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/api/logout")

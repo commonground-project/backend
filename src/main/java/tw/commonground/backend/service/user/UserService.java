@@ -13,6 +13,7 @@ import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.user.entity.UserRole;
 import tw.commonground.backend.service.user.exception.EmailNotFoundException;
+import tw.commonground.backend.service.user.exception.UserAlreadySetupException;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,6 @@ public class UserService {
     public UserEntity createUser(UserInitRequest userInitRequest, UserRole role) {
         UserEntity userEntity = UserEntity.builder()
                 .email(userInitRequest.getEmail())
-                .username(userInitRequest.getUsername())
                 .role(role)
                 .build();
 
@@ -83,10 +83,6 @@ public class UserService {
         return (List<UserEntity>) userRepository.findAll();
     }
 
-    public boolean isEmailRegistered(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
-
     public Optional<UserEntity> getUserById(Long id) {
         return userRepository.findById(id);
     }
@@ -95,25 +91,24 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public String completeSetup(UserSetupRequest setupRequest, OAuth2User principal) {
-        String email = principal.getAttribute("email");
-        Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
+    public UserEntity completeSetup(UserSetupRequest setupRequest, String email) {
+        // Todo: wait for impl rfc 7807, should throw generic not found exception
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow();
 
-        if (userEntityOptional.isPresent()) {
-            UserEntity user = userEntityOptional.get();
-            user.setUsername(setupRequest.getUsername());
-            user.setNickname(setupRequest.getNickname());
-            user.setRole(UserRole.ROLE_USER);
-            userRepository.save(user);
-
-            return "User setup completed successfully.";
+        if (userEntity.getRole() != UserRole.ROLE_NOT_SETUP) {
+            // Use UserAlreadySetupException to provide more context,
+            // instead of `@PreAuthorize("hasRole('SETUP_REQUIRED')")`
+            throw new UserAlreadySetupException(email);
         } else {
-            throw new EmailNotFoundException(email);
+            userEntity.setRole(UserRole.ROLE_USER);
+            userEntity.setUsername(setupRequest.getUsername());
+            userEntity.setNickname(setupRequest.getNickname());
+            return userRepository.save(userEntity);
         }
     }
 
-    public UserEntity getMe(OAuth2User principal) {
-        String email = principal.getAttribute("email");
+    public UserEntity getMe(String email) {
         Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
 
         if (userEntityOptional.isPresent()) {
