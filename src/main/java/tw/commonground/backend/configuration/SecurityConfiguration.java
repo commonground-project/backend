@@ -118,18 +118,4 @@ public class SecurityConfiguration {
             return new DefaultOAuth2User(authorities, user.getAttributes(), "email");
         };
     }
-
-    @Component
-    public static class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-        @Override
-        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                            Authentication authentication) throws IOException, ServletException {
-            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"))) {
-                setDefaultTargetUrl("/api/setup");
-            } else {
-                setDefaultTargetUrl("/api");
-            }
-            super.onAuthenticationSuccess(request, response, authentication);
-        }
-    }
 }
