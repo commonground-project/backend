@@ -15,6 +15,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
@@ -84,6 +85,11 @@ public class SecurityConfiguration {
 
             String email = user.getAttribute("email");
             String picture = user.getAttribute("picture");
+
+            if (email == null) {
+                logger.error("Email not found in OAuth2 response {}", user.getAttributes());
+                throw new OAuth2AuthenticationException("Email not found in OAuth2 response");
+            }
 
             UserEntity userEntity = userService.getUserIdByEmail(email).orElseGet(
                     () -> {
