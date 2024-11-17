@@ -99,7 +99,7 @@ public class SecurityConfiguration {
                                 URI uri = new URI(picture);
                                 profileImageUrl = uri.toURL();
                             } catch (URISyntaxException | MalformedURLException e) {
-                                logger.error("Failed to create URL from profile image URL", e);
+                                logger.error("Failed to create URL from profile image URL, ignoring", e);
                             }
                         }
 
