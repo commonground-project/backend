@@ -14,6 +14,12 @@ public class ImageService {
         this.webClient = webClientBuilder.build();
     }
 
+    /**
+     * Fetch image as byte array. If image is less than 1MB, can use byte array to reduce complexity
+     *
+     * @param imageUrl the image url
+     * @return the mono
+     */
     public Mono<byte[]> fetchImage(String imageUrl) {
         return webClient.get()
                 .uri(imageUrl)
@@ -22,6 +28,12 @@ public class ImageService {
                 .bodyToMono(byte[].class);
     }
 
+    /**
+     * Fetch image as stream. If image is more than 1MB, should use stream to avoid OOM
+     *
+     * @param imageUrl the image url
+     * @return the mono
+     */
     public Mono<DataBuffer> fetchImageAsStream(String imageUrl) {
         return webClient.get()
                 .uri(imageUrl)
