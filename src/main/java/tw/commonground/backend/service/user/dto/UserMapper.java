@@ -3,7 +3,6 @@ package tw.commonground.backend.service.user.dto;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UserMapper {
     private UserMapper() {
@@ -28,6 +27,6 @@ public class UserMapper {
                         userEntity.getEmail(),
                         userEntity.getRole().name()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 }
