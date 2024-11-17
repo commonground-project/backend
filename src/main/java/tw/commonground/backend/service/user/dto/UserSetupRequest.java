@@ -11,5 +11,4 @@ public class UserSetupRequest {
     private String nickname;
     private String email;
     private byte[] profileImage;
-
 }
