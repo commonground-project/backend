@@ -5,7 +5,7 @@ import tw.commonground.backend.service.user.entity.UserEntity;
 
 import java.util.List;
 
-public class UserMapper {
+public final class UserMapper {
     private UserMapper() {
         // hide the constructor
     }
