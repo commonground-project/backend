@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserEntity {
+public class UserEntity implements SimpleUserEntity, FullUserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

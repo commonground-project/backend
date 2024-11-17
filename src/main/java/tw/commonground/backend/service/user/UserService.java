@@ -1,5 +1,7 @@
 package tw.commonground.backend.service.user;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
@@ -8,6 +10,7 @@ import reactor.core.publisher.Mono;
 import tw.commonground.backend.service.image.ImageService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.user.entity.UserRole;
@@ -22,7 +25,11 @@ public class UserService {
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+
     private final ImageService imageService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public UserService(UserRepository userRepository, ImageService imageService) {
         this.userRepository = userRepository;
@@ -50,39 +57,38 @@ public class UserService {
         return (List<UserEntity>) userRepository.findAll();
     }
 
-    public Optional<UserEntity> getUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<FullUserEntity> getUserById(Long id) {
+        return userRepository.findUserEntityById(id);
     }
 
-    public Optional<UserEntity> getUserIdByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<FullUserEntity> getUserIdByEmail(String email) {
+        return userRepository.findUserEntityByEmail(email);
     }
 
-    public UserEntity completeSetup(UserSetupRequest setupRequest, String email) {
+    public FullUserEntity completeSetup(UserSetupRequest setupRequest, String email) {
         // Todo: wait for impl rfc 7807, should throw generic not found exception
-        UserEntity userEntity = userRepository.findByEmail(email)
+        FullUserEntity fullUser = userRepository.findUserEntityByEmail(email)
                 .orElseThrow();
 
-        if (userEntity.getRole() != UserRole.ROLE_NOT_SETUP) {
+        if (fullUser.getRole() != UserRole.ROLE_NOT_SETUP) {
             // Use UserAlreadySetupException to provide more context,
             // instead of `@PreAuthorize("hasRole('SETUP_REQUIRED')")`
             // Todo: will response internal server error before impl rfc 7807
             throw new UserAlreadySetupException(email);
         } else {
-            userEntity.setRole(UserRole.ROLE_USER);
-            userEntity.setUsername(setupRequest.getUsername());
-            userEntity.setNickname(setupRequest.getNickname());
-            return userRepository.save(userEntity);
+            userRepository.setupUserById(fullUser.getId(),
+                    setupRequest.getUsername(),
+                    setupRequest.getNickname(),
+                    UserRole.ROLE_USER);
+
+            // Use to clear hibernate second level cache before fetching and returning user
+            entityManager.clear();
+            return userRepository.findUserEntityByEmail(email).orElseThrow();
         }
     }
 
-    public UserEntity getMe(String email) {
-        Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
-
-        if (userEntityOptional.isPresent()) {
-            return userEntityOptional.get();
-        } else {
-            throw new EmailNotFoundException(email);
-        }
+    public FullUserEntity getMe(String email) {
+        Optional<FullUserEntity> userEntityOptional = userRepository.findUserEntityByEmail(email);
+        return userEntityOptional.orElseThrow(() -> new EmailNotFoundException(email));
     }
 }

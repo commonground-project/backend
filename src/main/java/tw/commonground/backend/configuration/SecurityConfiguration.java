@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Component;
 
 import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
-import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRole;
 
 import java.io.IOException;
@@ -67,7 +68,8 @@ public class SecurityConfiguration {
                         .logoutUrl("/api/logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
-                );
+                )
+                .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
 
@@ -91,7 +93,7 @@ public class SecurityConfiguration {
                 throw new OAuth2AuthenticationException("Email not found in OAuth2 response");
             }
 
-            UserEntity userEntity = userService.getUserIdByEmail(email).orElseGet(
+            FullUserEntity userEntity = userService.getUserIdByEmail(email).orElseGet(
                     () -> {
                         URL profileImageUrl = null;
                         if (picture != null) {
