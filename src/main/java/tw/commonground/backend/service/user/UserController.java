@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
@@ -23,12 +24,12 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/api")
+    @GetMapping("/")
     public ResponseEntity<String> home() {
         return ResponseEntity.ok("login successful");
     }
 
-    @GetMapping("/api/users")
+    @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getUser() {
         List<UserEntity> userEntities = userService.getUsers();
@@ -36,7 +37,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/users/{id}")
+    @GetMapping("/user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         Optional<UserEntity> userEntityOptional = userService.getUserById(id);
@@ -50,7 +51,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/users/me")
+    @GetMapping("/user/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal DefaultOAuth2User user) {
         UserEntity userEntity = userService.getMe(user.getName());
@@ -58,15 +59,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/api/setup")
+    @PostMapping("/user/setup")
     public ResponseEntity<UserResponse> userSetup(@Valid @RequestBody UserSetupRequest setupRequest, @AuthenticationPrincipal DefaultOAuth2User user) {
         UserEntity userEntity = userService.completeSetup(setupRequest, user.getName());
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/api/logout")
-    public ResponseEntity<String> logout() {
-        return ResponseEntity.ok("Logout successful");
     }
 }

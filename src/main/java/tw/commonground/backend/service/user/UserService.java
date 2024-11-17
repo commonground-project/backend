@@ -3,7 +3,6 @@ package tw.commonground.backend.service.user;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import tw.commonground.backend.service.image.ImageService;
@@ -46,38 +45,6 @@ public class UserService {
         return userEntity;
     }
 
-//    public UserResponse loadUserByEmail(String email) throws EmailNotFoundException {
-//        Optional<UserEntity> user = userRepository.findByEmail(email);
-//        if (user.isPresent()) {
-//            UserEntity userEntity = user.get();
-//            return new UserResponse(
-//                    userEntity.getUsername(),
-//                    userEntity.getNickname(),
-//                    userEntity.getEmail(),
-//                    userEntity.getProfileImage(),
-//                    userEntity.getRole()
-//            );
-//        } else {
-//            throw new EmailNotFoundException(email);
-//        }
-//    }
-//
-//    public UserResponse loadUserById(Long id) throws IdNotFoundException {
-//        Optional<UserEntity> user = userRepository.findById(id);
-//        if (user.isPresent()) {
-//            UserEntity userEntity = user.get();
-//            return new UserResponse(
-//                    userEntity.getUsername(),
-//                    userEntity.getNickname(),
-//                    userEntity.getEmail(),
-//                    userEntity.getProfileImage(),
-//                    userEntity.getRole()
-//            );
-//        } else {
-//            throw new IdNotFoundException(id);
-//        }
-//    }
-
     @Secured("ROLE_ADMIN")
     public List<UserEntity> getUsers() {
         return (List<UserEntity>) userRepository.findAll();
@@ -99,6 +66,7 @@ public class UserService {
         if (userEntity.getRole() != UserRole.ROLE_NOT_SETUP) {
             // Use UserAlreadySetupException to provide more context,
             // instead of `@PreAuthorize("hasRole('SETUP_REQUIRED')")`
+            // Todo: will response internal server error before impl rfc 7807
             throw new UserAlreadySetupException(email);
         } else {
             userEntity.setRole(UserRole.ROLE_USER);
