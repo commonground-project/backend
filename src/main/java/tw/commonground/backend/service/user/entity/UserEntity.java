@@ -2,8 +2,7 @@ package tw.commonground.backend.service.user.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,20 +13,26 @@ import java.net.URL;
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     private String username;
 
     @Column(unique = true)
     private String email;
+
     private String nickname;
-    @Lob
-    @Column(name="profileImage", columnDefinition="BLOB")
+
     private byte[] profileImage;
-    private String role;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     public void setProfileImageUrl(String profileImageUrl) {
         try (InputStream in = new URL(profileImageUrl).openStream();
@@ -43,5 +48,4 @@ public class UserEntity {
             e.printStackTrace();
         }
     }
-
 }
