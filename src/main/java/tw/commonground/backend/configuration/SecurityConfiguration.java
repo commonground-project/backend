@@ -3,18 +3,15 @@ package tw.commonground.backend.configuration;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -25,8 +22,15 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import tw.commonground.backend.service.user.UserService;
+import tw.commonground.backend.service.user.dto.UserInitRequest;
+import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.service.user.entity.UserRole;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 @EnableMethodSecurity(securedEnabled = true)
@@ -34,9 +38,13 @@ import java.util.*;
 @Configuration
 public class SecurityConfiguration {
 
-    @Autowired
-    private UserService userService;
+    private final Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
 
+    private final UserService userService;
+
+    public SecurityConfiguration(UserService userService) {
+        this.userService = userService;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -62,34 +70,54 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+    /**
+     * Parse OAuth2 user, then fetch user from database or create new user if not exists.
+     *
+     * @return OAuth2UserService
+     */
     private OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
-        return (userRequest) -> {
+        return userRequest -> {
+            UserRole defaultRole = UserRole.ROLE_NOT_SETUP;
+
             OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
             OAuth2User user = delegate.loadUser(userRequest);
 
             String email = user.getAttribute("email");
-            String profileImageUrl = user.getAttribute("picture");
-            String id;
+            String picture = user.getAttribute("picture");
 
-            ArrayList<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
-            if (!userService.isEmailRegistered(email)) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_SETUP_REQUIRED"));
-                id = userService.createUser(email, profileImageUrl);
-                System.out.println("User created with ID: " + id);
-            } else {
-                id = userService.getUserIdByEmail(email);
-            }
-            return new DefaultOAuth2User(authorities, user.getAttributes(), "sub");
+            UserEntity userEntity = userService.getUserIdByEmail(email).orElseGet(
+                    () -> {
+                        URL profileImageUrl = null;
+                        if (picture != null) {
+                            try {
+                                URI uri = new URI(picture);
+                                profileImageUrl = uri.toURL();
+                            } catch (URISyntaxException | MalformedURLException e) {
+                                logger.error("Failed to create URL from profile image URL", e);
+                            }
+                        }
+
+                        UserInitRequest userInitRequest = UserInitRequest.builder()
+                                .email(email)
+                                .username(user.getAttribute("name"))
+                                .profileImageUrl(profileImageUrl)
+                                .build();
+
+                        return userService.createUser(userInitRequest, defaultRole);
+                    }
+            );
+
+            var authorities = List.of(new SimpleGrantedAuthority(userEntity.getRole().name()));
+            return new DefaultOAuth2User(authorities, user.getAttributes(), "email");
         };
     }
-
 
     @Component
     public static class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         @Override
         public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                             Authentication authentication) throws IOException, ServletException {
-            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SETUP_REQUIRED"))) {
+            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"))) {
                 setDefaultTargetUrl("/api/setup");
             } else {
                 setDefaultTargetUrl("/api");
