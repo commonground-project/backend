@@ -61,7 +61,8 @@ public class UserController {
     }
 
     @PostMapping("/user/setup")
-    public ResponseEntity<UserResponse> userSetup(@Valid @RequestBody UserSetupRequest setupRequest, @AuthenticationPrincipal DefaultOAuth2User user) {
+    public ResponseEntity<UserResponse> userSetup(@Valid @RequestBody UserSetupRequest setupRequest,
+                                                  @AuthenticationPrincipal DefaultOAuth2User user) {
         FullUserEntity userEntity = userService.completeSetup(setupRequest, user.getName());
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
