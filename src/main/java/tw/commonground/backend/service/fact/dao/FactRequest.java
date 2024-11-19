@@ -6,7 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import tw.commonground.backend.service.reference.ReferenceRequest;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -15,6 +16,6 @@ import java.util.List;
 public class FactRequest {
 
     private String title;
-    private List<ReferenceRequest> references;
+    private Set<ReferenceRequest> references = new HashSet<>();
 
 }

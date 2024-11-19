@@ -45,6 +45,9 @@ public class FactEntity {
     @Column(nullable = false)
     private String authorName;
 
+    @Column(nullable = false)
+    private String authorAvatar;
+
     @ManyToMany
     private Set<ReferenceEntity> references;
 }
