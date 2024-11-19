@@ -7,7 +7,7 @@ public final class ProblemTemplate {
 
     public static final String UNAUTHORIZED = """
             {
-                "type": "UNAUTHORIZED",
+                "type": "type:UNAUTHORIZED",
                 "title": "Unauthorized",
                 "status": 401,
                 "detail": "Login required"
@@ -16,7 +16,7 @@ public final class ProblemTemplate {
 
     public static final String FORBIDDEN = """
             {
-                "type": "FORBIDDEN",
+                "type": "type:FORBIDDEN",
                 "title": "Forbidden",
                 "status": 403,
                 "detail": "Permission denied"
