@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.image.ImageService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
@@ -66,9 +67,8 @@ public class UserService {
     }
 
     public FullUserEntity completeSetup(UserSetupRequest setupRequest, String email) {
-        // Todo: wait for impl rfc 7807, should throw generic not found exception
         FullUserEntity fullUser = userRepository.findUserEntityByEmail(email)
-                .orElseThrow();
+                .orElseThrow(() -> new EntityNotFoundException("User", "email", email));
 
         if (fullUser.getRole() != UserRole.ROLE_NOT_SETUP) {
             // Use UserAlreadySetupException to provide more context,
