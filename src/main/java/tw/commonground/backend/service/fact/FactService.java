@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.fact;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,15 +11,15 @@ import tw.commonground.backend.service.fact.dao.FactRequest;
 import tw.commonground.backend.service.fact.dao.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
-import tw.commonground.backend.service.reference.ReferenceEntity;
-import tw.commonground.backend.service.reference.ReferenceRepository;
-import tw.commonground.backend.service.reference.ReferenceRequest;
+import tw.commonground.backend.service.reference.*;
+import tw.commonground.backend.shared.exceptions.ExceptionResponse;
+import tw.commonground.backend.shared.exceptions.IdNotFoundException;
+import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.shared.pagination.PaginationResponse;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class FactService {
@@ -27,27 +28,40 @@ public class FactService {
 
     private final ReferenceRepository referenceRepository;
 
-    private final FactMapper mapper = new FactMapper();
+    private final FactMapper factMapper = new FactMapper();
+    private final ReferenceMapper referenceMapper = new ReferenceMapper();
 
     public FactService(FactRepository factRepository, ReferenceRepository referenceRepository) {
         this.factRepository = factRepository;
         this.referenceRepository = referenceRepository;
     }
 
-    public List<FactResponse> getFacts(int page, int size, String column, String mode) {
-        Sort sorted = Sort.by((Objects.equals(mode, "asc") ? Sort.Order.by(column) : Sort.Order.desc(column)));
+    public WrappedPaginationResponse<List<FactResponse>> getFacts(int page, int size, String column, String mode) {
+
+        Sort sorted = Sort.by((Objects.equals(mode, "desc") ? Sort.Order.desc(column) : Sort.Order.asc(column)));
         Pageable pageable = PageRequest.of(page, size, sorted);
         Page<FactEntity> pageFacts = factRepository.findAll(pageable);
-        return pageFacts.getContent()
+
+        List<FactResponse> factResponses = pageFacts.getContent()
                 .stream()
-                .map(mapper::toResponse)
-                .collect(toList());
+                .map(factMapper::toResponse)
+                .toList();
+
+        return new WrappedPaginationResponse<>(factResponses, PaginationResponse.builder()
+                .totalElement(pageFacts.getTotalElements())
+                .totalPage(pageFacts.getTotalPages())
+                .number(pageFacts.getNumber())
+                .size(pageFacts.getSize())
+                .build());
     }
 
 
-    public FactResponse getFact(UUID id) {
-        //TODO: Add error handling of entity not found
-        return factRepository.findById(id).map(mapper::toResponse).orElse(null);
+    public FactResponse getFact(UUID id, HttpServletRequest request) throws ExceptionResponse {
+        FactEntity factEntity = factRepository.findById(id).orElse(null);
+        if (factEntity == null) {
+            throw new IdNotFoundException(id, request.getRequestURI());
+        }
+        return factRepository.findById(id).map(factMapper::toResponse).orElse(null);
     }
 
     public FactResponse createFact(FactRequest factRequest) {
@@ -56,36 +70,85 @@ public class FactService {
                 .title(factRequest.getTitle())
                 .authorId(1L)
                 .authorName("aaa")
+                .authorAvatar("asd")
                 .references(new HashSet<>())
                 .build();
 
         List<String> urls = factRequest.getReferences().stream().map(ReferenceRequest::getUrl).toList();
         addReferenceToFact(factEntity.getReferences(), urls);
 
-        return mapper.toResponse(factRepository.save(factEntity));
+        return factMapper.toResponse(factRepository.save(factEntity));
     }
 
-    public FactResponse updateFact(UUID id, FactRequest factRequest) {
-        //TODO: Add error handling of entity not found
+    public FactResponse updateFact(
+            UUID id, FactRequest factRequest, HttpServletRequest request
+    ) throws ExceptionResponse {
         FactEntity factEntity = factRepository.findById(id).orElse(null);
-        assert factEntity != null;
+        if (factEntity == null) {
+            throw new IdNotFoundException(id, request.getRequestURI());
+        }
 
         factEntity.setTitle(factRequest.getTitle());
 
         List<String> urls = factRequest.getReferences().stream().map(ReferenceRequest::getUrl).toList();
+        updateReferences(urls, factEntity);
 
+        return factMapper.toResponse(factRepository.save(factEntity));
+    }
+
+    public void deleteFact(UUID id, HttpServletRequest request) throws ExceptionResponse {
+        FactEntity factEntity = factRepository.findById(id).orElse(null);
+        if (factEntity == null) {
+            throw new IdNotFoundException(id, request.getRequestURI());
+        }
+        factRepository.delete(factEntity);
+    }
+
+    public List<ReferenceResponse> getFactReferences(UUID id, HttpServletRequest request) throws ExceptionResponse {
+        FactEntity factEntity = factRepository.findById(id).orElse(null);
+        if (factEntity == null) {
+            throw new IdNotFoundException(id, request.getRequestURI());
+        }
+        return factEntity.getReferences().stream().map(referenceMapper::toResponse).toList();
+    }
+
+    public List<ReferenceResponse> updateFactReferences(
+            UUID id, List<ReferenceRequest> referenceRequests, HttpServletRequest request
+    ) throws ExceptionResponse {
+        FactEntity factEntity = factRepository.findById(id).orElse(null);
+        if (factEntity == null) {
+            throw new IdNotFoundException(id, request.getRequestURI());
+        }
+        if (factEntity.getReferences() == null) {
+            factEntity.setReferences(new HashSet<>());
+        }
+
+        List<String> urls = referenceRequests.stream().map(ReferenceRequest::getUrl).toList();
+        updateReferences(urls, factEntity);
+
+        return factEntity.getReferences().stream().map(referenceMapper::toResponse).toList();
+    }
+
+    public void deleteFactReferences(
+            UUID id, long referenceId, HttpServletRequest request
+    ) throws ExceptionResponse {
+        FactEntity factEntity = factRepository.findById(id).orElse(null);
+        if (factEntity == null) {
+            throw new IdNotFoundException(id, request.getRequestURI());
+        }
+
+        Set<ReferenceEntity> referenceEntities = factEntity.getReferences();
+        referenceEntities.removeIf(referenceEntity -> referenceEntity.getId().equals(referenceId));
+        factEntity.setReferences(referenceEntities);
+        factRepository.save(factEntity);
+    }
+
+    private void updateReferences(List<String> urls, FactEntity factEntity) {
         List<ReferenceEntity> newUrls = factEntity.getReferences().stream()
                 .filter(entity -> urls.contains(entity.getUrl())).toList();
         factEntity.setReferences(new HashSet<>(newUrls));
 
         addReferenceToFact(factEntity.getReferences(), urls);
-
-        return mapper.toResponse(factRepository.save(factEntity));
-    }
-
-    public void deleteFact(UUID id) {
-        //TODO: Add error handling of entity not found
-        factRepository.deleteById(id);
     }
 
     private void addReferenceToFact(Set<ReferenceEntity> referenceEntities, List<String> urls) {
@@ -96,14 +159,15 @@ public class FactService {
                 .collect(Collectors.toMap(ReferenceEntity::getUrl, Function.identity()));
 
         for (String url : uniqueUrl) {
-            ReferenceEntity existReferenceEntity = existReferenceMap.get(url);
-            if (existReferenceEntity == null) {
-                existReferenceEntity = ReferenceEntity.builder().url(url).build();
-                existReferenceMap.put(url, existReferenceEntity);
-            }
+            ReferenceEntity existReferenceEntity = existReferenceMap.computeIfAbsent(
+                    url,
+                    k -> ReferenceEntity.builder().url(url).build()
+            );
             referenceEntities.add(existReferenceEntity);
         }
 
         referenceRepository.saveAll(referenceEntities);
     }
+
+
 }
