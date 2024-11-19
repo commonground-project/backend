@@ -57,8 +57,8 @@ public class UserService {
         return (List<UserEntity>) userRepository.findAll();
     }
 
-    public Optional<FullUserEntity> getUserById(Long id) {
-        return userRepository.findUserEntityById(id);
+    public Optional<FullUserEntity> getUserByUsername(String username) {
+        return userRepository.findUserEntityByUsername(username);
     }
 
     public Optional<FullUserEntity> getUserIdByEmail(String email) {
