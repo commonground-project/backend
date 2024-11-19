@@ -24,6 +24,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                     @NonNull HttpHeaders headers,
                                                                     @NonNull HttpStatusCode status,
                                                                     @NonNull WebRequest request) {
+
         ErrorResponseException exception = new ErrorResponseException(status);
         exception.setTitle("Not found");
         exception.setType(URI.create("type:NOT_FOUND"));
@@ -33,10 +34,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(@NonNull HttpRequestMethodNotSupportedException ex,
-                                                                         @NonNull HttpHeaders headers,
-                                                                         @NonNull HttpStatusCode status,
-                                                                         @NonNull WebRequest request) {
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
+            @NonNull HttpRequestMethodNotSupportedException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
+
         ErrorResponseException exception = new ErrorResponseException(status);
         exception.setTitle("Method not supported");
         exception.setType(URI.create("type:METHOD_NOT_SUPPORTED"));

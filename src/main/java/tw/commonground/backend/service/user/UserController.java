@@ -41,7 +41,7 @@ public class UserController {
 
     @GetMapping("/user/{username}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable String username) {
+    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable @NotBlank String username) {
         FullUserEntity userEntity = userService.getUserByUsername(username).orElseThrow(
                 () -> new EntityNotFoundException("User", "username", username));
 

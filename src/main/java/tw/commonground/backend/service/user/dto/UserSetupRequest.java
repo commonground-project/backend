@@ -9,6 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@SuppressWarnings("MagicNumber")
 public class UserSetupRequest {
 
     @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters long")
