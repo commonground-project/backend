@@ -15,7 +15,6 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.user.entity.UserRole;
-import tw.commonground.backend.service.user.exception.EmailNotFoundException;
 import tw.commonground.backend.service.user.exception.UserAlreadySetupException;
 
 import java.util.List;
@@ -73,7 +72,6 @@ public class UserService {
         if (fullUser.getRole() != UserRole.ROLE_NOT_SETUP) {
             // Use UserAlreadySetupException to provide more context,
             // instead of `@PreAuthorize("hasRole('SETUP_REQUIRED')")`
-            // Todo: will response internal server error before impl rfc 7807
             throw new UserAlreadySetupException(email);
         } else {
             userRepository.setupUserById(fullUser.getId(),
@@ -89,6 +87,6 @@ public class UserService {
 
     public FullUserEntity getMe(String email) {
         Optional<FullUserEntity> userEntityOptional = userRepository.findUserEntityByEmail(email);
-        return userEntityOptional.orElseThrow(() -> new EmailNotFoundException(email));
+        return userEntityOptional.orElseThrow(() -> new EntityNotFoundException("User", "email", email));
     }
 }
