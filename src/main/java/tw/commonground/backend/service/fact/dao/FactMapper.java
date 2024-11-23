@@ -1,10 +1,8 @@
 package tw.commonground.backend.service.fact.dao;
 
-import org.springframework.stereotype.Component;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reference.ReferenceMapper;
 
-@Component
 public class FactMapper {
 
     private final ReferenceMapper referenceMapper = new ReferenceMapper();

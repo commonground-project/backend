@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Reference")
+@Table
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,10 +28,9 @@ public class ReferenceEntity {
     @Column(nullable = false, unique = true)
     private String url;
 
-    @Column
     private String favicon;
 
-    @Column
+    @Column(nullable = false)
     private String title;
 
 }

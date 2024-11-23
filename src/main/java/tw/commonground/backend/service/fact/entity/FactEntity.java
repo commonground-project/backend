@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Fact")
+@Table
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,7 +32,6 @@ public class FactEntity {
     @Column
     private LocalDateTime updatedAt;
 
-    @Column
     private LocalDateTime deletedAt;
 
     @Column(nullable = false)

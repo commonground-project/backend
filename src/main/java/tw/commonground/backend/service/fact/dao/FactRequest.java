@@ -1,21 +1,22 @@
 package tw.commonground.backend.service.fact.dao;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.*;
 import tw.commonground.backend.service.reference.ReferenceRequest;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class FactRequest {
 
+    @NotEmpty
     private String title;
     private Set<ReferenceRequest> references = new HashSet<>();
+
+    public Optional<Set<ReferenceRequest>> getReferences() {
+        return Optional.ofNullable(references);
+    }
 
 }

@@ -10,6 +10,7 @@ import tw.commonground.backend.service.reference.ReferenceRequest;
 import tw.commonground.backend.service.reference.ReferenceResponse;
 import tw.commonground.backend.shared.exceptions.ExceptionResponse;
 import tw.commonground.backend.shared.exceptions.InvalidSortColumnException;
+import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 
 import java.util.*;
@@ -31,28 +32,26 @@ public class FactController {
             "authorName");
 
     @GetMapping("/api/facts")
-    public WrappedPaginationResponse<List<FactResponse>> listFacts(@RequestParam int page,
-                                                                   @RequestParam String sort,
-                                                                   @RequestParam int size,
+    public WrappedPaginationResponse<List<FactResponse>> listFacts(@RequestParam PaginationRequest pagination,
                                                                    HttpServletRequest request)
             throws ExceptionResponse {
 
-        List<String> sortBy = Arrays.stream(sort.split(",")).toList();
+        List<String> sortBy = Arrays.stream(pagination.getSort().split(",")).toList();
         if (!validSortColumnOfFact.contains(sortBy.getFirst())) {
             throw new InvalidSortColumnException(sortBy.getFirst(), request.getRequestURI());
         }
 
         WrappedPaginationResponse<List<FactResponse>> factResponses;
-        factResponses = factService.getFacts(page, size, sortBy.getFirst(), sortBy.getLast());
+        factResponses = factService.getFacts(pagination.getPage(),
+                pagination.getSize(),
+                sortBy.getFirst(),
+                sortBy.getLast());
+
         return factResponses;
     }
 
     @PostMapping("/api/facts")
     public FactResponse createFact(@RequestBody FactRequest factRequest) {
-        if (factRequest.getReferences() == null) {
-            factRequest.setReferences(new HashSet<>());
-        }
-
         return factService.createFact(factRequest);
     }
 
@@ -65,10 +64,6 @@ public class FactController {
     public FactResponse updateFact(@PathVariable String id,
                                    @RequestBody FactRequest factRequest,
                                    HttpServletRequest request) throws ExceptionResponse {
-
-        if (factRequest.getReferences() == null) {
-            factRequest.setReferences(new HashSet<>());
-        }
 
         return factService.updateFact(UUID.fromString(id), factRequest, request);
     }

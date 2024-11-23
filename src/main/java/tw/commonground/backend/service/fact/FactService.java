@@ -14,8 +14,8 @@ import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.*;
 import tw.commonground.backend.shared.exceptions.ExceptionResponse;
 import tw.commonground.backend.shared.exceptions.IdNotFoundException;
+import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
-import tw.commonground.backend.shared.pagination.PaginationResponse;
 
 import java.util.*;
 import java.util.function.Function;
@@ -30,6 +30,7 @@ public class FactService {
 
     private final FactMapper factMapper = new FactMapper();
     private final ReferenceMapper referenceMapper = new ReferenceMapper();
+    private final PaginationMapper paginationMapper = new PaginationMapper();
 
     public FactService(FactRepository factRepository, ReferenceRepository referenceRepository) {
         this.factRepository = factRepository;
@@ -46,12 +47,7 @@ public class FactService {
                 .map(factMapper::toResponse)
                 .toList();
 
-        return new WrappedPaginationResponse<>(factResponses, PaginationResponse.builder()
-                .totalElement(pageFacts.getTotalElements())
-                .totalPage(pageFacts.getTotalPages())
-                .number(pageFacts.getNumber())
-                .size(pageFacts.getSize())
-                .build());
+        return new WrappedPaginationResponse<>(factResponses, paginationMapper.toResponse(pageFacts));
     }
 
 
@@ -73,8 +69,9 @@ public class FactService {
                 .references(new HashSet<>())
                 .build();
 
-        List<String> urls = factRequest.getReferences().stream().map(ReferenceRequest::getUrl).toList();
-        addReferenceToFact(factEntity.getReferences(), urls);
+        factRequest.getReferences().ifPresent(references ->
+            addReferenceToFact(factEntity.getReferences(), references.stream().map(ReferenceRequest::getUrl).toList())
+        );
 
         return factMapper.toResponse(factRepository.save(factEntity));
     }
@@ -88,8 +85,8 @@ public class FactService {
 
         factEntity.setTitle(factRequest.getTitle());
 
-        List<String> urls = factRequest.getReferences().stream().map(ReferenceRequest::getUrl).toList();
-        updateReferences(urls, factEntity);
+        factRequest.getReferences().ifPresent(references ->
+            updateReferences(references.stream().map(ReferenceRequest::getUrl).toList(), factEntity));
 
         return factMapper.toResponse(factRepository.save(factEntity));
     }
