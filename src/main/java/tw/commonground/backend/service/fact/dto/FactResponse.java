@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.fact.dao;
+package tw.commonground.backend.service.fact.dto;
 
 import lombok.*;
 import tw.commonground.backend.service.reference.ReferenceResponse;

@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.fact.dao;
+package tw.commonground.backend.service.fact.dto;
 
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reference.ReferenceMapper;
