@@ -32,7 +32,7 @@ public class FactController {
             "authorName");
 
     @GetMapping("/api/facts")
-    public WrappedPaginationResponse<List<FactResponse>> listFacts(@RequestParam PaginationRequest pagination,
+    public WrappedPaginationResponse<List<FactResponse>> listFacts(PaginationRequest pagination,
                                                                    HttpServletRequest request)
             throws ExceptionResponse {
 

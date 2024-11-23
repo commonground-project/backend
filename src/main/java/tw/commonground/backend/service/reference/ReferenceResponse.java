@@ -3,9 +3,11 @@ package tw.commonground.backend.service.reference;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@Data
 @AllArgsConstructor
 public class ReferenceResponse {
     @JsonProperty("create_at")
