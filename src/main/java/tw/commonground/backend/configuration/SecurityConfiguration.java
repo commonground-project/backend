@@ -86,7 +86,7 @@ public class SecurityConfiguration {
                 throw new OAuth2AuthenticationException("Email not found in OAuth2 response");
             }
 
-            FullUserEntity userEntity = userService.getUserIdByEmail(email).orElseGet(
+            FullUserEntity userEntity = userService.getUserByEmail(email).orElseGet(
                     () -> {
                         URL profileImageUrl = null;
                         if (picture != null) {

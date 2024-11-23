@@ -61,7 +61,7 @@ public class UserService {
         return userRepository.findUserEntityById(id);
     }
 
-    public Optional<FullUserEntity> getUserIdByEmail(String email) {
+    public Optional<FullUserEntity> getUserByEmail(String email) {
         return userRepository.findUserEntityByEmail(email);
     }
 
