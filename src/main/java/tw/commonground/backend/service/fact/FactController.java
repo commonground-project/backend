@@ -31,15 +31,13 @@ public class FactController {
             "authorName");
 
     @GetMapping("/api/facts")
-    public WrappedPaginationResponse<List<FactResponse>> listFacts(
-            @RequestParam int page,
-            @RequestParam String sort,
-            @RequestParam int size,
-            HttpServletRequest request
-    ) throws ExceptionResponse {
+    public WrappedPaginationResponse<List<FactResponse>> listFacts(@RequestParam int page,
+                                                                   @RequestParam String sort,
+                                                                   @RequestParam int size,
+                                                                   HttpServletRequest request)
+            throws ExceptionResponse {
 
         List<String> sortBy = Arrays.stream(sort.split(",")).toList();
-
         if (!validSortColumnOfFact.contains(sortBy.getFirst())) {
             throw new InvalidSortColumnException(sortBy.getFirst(), request.getRequestURI());
         }
@@ -59,16 +57,15 @@ public class FactController {
     }
 
     @GetMapping("/api/fact/{id}")
-    public FactResponse getFact(
-            @PathVariable String id, HttpServletRequest request
-    ) throws ExceptionResponse {
+    public FactResponse getFact(@PathVariable String id, HttpServletRequest request) throws ExceptionResponse {
         return factService.getFact(UUID.fromString(id), request);
     }
 
     @PutMapping("/api/fact/{id}")
-    public FactResponse updateFact(
-            @PathVariable String id, @RequestBody FactRequest factRequest, HttpServletRequest request
-    ) throws ExceptionResponse {
+    public FactResponse updateFact(@PathVariable String id,
+                                   @RequestBody FactRequest factRequest,
+                                   HttpServletRequest request) throws ExceptionResponse {
+
         if (factRequest.getReferences() == null) {
             factRequest.setReferences(new HashSet<>());
         }
@@ -77,31 +74,33 @@ public class FactController {
     }
 
     @DeleteMapping("/api/fact/{id}")
-    public ResponseEntity<String> deleteFact(
-            @PathVariable String id, HttpServletRequest request
-    ) throws ExceptionResponse {
+    public ResponseEntity<String> deleteFact(@PathVariable String id, HttpServletRequest request)
+            throws ExceptionResponse {
+
         factService.deleteFact(UUID.fromString(id), request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/api/fact/{id}/references")
-    public List<ReferenceResponse> getFactReferences(
-            @PathVariable String id, HttpServletRequest request
-    ) throws ExceptionResponse {
+    public List<ReferenceResponse> getFactReferences(@PathVariable String id, HttpServletRequest request)
+            throws ExceptionResponse {
+
         return factService.getFactReferences(UUID.fromString(id), request);
     }
 
     @PostMapping("/api/fact/{id}/references")
-    public List<ReferenceResponse> updateFactReferences(
-            @PathVariable String id, @RequestBody List<ReferenceRequest> referenceRequests, HttpServletRequest request
-    ) throws ExceptionResponse {
+    public List<ReferenceResponse> updateFactReferences(@PathVariable String id,
+                                                        @RequestBody List<ReferenceRequest> referenceRequests,
+                                                        HttpServletRequest request) throws ExceptionResponse {
+
         return factService.updateFactReferences(UUID.fromString(id), referenceRequests, request);
     }
 
     @DeleteMapping("/api/fact/{id}/reference/{referenceId}")
-    public ResponseEntity<String> deleteFactReferences(
-            @PathVariable String id, @PathVariable long referenceId, HttpServletRequest request
-    ) throws ExceptionResponse {
+    public ResponseEntity<String> deleteFactReferences(@PathVariable String id,
+                                                       @PathVariable long referenceId,
+                                                       HttpServletRequest request) throws ExceptionResponse {
+
         factService.deleteFactReferences(UUID.fromString(id), referenceId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
