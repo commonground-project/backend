@@ -1,23 +1,24 @@
 package tw.commonground.backend.service.viewpoint.dto;
 
 
-import tw.commonground.backend.service.viewpoint.entity.ViewPointReaction;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointReaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 
 import java.util.List;
 
 public final class ViewpointMapper {
 
-    private ViewpointMapper() {
-        // hide the constuctor
+    public ViewpointMapper() {
+        // hide the constructor
     }
 
-    public static ViewpointReactionResponse toReactionResponse(ViewPointReaction viewpointReaction) {
+    public static ViewpointReactionResponse toReactionResponse(ViewpointReaction viewpointReaction) {
         return new ViewpointReactionResponse(viewpointReaction.getReaction().name());
     }
 
-    public static ViewPointResponse toResponse(ViewpointEntity viewpointEntity) {
-        return new ViewPointResponse(
+    public static ViewpointResponse toResponse(ViewpointEntity viewpointEntity) {
+        return new ViewpointResponse(
+            viewpointEntity.getId(),
             viewpointEntity.getCreatedAt(),
             viewpointEntity.getUpdatedAt(),
             viewpointEntity.getTitle(),
@@ -34,9 +35,10 @@ public final class ViewpointMapper {
     }
 
 
-    public static List<ViewPointResponse> toResponses(List<ViewpointEntity> viewpointEntities) {
+    public static List<ViewpointResponse> toResponses(List<ViewpointEntity> viewpointEntities) {
         return viewpointEntities.stream()
-                .map(viewpointEntity -> new ViewPointResponse(
+                .map(viewpointEntity -> new ViewpointResponse(
+                        viewpointEntity.getId(),
                         viewpointEntity.getCreatedAt(),
                         viewpointEntity.getUpdatedAt(),
                         viewpointEntity.getTitle(),

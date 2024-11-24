@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ViewPointReaction {
+public class ViewpointReaction {
     @Enumerated(EnumType.STRING)
     private Reaction reaction;
 }

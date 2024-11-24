@@ -40,7 +40,7 @@ public class ViewpointEntity {
     private URI authorAvatar;
 
     @Column(nullable = false)
-    private ViewPointReaction userReaction;
+    private ViewpointReaction userReaction;
 
     @Column(nullable = false)
     private Integer likeCount;
