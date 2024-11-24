@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.pagination;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Order;
@@ -8,8 +9,12 @@ import tw.commonground.backend.exception.EntityNotFoundException;
 
 import java.util.*;
 
+@AllArgsConstructor
 public class PaginationValidator {
-    public Pageable validatePaginationRequest(PaginationRequest paginationRequest, Set<String> sortableColumn) {
+
+    private Set<String> sortableColumn;
+
+    public Pageable validatePaginationRequest(PaginationRequest paginationRequest) {
         List<Order> orders = new ArrayList<>();
         Arrays.stream(paginationRequest.getSort().split(",")).toList().forEach(order -> {
             List<String> sep = Arrays.stream(order.split(";")).toList();
