@@ -18,8 +18,7 @@ public class PaginationValidator {
             }
             if (Objects.equals(sep.getLast(), "desc")) {
                 orders.add(Order.desc(sep.getFirst()));
-            }
-            else {
+            } else {
                 orders.add(Order.asc(sep.getFirst()));
             }
         });
