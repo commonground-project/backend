@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReferenceRequest {
-    @NotBlank(message = "It should have a url")
+    @NotBlank(message = "url is required")
     private String url;
 }
