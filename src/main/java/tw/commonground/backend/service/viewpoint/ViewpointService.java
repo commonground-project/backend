@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import java.util.Optional;
+
 @Service
 public class ViewpointService {
     private final ViewpointRepository viewpointRepository;
@@ -31,8 +33,10 @@ public class ViewpointService {
     public ViewpointEntity getViewpoint(UUID id) {
         return viewpointRepository.findViewpointEntityById(id).orElseThrow(
                 () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
+
     }
 
+    // TODO: issue viewpoint api
     public void deleteViewpoint(UUID id) {
         viewpointRepository.deleteById(id);
         viewpointRepository.flush();
@@ -59,7 +63,6 @@ public class ViewpointService {
     public ViewpointEntity updateViewpoint(UUID id, ViewpointUpdateRequest updateRequest) {
         ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(id).orElseThrow(
                 () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
-
         viewpointEntity.setTitle(updateRequest.getTitle());
         viewpointEntity.setContent(updateRequest.getContent());
         // updateRequest contains a list of factIds, need to get the fact entities from the database
@@ -81,5 +84,4 @@ public class ViewpointService {
         viewpointEntity.getFacts().remove(factEntity);
         viewpointRepository.save(viewpointEntity);
     }
-
 }
