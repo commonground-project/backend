@@ -1,74 +1,70 @@
 package tw.commonground.backend.service.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
+import tw.commonground.backend.service.user.dto.UserMapper;
 import tw.commonground.backend.service.user.dto.UserResponse;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
+
 import java.util.List;
+import java.util.Optional;
 
 @RestController
+@RequestMapping("/api")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @GetMapping("/api")
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/")
     public ResponseEntity<String> home() {
         return ResponseEntity.ok("login successful");
     }
 
-    @GetMapping("/api/users")
+    @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getUser() {
-        List<UserEntity> userEntities = userService.getUser();
-        List<UserResponse> response = UserResponse.fromEntities(userEntities);
+        List<UserEntity> userEntities = userService.getUsers();
+        List<UserResponse> response = UserMapper.toResponses(userEntities);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/users/{id}")
+    @GetMapping("/user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        UserEntity userEntity = userService.getUserById(id);
-        UserResponse response = new UserResponse(
-                userEntity.getUsername(),
-                userEntity.getNickname(),
-                userEntity.getEmail(),
-                userEntity.getProfileImage(),
-                userEntity.getRole()
-        );
+        Optional<FullUserEntity> userEntityOptional = userService.getUserById(id);
+        if (userEntityOptional.isEmpty()) {
+            // Todo: wait for impl rfc 7807
+            return ResponseEntity.notFound().build();
+        }
+
+        FullUserEntity userEntity = userEntityOptional.get();
+        UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/users/me")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal OAuth2User principal) {
-        UserEntity userEntity = userService.getMe(principal);
-        UserResponse response = new UserResponse(
-                userEntity.getUsername(),
-                userEntity.getNickname(),
-                userEntity.getEmail(),
-                userEntity.getProfileImage(),
-                userEntity.getRole()
-        );
+    @GetMapping("/user/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal DefaultOAuth2User user) {
+        FullUserEntity userEntity = userService.getMe(user.getName());
+        UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/api/setup")
-    @PreAuthorize("hasRole('SETUP_REQUIRED')")
-    public ResponseEntity<?> completeSetup(@RequestBody UserSetupRequest setupRequest, @AuthenticationPrincipal OAuth2User principal) {
-        String result = userService.completeSetup(setupRequest, principal);
-        return ResponseEntity.ok(result);
+    @PostMapping("/user/setup")
+    public ResponseEntity<UserResponse> userSetup(@Valid @RequestBody UserSetupRequest setupRequest,
+                                                  @AuthenticationPrincipal DefaultOAuth2User user) {
+        FullUserEntity userEntity = userService.completeSetup(setupRequest, user.getName());
+        UserResponse response = UserMapper.toResponse(userEntity);
+        return ResponseEntity.ok(response);
     }
-
-    @PutMapping("/api/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok("Logout successful");
-    }
-
-
 }
