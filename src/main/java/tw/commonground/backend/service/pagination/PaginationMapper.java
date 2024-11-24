@@ -1,4 +1,4 @@
-package tw.commonground.backend.shared.pagination;
+package tw.commonground.backend.service.pagination;
 
 import org.springframework.data.domain.Page;
 
