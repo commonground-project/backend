@@ -38,13 +38,10 @@ public class FactEntity {
     private String title;
 
     // TODO: Waiting User Entity
-    @Column(nullable = false)
     private Long authorId;
 
-    @Column(nullable = false)
     private String authorName;
 
-    @Column(nullable = false)
     private String authorAvatar;
 
     @ManyToMany

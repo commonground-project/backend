@@ -1,6 +1,6 @@
 package tw.commonground.backend.service.fact.dto;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import tw.commonground.backend.service.reference.ReferenceRequest;
 
@@ -11,7 +11,7 @@ import java.util.Set;
 @Data
 public class FactRequest {
 
-    @NotEmpty
+    @NotBlank(message = "It should have a title")
     private String title;
     private Set<ReferenceRequest> references = new HashSet<>();
 

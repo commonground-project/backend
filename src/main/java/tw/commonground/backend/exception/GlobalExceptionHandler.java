@@ -10,6 +10,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -55,11 +56,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   @NonNull WebRequest request) {
 
         ErrorResponseException exception = new ErrorResponseException(status);
-        exception.setTitle("Validation error");
-        exception.setType(URI.create("type:VALIDATION_ERROR"));
+        StringBuilder detail = createValidException(exception);
 
-        StringBuilder detail = new StringBuilder();
-        detail.append("Validation failed for the following fields:\n ");
         for (ObjectError error : ex.getBindingResult().getAllErrors()) {
             detail.append(error.getDefaultMessage());
             if (error != ex.getBindingResult().getAllErrors().getLast()) {
@@ -69,5 +67,37 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         exception.setDetail(detail.toString());
 
         return super.handleExceptionInternal(exception, null, headers, status, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex,
+                                                                      @NonNull HttpHeaders headers,
+                                                                      @NonNull HttpStatusCode status,
+                                                                      @NonNull WebRequest request) {
+
+        ErrorResponseException exception = new ErrorResponseException(status);
+        StringBuilder detail = createValidException(exception);
+
+        ex.getAllValidationResults().forEach(validationResult ->
+            validationResult.getResolvableErrors().forEach(error -> {
+                detail.append(error.getDefaultMessage());
+                if (error != validationResult.getResolvableErrors().getLast()) {
+                    detail.append("\n ");
+                }
+        }));
+
+        exception.setDetail(detail.toString());
+
+        return super.handleExceptionInternal(exception, null, headers, status, request);
+    }
+
+    private StringBuilder createValidException(ErrorResponseException exception) {
+        StringBuilder detail = new StringBuilder();
+        exception.setTitle("Validation error");
+        exception.setType(URI.create("type:VALIDATION_ERROR"));
+
+        detail.append("Validation failed for the following fields:\n ");
+
+        return detail;
     }
 }

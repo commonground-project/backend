@@ -1,21 +1,17 @@
 package tw.commonground.backend.service.fact;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.dto.FactRequest;
 import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.*;
-import tw.commonground.backend.shared.exceptions.ExceptionResponse;
-import tw.commonground.backend.shared.exceptions.IdNotFoundException;
-import tw.commonground.backend.shared.pagination.PaginationMapper;
-import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.service.pagination.PaginationMapper;
+import tw.commonground.backend.service.pagination.WrappedPaginationResponse;
 
 import java.util.*;
 import java.util.function.Function;
@@ -37,9 +33,7 @@ public class FactService {
         this.referenceRepository = referenceRepository;
     }
 
-    public WrappedPaginationResponse<List<FactResponse>> getFacts(int page, int size, String column, String mode) {
-        Sort sorted = Sort.by((Objects.equals(mode, "desc") ? Sort.Order.desc(column) : Sort.Order.asc(column)));
-        Pageable pageable = PageRequest.of(page, size, sorted);
+    public WrappedPaginationResponse<List<FactResponse>> getFacts(Pageable pageable) {
         Page<FactEntity> pageFacts = factRepository.findAll(pageable);
 
         List<FactResponse> factResponses = pageFacts.getContent()
@@ -51,10 +45,10 @@ public class FactService {
     }
 
 
-    public FactResponse getFact(UUID id, HttpServletRequest request) throws ExceptionResponse {
+    public FactResponse getFact(UUID id) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException(id, request.getRequestURI())
+                () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
         return factMapper.toResponse(factEntity);
     }
@@ -76,11 +70,10 @@ public class FactService {
         return factMapper.toResponse(factRepository.save(factEntity));
     }
 
-    public FactResponse updateFact(UUID id, FactRequest factRequest, HttpServletRequest request)
-            throws ExceptionResponse {
+    public FactResponse updateFact(UUID id, FactRequest factRequest) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException(id, request.getRequestURI())
+                () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
 
         factEntity.setTitle(factRequest.getTitle());
@@ -91,43 +84,42 @@ public class FactService {
         return factMapper.toResponse(factRepository.save(factEntity));
     }
 
-    public void deleteFact(UUID id, HttpServletRequest request) throws ExceptionResponse {
+    public void deleteFact(UUID id) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException(id, request.getRequestURI())
+                () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
         factRepository.delete(factEntity);
     }
 
-    public List<ReferenceResponse> getFactReferences(UUID id, HttpServletRequest request) throws ExceptionResponse {
+    public List<ReferenceResponse> getFactReferences(UUID id) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException(id, request.getRequestURI())
+                () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
         return factEntity.getReferences().stream().map(referenceMapper::toResponse).toList();
     }
 
-    public List<ReferenceResponse> updateFactReferences(UUID id,
-                                                        List<ReferenceRequest> referenceRequests,
-                                                        HttpServletRequest request) throws ExceptionResponse {
+    public List<ReferenceResponse> createFactReferences(UUID id,
+                                                        List<ReferenceRequest> referenceRequests) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException(id, request.getRequestURI())
+                () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
         if (factEntity.getReferences() == null) {
             factEntity.setReferences(new HashSet<>());
         }
 
         List<String> urls = referenceRequests.stream().map(ReferenceRequest::getUrl).toList();
-        updateReferences(urls, factEntity);
+        addReferenceToFact(factEntity.getReferences(), urls);
 
         return factEntity.getReferences().stream().map(referenceMapper::toResponse).toList();
     }
 
-    public void deleteFactReferences(UUID id, long referenceId, HttpServletRequest request) throws ExceptionResponse {
+    public void deleteFactReferences(UUID id, UUID referenceId) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
-                () -> new IdNotFoundException(id, request.getRequestURI())
+                () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
         Set<ReferenceEntity> referenceEntities = factEntity.getReferences();
         referenceEntities.removeIf(referenceEntity -> referenceEntity.getId().equals(referenceId));
@@ -136,7 +128,6 @@ public class FactService {
     }
 
     private void updateReferences(List<String> urls, FactEntity factEntity) {
-
         List<ReferenceEntity> newUrls = factEntity.getReferences().stream()
                 .filter(entity -> urls.contains(entity.getUrl())).toList();
         factEntity.setReferences(new HashSet<>(newUrls));

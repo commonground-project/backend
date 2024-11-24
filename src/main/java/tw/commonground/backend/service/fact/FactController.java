@@ -1,102 +1,79 @@
 package tw.commonground.backend.service.fact;
 
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.dto.FactRequest;
 import tw.commonground.backend.service.fact.dto.FactResponse;
+import tw.commonground.backend.service.pagination.PaginationValidator;
 import tw.commonground.backend.service.reference.ReferenceRequest;
 import tw.commonground.backend.service.reference.ReferenceResponse;
-import tw.commonground.backend.shared.exceptions.ExceptionResponse;
-import tw.commonground.backend.shared.exceptions.InvalidSortColumnException;
-import tw.commonground.backend.shared.pagination.PaginationRequest;
-import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.service.pagination.PaginationRequest;
+import tw.commonground.backend.service.pagination.WrappedPaginationResponse;
 
 import java.util.*;
 
 @RestController
 public class FactController {
     private final FactService factService;
+    private final PaginationValidator paginationValidator = new PaginationValidator();
+
+    private final Set<String> sortableColumn = Set.of("title", "createAt", "updateAt", "authorId", "authorName");
 
     public FactController(FactService factService) {
         this.factService = factService;
     }
 
-    private final Set<String> validSortColumnOfFact = Set.of(
-            "id",
-            "createAt",
-            "updateAt",
-            "title",
-            "authorId",
-            "authorName");
+    @GetMapping("/csrf-token")
+    public CsrfToken csrfToken(CsrfToken token) {
+        return token;
+    }
 
     @GetMapping("/api/facts")
-    public WrappedPaginationResponse<List<FactResponse>> listFacts(PaginationRequest pagination,
-                                                                   HttpServletRequest request)
-            throws ExceptionResponse {
-
-        List<String> sortBy = Arrays.stream(pagination.getSort().split(",")).toList();
-        if (!validSortColumnOfFact.contains(sortBy.getFirst())) {
-            throw new InvalidSortColumnException(sortBy.getFirst(), request.getRequestURI());
-        }
-
-        WrappedPaginationResponse<List<FactResponse>> factResponses;
-        factResponses = factService.getFacts(pagination.getPage(),
-                pagination.getSize(),
-                sortBy.getFirst(),
-                sortBy.getLast());
-
-        return factResponses;
+    public WrappedPaginationResponse<List<FactResponse>> listFacts(@Valid PaginationRequest pagination) {
+        Pageable pageable = paginationValidator.validatePaginationRequest(pagination, sortableColumn);
+        return factService.getFacts(pageable);
     }
 
     @PostMapping("/api/facts")
-    public FactResponse createFact(@RequestBody FactRequest factRequest) {
+    public FactResponse createFact(@Valid @RequestBody FactRequest factRequest) {
         return factService.createFact(factRequest);
     }
 
     @GetMapping("/api/fact/{id}")
-    public FactResponse getFact(@PathVariable String id, HttpServletRequest request) throws ExceptionResponse {
-        return factService.getFact(UUID.fromString(id), request);
+    public FactResponse getFact(@PathVariable String id) {
+        return factService.getFact(UUID.fromString(id));
     }
 
     @PutMapping("/api/fact/{id}")
-    public FactResponse updateFact(@PathVariable String id,
-                                   @RequestBody FactRequest factRequest,
-                                   HttpServletRequest request) throws ExceptionResponse {
-
-        return factService.updateFact(UUID.fromString(id), factRequest, request);
+    public FactResponse updateFact(@PathVariable String id, @Valid @RequestBody FactRequest factRequest) {
+        return factService.updateFact(UUID.fromString(id), factRequest);
     }
 
     @DeleteMapping("/api/fact/{id}")
-    public ResponseEntity<String> deleteFact(@PathVariable String id, HttpServletRequest request)
-            throws ExceptionResponse {
-
-        factService.deleteFact(UUID.fromString(id), request);
+    public ResponseEntity<String> deleteFact(@PathVariable String id) {
+        factService.deleteFact(UUID.fromString(id));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/api/fact/{id}/references")
-    public List<ReferenceResponse> getFactReferences(@PathVariable String id, HttpServletRequest request)
-            throws ExceptionResponse {
-
-        return factService.getFactReferences(UUID.fromString(id), request);
+    public List<ReferenceResponse> getFactReferences(@PathVariable String id) {
+        return factService.getFactReferences(UUID.fromString(id));
     }
 
     @PostMapping("/api/fact/{id}/references")
     public List<ReferenceResponse> updateFactReferences(@PathVariable String id,
-                                                        @RequestBody List<ReferenceRequest> referenceRequests,
-                                                        HttpServletRequest request) throws ExceptionResponse {
+                                                        @RequestBody List<@Valid ReferenceRequest> referenceRequests) {
 
-        return factService.updateFactReferences(UUID.fromString(id), referenceRequests, request);
+        return factService.createFactReferences(UUID.fromString(id), referenceRequests);
     }
 
     @DeleteMapping("/api/fact/{id}/reference/{referenceId}")
-    public ResponseEntity<String> deleteFactReferences(@PathVariable String id,
-                                                       @PathVariable long referenceId,
-                                                       HttpServletRequest request) throws ExceptionResponse {
-
-        factService.deleteFactReferences(UUID.fromString(id), referenceId, request);
+    public ResponseEntity<String> deleteFactReferences(@PathVariable String id, @PathVariable String referenceId) {
+        factService.deleteFactReferences(UUID.fromString(id), UUID.fromString(referenceId));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
