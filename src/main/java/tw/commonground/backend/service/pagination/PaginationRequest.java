@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 public class PaginationRequest {
 
-    @Min(value = 0, message = "Page should more than 0")
+    @Min(value = 0, message = "Page must be more than 0")
     private int page;
-    @Min(value = 1, message = "Size should more than 1")
-    @Max(value = 200, message = "Size should less than 200")
+    @Min(value = 1, message = "Size must be more than 1")
+    @Max(value = 200, message = "Size must be less than 200")
     private int size;
 
     private String sort;

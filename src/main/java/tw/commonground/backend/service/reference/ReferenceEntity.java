@@ -18,6 +18,10 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 public class ReferenceEntity {
 
+    public ReferenceEntity(String url) {
+        this.url = url;
+    }
+
     @Id
     @GeneratedValue
     private UUID id;

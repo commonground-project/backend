@@ -14,8 +14,6 @@ import tw.commonground.backend.service.pagination.PaginationMapper;
 import tw.commonground.backend.service.pagination.WrappedPaginationResponse;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class FactService {
@@ -50,6 +48,7 @@ public class FactService {
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
+
         return factMapper.toResponse(factEntity);
     }
 
@@ -63,11 +62,13 @@ public class FactService {
                 .references(new HashSet<>())
                 .build();
 
-        addReferenceToFact(factEntity.getReferences(), factRequest.getUrls());
+        Set<ReferenceEntity> referenceEntities = parseReferenceEntity(factRequest.getUrls());
+        factEntity.setReferences(referenceEntities);
 
         return factMapper.toResponse(factRepository.save(factEntity));
     }
 
+    // sameUrls represent the urls which already save in ReferenceEntity
     public FactResponse updateFact(UUID id, FactRequest factRequest) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
@@ -75,12 +76,8 @@ public class FactService {
         );
         factEntity.setTitle(factRequest.getTitle());
 
-        List<ReferenceEntity> sameUrl = factEntity.getReferences().stream()
-                .filter(referenceEntity -> factRequest.getUrls().contains(referenceEntity.getUrl()))
-                .toList();
-        factEntity.setReferences(new HashSet<>(sameUrl));
-
-        addReferenceToFact(factEntity.getReferences(), factRequest.getUrls());
+        Set<ReferenceEntity> referenceEntities = parseReferenceEntity(factRequest.getUrls());
+        factEntity.setReferences(referenceEntities);
 
         return factMapper.toResponse(factRepository.save(factEntity));
     }
@@ -108,7 +105,11 @@ public class FactService {
         }
 
         List<String> urls = referenceRequests.stream().map(ReferenceRequest::getUrl).toList();
-        addReferenceToFact(factEntity.getReferences(), urls);
+        Set<ReferenceEntity> referenceEntities = factEntity.getReferences();
+        referenceEntities.addAll(parseReferenceEntity(urls));
+        factEntity.setReferences(referenceEntities);
+
+        factRepository.save(factEntity);
 
         return factEntity.getReferences().stream().map(referenceMapper::toResponse).toList();
     }
@@ -117,25 +118,27 @@ public class FactService {
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
+
         Set<ReferenceEntity> referenceEntities = factEntity.getReferences();
         referenceEntities.removeIf(referenceEntity -> referenceEntity.getId().equals(referenceId));
         factEntity.setReferences(referenceEntities);
+
         factRepository.save(factEntity);
     }
 
-    private void addReferenceToFact(Set<ReferenceEntity> referenceEntities, List<String> urls) {
-        Set<String> uniqueUrl = new HashSet<>(urls);
-        List<ReferenceEntity> existReference = referenceRepository.findAllByUrlIn(uniqueUrl);
-        Map<String, ReferenceEntity> existReferenceMap = existReference.stream()
-                .collect(Collectors.toMap(ReferenceEntity::getUrl, Function.identity()));
+    private Set<ReferenceEntity> parseReferenceEntity(List<String> urls) {
+        Set<ReferenceEntity> referenceEntities = new HashSet<>();
+        List<ReferenceEntity> newReferenceEntities = new ArrayList<>();
 
-        for (String url : uniqueUrl) {
-            ReferenceEntity existReferenceEntity = existReferenceMap.computeIfAbsent(
-                    url, k -> ReferenceEntity.builder().url(url).build()
+        for (String url : urls) {
+            referenceRepository.findByUrl(url).ifPresentOrElse(referenceEntities::add,
+                    () -> newReferenceEntities.add(new ReferenceEntity(url))
             );
-            referenceEntities.add(existReferenceEntity);
         }
 
-        referenceRepository.saveAll(referenceEntities);
+        referenceRepository.saveAll(newReferenceEntities);
+
+        referenceEntities.addAll(newReferenceEntities);
+        return referenceEntities;
     }
 }

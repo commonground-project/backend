@@ -11,8 +11,9 @@ import java.util.*;
 @Setter
 public class FactRequest {
 
-    @NotBlank(message = "It should have a title")
+    @NotBlank(message = "Title is required")
     private String title;
+
     @Valid
     private Set<ReferenceRequest> references = new HashSet<>();
 
@@ -25,5 +26,4 @@ public class FactRequest {
         getReferences().ifPresent(references -> urls.addAll(references.stream().map(ReferenceRequest::getUrl).toList()));
         return urls;
     }
-
 }
