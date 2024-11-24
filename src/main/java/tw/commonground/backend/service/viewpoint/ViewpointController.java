@@ -36,10 +36,7 @@ public class ViewpointController {
 
     @GetMapping("/viewpoint/{id}")
     public ResponseEntity<ViewpointResponse> getViewPoint(@PathVariable @NotBlank UUID id) {
-        ViewpointEntity viewpointEntity = viewpointService.getViewpoint(id).orElseThrow(
-                () -> new RuntimeException("Viewpoint not found"));
-
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.getViewpoint(id));
         return ResponseEntity.ok(response);
     }
 
@@ -47,7 +44,6 @@ public class ViewpointController {
     public ResponseEntity<ViewpointResponse> updateViewPoint(
             @PathVariable @NotBlank UUID id,
             @RequestBody ViewpointUpdateRequest updateRequest) {
-
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.updateViewpoint(id, updateRequest));
         return ResponseEntity.ok(response);
     }
