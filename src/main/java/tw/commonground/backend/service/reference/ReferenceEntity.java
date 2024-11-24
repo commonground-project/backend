@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table
@@ -19,7 +20,7 @@ public class ReferenceEntity {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private UUID id;
 
     @CreatedDate
     @Column(nullable = false)
@@ -30,7 +31,6 @@ public class ReferenceEntity {
 
     private String favicon;
 
-    @Column(nullable = false)
     private String title;
 
 }
