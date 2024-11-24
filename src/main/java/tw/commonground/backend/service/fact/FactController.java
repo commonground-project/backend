@@ -17,9 +17,13 @@ import java.util.*;
 
 @RestController
 public class FactController {
+    private static final int MAX_SIZE = 200;
+
     private final FactService factService;
+
     private final Set<String> sortableColumn = Set.of("title", "createAt", "updateAt", "authorId", "authorName");
-    private final PaginationValidator paginationValidator = new PaginationValidator(sortableColumn);
+
+    private final PaginationValidator paginationValidator = new PaginationValidator(sortableColumn, MAX_SIZE);
 
 
     public FactController(FactService factService) {

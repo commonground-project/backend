@@ -23,7 +23,8 @@ public class FactRequest {
 
     public List<String> getUrls() {
         List<String> urls = new ArrayList<>();
-        getReferences().ifPresent(references -> urls.addAll(references.stream().map(ReferenceRequest::getUrl).toList()));
+        getReferences().ifPresent(references ->
+                urls.addAll(references.stream().map(ReferenceRequest::getUrl).toList()));
         return urls;
     }
 }

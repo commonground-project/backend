@@ -12,9 +12,15 @@ import java.util.*;
 @AllArgsConstructor
 public class PaginationValidator {
 
-    private Set<String> sortableColumn;
+    private final Set<String> sortableColumn;
+
+    private final int maxSize;
 
     public Pageable validatePaginationRequest(PaginationRequest paginationRequest) {
+        if (paginationRequest.getSize() > maxSize) {
+            throw new ValidationException("Page size must be less than or equal to " + maxSize);
+        }
+
         List<Order> orders = new ArrayList<>();
         Arrays.stream(paginationRequest.getSort().split(",")).toList().forEach(order -> {
             List<String> sep = Arrays.stream(order.split(";")).toList();
