@@ -2,7 +2,8 @@ package tw.commonground.backend.service.pagination;
 
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class WrappedPaginationResponse<T> {
     private T content;

@@ -2,7 +2,8 @@ package tw.commonground.backend.service.pagination;
 
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class PaginationResponse {
     private int size;

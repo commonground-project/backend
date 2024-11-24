@@ -12,11 +12,11 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 @EntityListeners(AuditingEntityListener.class)
 public class FactEntity {
 

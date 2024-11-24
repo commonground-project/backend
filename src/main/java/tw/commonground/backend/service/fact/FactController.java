@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.dto.FactRequest;
 import tw.commonground.backend.service.fact.dto.FactResponse;
@@ -25,11 +24,6 @@ public class FactController {
 
     public FactController(FactService factService) {
         this.factService = factService;
-    }
-
-    @GetMapping("/csrf-token")
-    public CsrfToken csrfToken(CsrfToken token) {
-        return token;
     }
 
     @GetMapping("/api/facts")

@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 public class FactRequest {
 
     @NotBlank(message = "It should have a title")
