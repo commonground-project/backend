@@ -133,7 +133,7 @@ jobs:
         if: ${{ (contains(github.ref, 'ref/tags/')) }}
         run: |
           export MODE='Stage'
-          export NAME='dev-${{ github.ref_name }}'
+          export NAME='${{ github.ref_name }}'
           ssh -o SendEnv=MODE -o SendEnv=NAME -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Clear up
