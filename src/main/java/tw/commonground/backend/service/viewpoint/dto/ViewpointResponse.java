@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import tw.commonground.backend.service.fact.entity.FactEntity;
-import tw.commonground.backend.service.viewpoint.entity.ViewPointReaction;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointReaction;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -15,8 +15,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ViewPointResponse {
-//  private UUID id;
+public class ViewpointResponse {
+    private UUID id;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String title;
@@ -24,7 +24,7 @@ public class ViewPointResponse {
     private UUID authorId;
     private String authorName;
     private URI authorAvatar;
-    private ViewPointReaction userReaction;
+    private ViewpointReaction userReaction;
     private Integer likeCount;
     private Integer reasonableCount;
     private Integer dislikeCount;
