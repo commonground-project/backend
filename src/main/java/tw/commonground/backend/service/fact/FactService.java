@@ -63,9 +63,7 @@ public class FactService {
                 .references(new HashSet<>())
                 .build();
 
-        factRequest.getReferences().ifPresent(references ->
-            addReferenceToFact(factEntity.getReferences(), references.stream().map(ReferenceRequest::getUrl).toList())
-        );
+        addReferenceToFact(factEntity.getReferences(), factRequest.getUrls());
 
         return factMapper.toResponse(factRepository.save(factEntity));
     }
@@ -75,21 +73,20 @@ public class FactService {
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
-
         factEntity.setTitle(factRequest.getTitle());
 
-        factRequest.getReferences().ifPresent(references ->
-            updateReferences(references.stream().map(ReferenceRequest::getUrl).toList(), factEntity));
+        List<ReferenceEntity> sameUrl = factEntity.getReferences().stream()
+                .filter(referenceEntity -> factRequest.getUrls().contains(referenceEntity.getUrl()))
+                .toList();
+        factEntity.setReferences(new HashSet<>(sameUrl));
+
+        addReferenceToFact(factEntity.getReferences(), factRequest.getUrls());
 
         return factMapper.toResponse(factRepository.save(factEntity));
     }
 
     public void deleteFact(UUID id) {
-
-        FactEntity factEntity = factRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Fact", "id", id.toString())
-        );
-        factRepository.delete(factEntity);
+        factRepository.findById(id).ifPresent(factRepository::delete);
     }
 
     public List<ReferenceResponse> getFactReferences(UUID id) {
@@ -117,7 +114,6 @@ public class FactService {
     }
 
     public void deleteFactReferences(UUID id, UUID referenceId) {
-
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
@@ -127,18 +123,8 @@ public class FactService {
         factRepository.save(factEntity);
     }
 
-    private void updateReferences(List<String> urls, FactEntity factEntity) {
-        List<ReferenceEntity> newUrls = factEntity.getReferences().stream()
-                .filter(entity -> urls.contains(entity.getUrl())).toList();
-        factEntity.setReferences(new HashSet<>(newUrls));
-
-        addReferenceToFact(factEntity.getReferences(), urls);
-    }
-
     private void addReferenceToFact(Set<ReferenceEntity> referenceEntities, List<String> urls) {
-
         Set<String> uniqueUrl = new HashSet<>(urls);
-
         List<ReferenceEntity> existReference = referenceRepository.findAllByUrlIn(uniqueUrl);
         Map<String, ReferenceEntity> existReferenceMap = existReference.stream()
                 .collect(Collectors.toMap(ReferenceEntity::getUrl, Function.identity()));
@@ -152,6 +138,4 @@ public class FactService {
 
         referenceRepository.saveAll(referenceEntities);
     }
-
-
 }

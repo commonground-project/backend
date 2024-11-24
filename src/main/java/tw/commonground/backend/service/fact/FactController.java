@@ -18,9 +18,9 @@ import java.util.*;
 @RestController
 public class FactController {
     private final FactService factService;
-    private final PaginationValidator paginationValidator = new PaginationValidator();
-
     private final Set<String> sortableColumn = Set.of("title", "createAt", "updateAt", "authorId", "authorName");
+    private final PaginationValidator paginationValidator = new PaginationValidator(sortableColumn);
+
 
     public FactController(FactService factService) {
         this.factService = factService;
@@ -28,7 +28,7 @@ public class FactController {
 
     @GetMapping("/api/facts")
     public WrappedPaginationResponse<List<FactResponse>> listFacts(@Valid PaginationRequest pagination) {
-        Pageable pageable = paginationValidator.validatePaginationRequest(pagination, sortableColumn);
+        Pageable pageable = paginationValidator.validatePaginationRequest(pagination);
         return factService.getFacts(pageable);
     }
 
