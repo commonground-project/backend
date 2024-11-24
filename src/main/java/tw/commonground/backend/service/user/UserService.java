@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.image.ImageService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
@@ -14,7 +15,6 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.user.entity.UserRole;
-import tw.commonground.backend.service.user.exception.EmailNotFoundException;
 import tw.commonground.backend.service.user.exception.UserAlreadySetupException;
 
 import java.util.List;
@@ -57,8 +57,8 @@ public class UserService {
         return (List<UserEntity>) userRepository.findAll();
     }
 
-    public Optional<FullUserEntity> getUserById(Long id) {
-        return userRepository.findUserEntityById(id);
+    public Optional<FullUserEntity> getUserByUsername(String username) {
+        return userRepository.findUserEntityByUsername(username);
     }
 
     public Optional<FullUserEntity> getUserByEmail(String email) {
@@ -66,14 +66,12 @@ public class UserService {
     }
 
     public FullUserEntity completeSetup(UserSetupRequest setupRequest, String email) {
-        // Todo: wait for impl rfc 7807, should throw generic not found exception
         FullUserEntity fullUser = userRepository.findUserEntityByEmail(email)
-                .orElseThrow();
+                .orElseThrow(() -> new EntityNotFoundException("User", "email", email));
 
         if (fullUser.getRole() != UserRole.ROLE_NOT_SETUP) {
             // Use UserAlreadySetupException to provide more context,
             // instead of `@PreAuthorize("hasRole('SETUP_REQUIRED')")`
-            // Todo: will response internal server error before impl rfc 7807
             throw new UserAlreadySetupException(email);
         } else {
             userRepository.setupUserById(fullUser.getId(),
@@ -89,6 +87,6 @@ public class UserService {
 
     public FullUserEntity getMe(String email) {
         Optional<FullUserEntity> userEntityOptional = userRepository.findUserEntityByEmail(email);
-        return userEntityOptional.orElseThrow(() -> new EmailNotFoundException(email));
+        return userEntityOptional.orElseThrow(() -> new EntityNotFoundException("User", "email", email));
     }
 }

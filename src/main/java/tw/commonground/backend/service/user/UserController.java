@@ -1,11 +1,13 @@
 package tw.commonground.backend.service.user;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
+import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.user.dto.UserMapper;
 import tw.commonground.backend.service.user.dto.UserResponse;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
@@ -13,7 +15,6 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -38,16 +39,12 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/{username}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        Optional<FullUserEntity> userEntityOptional = userService.getUserById(id);
-        if (userEntityOptional.isEmpty()) {
-            // Todo: wait for impl rfc 7807
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable @NotBlank String username) {
+        FullUserEntity userEntity = userService.getUserByUsername(username).orElseThrow(
+                () -> new EntityNotFoundException("User", "username", username));
 
-        FullUserEntity userEntity = userEntityOptional.get();
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
