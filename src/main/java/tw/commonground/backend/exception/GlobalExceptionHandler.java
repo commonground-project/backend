@@ -1,6 +1,7 @@
 package tw.commonground.backend.exception;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -55,8 +56,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   @NonNull HttpStatusCode status,
                                                                   @NonNull WebRequest request) {
 
-        ErrorResponseException exception = new ErrorResponseException(status);
-        StringBuilder detail = createValidException(exception);
+        ErrorResponseException exception = createValidException();
+        StringBuilder detail = new StringBuilder("Validation failed for the following fields:\n ");
 
         for (ObjectError error : ex.getBindingResult().getAllErrors()) {
             detail.append(error.getDefaultMessage());
@@ -71,33 +72,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException ex,
-                                                                      @NonNull HttpHeaders headers,
-                                                                      @NonNull HttpStatusCode status,
-                                                                      @NonNull WebRequest request) {
-
-        ErrorResponseException exception = new ErrorResponseException(status);
-        StringBuilder detail = createValidException(exception);
+                                                                            @NonNull HttpHeaders headers,
+                                                                            @NonNull HttpStatusCode status,
+                                                                            @NonNull WebRequest request) {
+        ErrorResponseException exception = createValidException();
+        StringBuilder detail = new StringBuilder("Validation failed for the following fields:\n ");
 
         ex.getAllValidationResults().forEach(validationResult ->
-            validationResult.getResolvableErrors().forEach(error -> {
-                detail.append(error.getDefaultMessage());
-                if (error != validationResult.getResolvableErrors().getLast()) {
-                    detail.append("\n ");
-                }
-        }));
+                validationResult.getResolvableErrors().forEach(error -> {
+                    detail.append(error.getDefaultMessage());
+                    if (error != validationResult.getResolvableErrors().getLast()) {
+                        detail.append("\n ");
+                    }
+                }));
 
         exception.setDetail(detail.toString());
 
         return super.handleExceptionInternal(exception, null, headers, status, request);
     }
 
-    private StringBuilder createValidException(ErrorResponseException exception) {
-        StringBuilder detail = new StringBuilder();
+    private ErrorResponseException createValidException() {
+        ErrorResponseException exception = new ErrorResponseException(HttpStatus.BAD_REQUEST);
         exception.setTitle("Validation error");
         exception.setType(URI.create("type:VALIDATION_ERROR"));
 
-        detail.append("Validation failed for the following fields:\n ");
-
-        return detail;
+        return exception;
     }
 }
