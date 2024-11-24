@@ -89,7 +89,7 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           tags: |
-            commongroundproject/backend:${{ github.ref_name }}
+            commongroundproject/backend:stage
             commongroundproject/backend:${{ github.sha }}
           context: .
 
@@ -103,7 +103,7 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           tags: |
-            commongroundproject/backend:dev-${{ github.ref_name }}
+            commongroundproject/backend:dev
             commongroundproject/backend:${{ github.sha }}
           context: .
 
@@ -125,16 +125,13 @@ jobs:
         if: ${{ !(contains(github.ref, 'ref/tags/')) }}
         run: |
           export MODE='Dev'
-          export ENV='${{ github.event.number }}'
-          export NAME='dev-${{ github.ref_name }}'
-          ssh -o SendEnv=MODE -o SendEnv=NAME -o SendEnv=ENV -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+          ssh -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Deploy Stage
         if: ${{ (contains(github.ref, 'ref/tags/')) }}
         run: |
           export MODE='Stage'
-          export NAME='${{ github.ref_name }}'
-          ssh -o SendEnv=MODE -o SendEnv=NAME -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+          ssh -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
