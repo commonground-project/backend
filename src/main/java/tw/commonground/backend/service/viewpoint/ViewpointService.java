@@ -1,14 +1,18 @@
 package tw.commonground.backend.service.viewpoint;
 
+import jakarta.persistence.Column;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
 //import tw.commonground.backend.service.fact.entity.FactEntity;
 //import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointMapper;
+import tw.commonground.backend.service.viewpoint.dto.ViewpointResponse;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointUpdateRequest;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReaction;
 
+import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,12 +50,13 @@ public class ViewpointService {
         viewpointRepository.flush();
     }
 
-    public ViewpointReaction reactToViewpoint(UUID id, ViewpointReaction reaction) {
+    public ViewpointEntity reactToViewpoint(UUID id, ViewpointReaction reaction) {
         ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(id).orElseThrow(
                 () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
         viewpointEntity.setUserReaction(reaction);
         viewpointRepository.save(viewpointEntity);
-        return viewpointEntity.getUserReaction();
+
+        return viewpointEntity;
     }
 
 //    public ViewpointEntity addFactToViewpoint(UUID id, UUID factId) {
@@ -76,6 +81,17 @@ public class ViewpointService {
 //                        .orElseThrow(() -> new EntityNotFoundException("Fact", "id", factId.toString())))
 //                .collect(Collectors.toList());
 //        viewpointEntity.setFacts(facts);
+        viewpointRepository.save(viewpointEntity);
+        return viewpointEntity;
+    }
+
+    public ViewpointEntity createViewpoint(ViewpointUpdateRequest updateRequest) {
+        ViewpointEntity viewpointEntity = new ViewpointEntity();
+        viewpointEntity.setTitle(updateRequest.getTitle());
+        viewpointEntity.setContent(updateRequest.getContent());
+        viewpointEntity.setCreatedAt(LocalDateTime.now());
+        viewpointEntity.setUpdatedAt(LocalDateTime.now());
+
         viewpointRepository.save(viewpointEntity);
         return viewpointEntity;
     }

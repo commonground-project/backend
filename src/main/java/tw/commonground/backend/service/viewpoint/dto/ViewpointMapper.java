@@ -17,42 +17,41 @@ public final class ViewpointMapper {
     }
 
     public static ViewpointResponse toResponse(ViewpointEntity viewpointEntity) {
-        return new ViewpointResponse(
-                viewpointEntity.getId(),
-                viewpointEntity.getCreatedAt(),
-                viewpointEntity.getUpdatedAt(),
-                viewpointEntity.getTitle(),
-                viewpointEntity.getContent(),
-                viewpointEntity.getAuthorId(),
-                viewpointEntity.getAuthorName(),
-                viewpointEntity.getAuthorAvatar(),
-                viewpointEntity.getUserReaction(),
-                viewpointEntity.getLikeCount(),
-                viewpointEntity.getReasonableCount(),
-                viewpointEntity.getDislikeCount()
+        return ViewpointResponse.builder()
+                .id(viewpointEntity.getId())
+                .createdAt(viewpointEntity.getCreatedAt())
+                .updatedAt(viewpointEntity.getUpdatedAt())
+                .title(viewpointEntity.getTitle())
+                .content(viewpointEntity.getContent())
+                .authorId(viewpointEntity.getAuthorId())
+                .authorName(viewpointEntity.getAuthorName())
+                .authorAvatar(viewpointEntity.getAuthorAvatar())
+                .userReaction(viewpointEntity.getUserReaction())
+                .likeCount(viewpointEntity.getLikeCount())
+                .reasonableCount(viewpointEntity.getReasonableCount())
+                .dislikeCount(viewpointEntity.getDislikeCount())
+                .build();
 //                viewpointEntity.getFacts()
-        );
     }
 
 
     public static List<ViewpointResponse> toResponses(List<ViewpointEntity> viewpointEntities) {
         return viewpointEntities.stream()
-                .map(viewpointEntity -> new ViewpointResponse(
-                        viewpointEntity.getId(),
-                        viewpointEntity.getCreatedAt(),
-                        viewpointEntity.getUpdatedAt(),
-                        viewpointEntity.getTitle(),
-                        viewpointEntity.getContent(),
-                        viewpointEntity.getAuthorId(),
-                        viewpointEntity.getAuthorName(),
-                        viewpointEntity.getAuthorAvatar(),
-                        viewpointEntity.getUserReaction(),
-                        viewpointEntity.getLikeCount(),
-                        viewpointEntity.getReasonableCount(),
-                        viewpointEntity.getDislikeCount()
-//                        viewpointEntity.getFacts()
-                ))
-                .toList();
+                .map(viewpointEntity -> ViewpointResponse.builder()
+                        .id(viewpointEntity.getId())
+                        .createdAt(viewpointEntity.getCreatedAt())
+                        .updatedAt(viewpointEntity.getUpdatedAt())
+                        .title(viewpointEntity.getTitle())
+                        .content(viewpointEntity.getContent())
+                        .authorId(viewpointEntity.getAuthorId())
+                        .authorName(viewpointEntity.getAuthorName())
+                        .authorAvatar(viewpointEntity.getAuthorAvatar())
+                        .userReaction(viewpointEntity.getUserReaction())
+                        .likeCount(viewpointEntity.getLikeCount())
+                        .reasonableCount(viewpointEntity.getReasonableCount())
+                        .dislikeCount(viewpointEntity.getDislikeCount())
+                        .build())
+                .toList(); //     viewpointEntity.getFacts()
     }
 
 

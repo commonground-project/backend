@@ -1,6 +1,7 @@
 package tw.commonground.backend.service.viewpoint;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 //import tw.commonground.backend.service.fact.entity.FactEntity;
@@ -34,38 +35,45 @@ public class ViewpointController {
 //        return ResponseEntity.ok(viewpointService.getViewpoints(sort, page, size));
 //    }
 
+    // test
+    @PostMapping("/viewpointadd")
+    public ResponseEntity<ViewpointResponse> getViewPoint(@RequestBody ViewpointUpdateRequest updateRequest) {
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.createViewpoint(updateRequest));
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/viewpoint/{id}")
-    public ResponseEntity<ViewpointResponse> getViewPoint(@PathVariable @NotBlank UUID id) {
+    public ResponseEntity<ViewpointResponse> getViewPoint(@PathVariable @NotNull UUID id) {
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.getViewpoint(id));
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/viewpoint/{id}")
     public ResponseEntity<ViewpointResponse> updateViewPoint(
-            @PathVariable @NotBlank UUID id,
+            @PathVariable @NotNull UUID id,
             @RequestBody ViewpointUpdateRequest updateRequest) {
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.updateViewpoint(id, updateRequest));
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/viewpoint/{id}")
-    public ResponseEntity<Void> deleteViewPoint(@PathVariable @NotBlank UUID id) {
+    public ResponseEntity<Void> deleteViewPoint(@PathVariable @NotNull UUID id) {
         viewpointService.deleteViewpoint(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/viewpoint/{id}/reaction/me")
-    public ResponseEntity<ViewpointReactionResponse> reactToViewPoint(
-            @PathVariable @NotBlank UUID id,
+    public ResponseEntity<ViewpointResponse> reactToViewPoint(
+            @PathVariable @NotNull UUID id,
             @RequestBody ViewpointReaction reaction) {
-        ViewpointReactionResponse response = ViewpointMapper.toReactionResponse(viewpointService.reactToViewpoint(id, reaction));
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.reactToViewpoint(id, reaction));
         return ResponseEntity.ok(response);
     }
 
     // TODO: wait for page and size
 //    @GetMapping("/viewpoint/{id}/facts")
 //    public ResponseEntity<List<FactEntity>> getFactsOfViewPoint(
-//            @PathVariable @NotBlank UUID id,
+//            @PathVariable @NotNull UUID id,
 //            @RequestParam(required = false) Integer page,
 //            @RequestParam(required = false) Integer size) {
 //        // Implement the logic to get facts of a viewpoint
@@ -74,7 +82,7 @@ public class ViewpointController {
 
 //    @PostMapping("/viewpoint/{id}/facts")
 //    public ResponseEntity<ViewpointResponse> addFactToViewPoint(
-//            @PathVariable @NotBlank UUID id,
+//            @PathVariable @NotNull UUID id,
 //            @RequestBody UUID factId) {
 //        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.addFactToViewpoint(id, factId));
 //        return ResponseEntity.ok(response);
@@ -82,8 +90,8 @@ public class ViewpointController {
 
 //    @DeleteMapping("/viewpoint/{id}/facts/{factId}")
 //    public ResponseEntity<Void> removeFactFromViewPoint(
-//            @PathVariable @NotBlank UUID id,
-//            @PathVariable @NotBlank UUID factId) {
+//            @PathVariable @NotNull UUID id,
+//            @PathVariable @NotNull UUID factId) {
 //        viewpointService.deleteFactFromViewpoint(id, factId);
 //        return ResponseEntity.noContent().build();
 //    }
