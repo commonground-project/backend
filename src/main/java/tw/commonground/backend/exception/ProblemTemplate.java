@@ -22,4 +22,13 @@ public final class ProblemTemplate {
                 "detail": "Permission denied"
             }
             """;
+
+    public static final String INVALID_ACCESS_TOKEN = """
+            {
+                "type": "type:INVALID_ACCESS_TOKEN",
+                "title": "Invalid access token",
+                "status": 403,
+                "detail": "Access token is invalid or expired"
+            }
+            """;
 }
