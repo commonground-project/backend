@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -19,7 +20,10 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import tw.commonground.backend.exception.ProblemTemplate;
+import tw.commonground.backend.service.jwt.JwtAuthenticationFilter;
+import tw.commonground.backend.service.jwt.JwtService;
 import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -40,13 +44,20 @@ public class SecurityConfiguration {
 
     private final UserService userService;
 
-    public SecurityConfiguration(UserService userService) {
+    private final JwtService jwtService;
+
+    public SecurityConfiguration(UserService userService, JwtService jwtService) {
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/setup/**").hasRole("SETUP_REQUIRED")
                         .requestMatchers("/api/**").authenticated()
