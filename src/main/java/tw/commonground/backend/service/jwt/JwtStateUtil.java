@@ -54,7 +54,7 @@ public class JwtStateUtil {
             stateVerifier.verify(state);
             return true;
         } catch (Exception e) {
-            logger.error("Failed to verify state {}", e.getMessage());
+            LOGGER.error("Failed to verify state {}", e.getMessage());
             return false;
         }
     }
