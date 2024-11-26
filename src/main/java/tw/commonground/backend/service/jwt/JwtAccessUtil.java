@@ -21,9 +21,9 @@ import java.util.Date;
 import java.util.UUID;
 
 @Component
-public class JwtUtil {
+public class JwtAccessUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtAccessUtil.class);
 
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -49,7 +49,7 @@ public class JwtUtil {
 
     private JWTVerifier accessTokenVerifier;
 
-    public JwtUtil(RefreshTokenRepository refreshTokenRepository, UserRepository userRepository) {
+    public JwtAccessUtil(RefreshTokenRepository refreshTokenRepository, UserRepository userRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.userRepository = userRepository;
     }
@@ -100,7 +100,7 @@ public class JwtUtil {
         return new JwtUserDetails(jwt, () -> userRepository.getIdByUid(jwt.getSubject()));
     }
 
-    public String generateRefreshToken(FullUserEntity user) {
+    public RefreshTokenEntity generateRefreshToken(FullUserEntity user) {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(user.getId());
 
@@ -110,6 +110,10 @@ public class JwtUtil {
         refreshToken.setExpirationTime(System.currentTimeMillis() + refreshTokenExpirationMillis);
 
         refreshTokenRepository.save(refreshToken);
-        return refreshToken.getId().toString();
+        return refreshToken;
+    }
+
+    public void inactiveRefreshToken(UUID refreshToken) {
+        refreshTokenRepository.inactivateById(refreshToken);
     }
 }

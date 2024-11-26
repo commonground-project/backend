@@ -11,7 +11,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@NamedEntityGraph
 public class RefreshTokenEntity {
 
     @Id

@@ -22,8 +22,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import tw.commonground.backend.exception.ProblemTemplate;
-import tw.commonground.backend.service.jwt.JwtAuthenticationFilter;
+import tw.commonground.backend.service.jwt.security.JwtAuthenticationFilter;
 import tw.commonground.backend.service.jwt.JwtService;
+import tw.commonground.backend.service.jwt.security.OAuthRequestResolver;
+import tw.commonground.backend.service.jwt.security.OAuthSuccessHandler;
 import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -46,9 +48,15 @@ public class SecurityConfiguration {
 
     private final JwtService jwtService;
 
-    public SecurityConfiguration(UserService userService, JwtService jwtService) {
+    private final OAuthSuccessHandler successHandler;
+
+    private final OAuthRequestResolver requestResolver;
+
+    public SecurityConfiguration(UserService userService, JwtService jwtService, OAuthSuccessHandler successHandler, OAuthRequestResolver requestResolver) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.successHandler = successHandler;
+        this.requestResolver = requestResolver;
     }
 
     @Bean
@@ -60,16 +68,19 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/setup/**").hasRole("SETUP_REQUIRED")
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/debug/**").anonymous()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/completed-sign-in.html").permitAll()
+                        .requestMatchers("/login").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(this.oauth2UserService())
                         )
                         .authorizationEndpoint(authorization -> authorization
-                                .baseUri("/api/oauth2")
+                                .authorizationRequestResolver(requestResolver)
                         )
+                        .successHandler(successHandler)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
@@ -138,8 +149,11 @@ public class SecurityConfiguration {
                     }
             );
 
+            Map<String, Object> attributes = new HashMap<>(user.getAttributes());
+            attributes.put("entity", userEntity);
+
             var authorities = List.of(new SimpleGrantedAuthority(userEntity.getRole().name()));
-            return new DefaultOAuth2User(authorities, user.getAttributes(), "email");
+            return new DefaultOAuth2User(authorities, attributes, "email");
         };
     }
 }
