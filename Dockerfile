@@ -13,7 +13,6 @@ COPY build/libs/*.jar /app/app.jar
 ENV SPRINGPROFILES=prod
 
 # Use the user created above
-USER spring:spring
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
