@@ -43,6 +43,8 @@ public class JwtService {
         RefreshTokenEntity newRefreshToken = jwtAccessUtil.generateRefreshToken(refreshTokenProjection.getUser());
         String newRefreshTokenString = newRefreshToken.getId().toString();
 
+        refreshTokenRepository.inactivateById(refreshToken);
+
         return new RefreshTokenResponse(newRefreshTokenString,
                 newRefreshToken.getExpirationTime(), accessToken);
     }
