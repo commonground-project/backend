@@ -3,7 +3,7 @@ FROM openjdk:21-slim
 # Create a group and user
 RUN groupadd -r spring && useradd -r -g spring spring
 
-RUN apt-get update && apt-get install -y crul
+RUN apt-get update && apt-get install -y curl
 
 WORKDIR /app
 COPY build/libs/*.jar /app/app.jar
