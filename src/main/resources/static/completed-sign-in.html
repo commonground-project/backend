@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Token Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .token-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .token-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: calc(100% - 80px);
+        }
+        .copy-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+        }
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .decoded-dates {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        h2 {
+            color: #333;
+        }
+        /* Toast styles */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>JWT Token Viewer</h1>
+    <h2>Extracted Tokens</h2>
+    <div class="token-container">
+        <strong>Token:</strong>
+        <span id="token" class="token-text">Loading...</span>
+        <button class="copy-button" onclick="copyToClipboard('token')">Copy</button>
+    </div>
+    <div class="token-container">
+        <strong>Refresh Token:</strong>
+        <span id="refreshToken" class="token-text">Loading...</span>
+        <button class="copy-button" onclick="copyToClipboard('refreshToken')">Copy</button>
+    </div>
+    <h2>Decoded Token</h2>
+    <pre id="decodedToken">Loading...</pre>
+    <h3>Decoded unix time</h3>
+    <pre id="decodedDates"></pre>
+    <a href="/api/oauth2/google"> Re-login(Google) </a>
+</div>
+
+<div id="toast" class="toast">Copied to clipboard!</div>
+
+<script>
+    // Function to parse query parameters
+    function getQueryParams() {
+        const params = {};
+        const queryString = window.location.search.substring(1);
+        const queryArray = queryString.split("&");
+        queryArray.forEach(param => {
+            const [key, value] = param.split("=");
+            if (key && value) {
+                params[decodeURIComponent(key)] = decodeURIComponent(value);
+            }
+        });
+        return params;
+    }
+
+    // Function to decode JWT
+    function decodeJWT(token) {
+        try {
+            const base64Url = token.split('.')[1]; // Get the payload part
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            return { error: "Invalid JWT" };
+        }
+    }
+
+    // Function to copy text to clipboard
+    function copyToClipboard(elementId) {
+        const textToCopy = document.getElementById(elementId).textContent;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showToast("Copied to clipboard!");
+        }).catch(err => {
+            showToast("Failed to copy text: " + err);
+        });
+    }
+
+    // Function to convert Unix timestamp to local date-time string
+    function unixToLocalDateTime(timestamp) {
+        return new Date(timestamp * 1000).toLocaleString();
+    }
+
+    // Function to show toast notification
+    function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 3000); // Toast visible for 3 seconds
+    }
+
+    // Extract tokens from URL
+    const queryParams = getQueryParams();
+    const token = queryParams.token || "Not provided";
+    const refreshToken = queryParams.refreshToken || "Not provided";
+
+    // Display tokens
+    document.getElementById('token').textContent = token;
+    document.getElementById('refreshToken').textContent = refreshToken;
+
+    // Decode and display the token payload
+    if (token !== "Not provided") {
+        const decoded = decodeJWT(token);
+        document.getElementById('decodedToken').textContent = JSON.stringify(decoded, null, 4);
+
+        // Extract iat, nbf, and exp and convert to local time
+        const iat = decoded.iat ? `Issued At:  ${unixToLocalDateTime(decoded.iat)}` : "Issued At: Not available";
+        const nbf = decoded.nbf ? `Not Before: ${unixToLocalDateTime(decoded.nbf)}` : "Not Before: Not available";
+        const exp = decoded.exp ? `Expires At: ${unixToLocalDateTime(decoded.exp)}` : "Expires At: Not available";
+
+        // Display the converted dates
+        document.getElementById('decodedDates').textContent = `${iat}\n${nbf}\n${exp}`;
+    } else {
+        document.getElementById('decodedToken').textContent = "No token provided.";
+    }
+</script>
+</body>
+</html>
