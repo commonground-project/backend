@@ -13,7 +13,4 @@ ENV SPRINGPROFILES=prod
 USER spring:spring
 EXPOSE 8080
 
-# Health check for the application
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8080/actuator/health || exit 1
-
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
