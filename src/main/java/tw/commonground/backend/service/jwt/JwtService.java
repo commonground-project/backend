@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.jwt;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.service.jwt.dto.RefreshTokenResponse;
 import tw.commonground.backend.service.jwt.entity.RefreshTokenEntity;
@@ -20,6 +21,8 @@ public class JwtService {
     public JwtService(JwtAccessUtil jwtAccessUtil, RefreshTokenRepository refreshTokenRepository) {
         this.jwtAccessUtil = jwtAccessUtil;
         this.refreshTokenRepository = refreshTokenRepository;
+
+        refreshTokenRepository.deleteAllByExpirationTimeBefore(System.currentTimeMillis());
     }
 
     public FullUserEntity authenticate(String accessToken) {
@@ -47,5 +50,10 @@ public class JwtService {
 
         return new RefreshTokenResponse(newRefreshTokenString,
                 newRefreshToken.getExpirationTime(), accessToken);
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void rotateRefreshTokens() {
+        refreshTokenRepository.deleteAllByExpirationTimeBefore(System.currentTimeMillis());
     }
 }
