@@ -23,7 +23,7 @@ import java.util.UUID;
 @Component
 public class JwtAccessUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAccessUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAccessUtil.class);
 
     private final RefreshTokenRepository refreshTokenRepository;
 

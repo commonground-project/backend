@@ -9,8 +9,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntity, UUID> {
-    Optional<RefreshTokenProjection> findByIdAndIsActiveAndExpirationTimeAfter
-            (UUID id, boolean isActive, long expirationTime);
+    Optional<RefreshTokenProjection> findByIdAndIsActiveAndExpirationTimeAfter(UUID id,
+                                                                               boolean isActive,
+                                                                               long expirationTime);
 
     @Modifying
     @Transactional

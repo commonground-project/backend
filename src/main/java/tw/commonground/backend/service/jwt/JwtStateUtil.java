@@ -17,7 +17,7 @@ import java.util.UUID;
 @Component
 public class JwtStateUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtStateUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtStateUtil.class);
 
     @Value("${jwt.secret:secret}")
     private String secret;

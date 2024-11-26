@@ -52,7 +52,8 @@ public class SecurityConfiguration {
 
     private final OAuthRequestResolver requestResolver;
 
-    public SecurityConfiguration(UserService userService, JwtService jwtService, OAuthSuccessHandler successHandler, OAuthRequestResolver requestResolver) {
+    public SecurityConfiguration(UserService userService, JwtService jwtService,
+                                 OAuthSuccessHandler successHandler, OAuthRequestResolver requestResolver) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.successHandler = successHandler;

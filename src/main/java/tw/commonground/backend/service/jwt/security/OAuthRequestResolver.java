@@ -29,7 +29,8 @@ public class OAuthRequestResolver implements OAuth2AuthorizationRequestResolver 
     private final JwtStateUtil jwtStateUtil;
 
     public OAuthRequestResolver(ClientRegistrationRepository clientRegistrationRepository, JwtStateUtil jwtStateUtil) {
-        this.defaultResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/api/oauth2");
+        this.defaultResolver = new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository,
+                "/api/oauth2");
         this.jwtStateUtil = jwtStateUtil;
     }
 
@@ -46,7 +47,8 @@ public class OAuthRequestResolver implements OAuth2AuthorizationRequestResolver 
     }
 
     @SneakyThrows
-    private OAuth2AuthorizationRequest customizeAuthorizationRequest(HttpServletRequest request, OAuth2AuthorizationRequest authorizationRequest) {
+    private OAuth2AuthorizationRequest customizeAuthorizationRequest(HttpServletRequest request,
+                                                                     OAuth2AuthorizationRequest authorizationRequest) {
         if (authorizationRequest == null) {
             return null;
         }
