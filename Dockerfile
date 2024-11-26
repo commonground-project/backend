@@ -4,6 +4,7 @@ FROM openjdk:21-slim
 RUN groupadd -r spring && useradd -r -g spring spring
 
 RUN apt-get update && apt-get install -y curl
+RUN curl https://www.google.com/
 
 WORKDIR /app
 COPY build/libs/*.jar /app/app.jar
