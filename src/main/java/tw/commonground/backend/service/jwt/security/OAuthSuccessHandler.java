@@ -70,7 +70,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
             }
 
             if (redirectUrl != null) {
-                callbackParam.append("?redirectUrl=").append(redirectUrl);
+                callbackParam.append("?r=").append(redirectUrl);
             }
         } else if (!disableStateVerification) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
