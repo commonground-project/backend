@@ -1,0 +1,16 @@
+{
+  "properties": [
+    {
+      "name": "feature.debug.jwt.enabled",
+      "type": "java.lang.String",
+      "description": "Description for feature.debug.jwt.enabled.",
+      "defaultValue": "false"
+    },
+    {
+      "name": "feature.debug.jwt.custom-callback-url.enabled",
+      "type": "java.lang.String",
+      "description": "Description for feature.debug.jwt.custom-callback-url.enabled.",
+      "defaultValue": "false"
+    }
+  ]
+}
