@@ -103,12 +103,12 @@ jobs:
 
       - name: Deploy image
         env:
-          title: "${{ github.event.pull_request.title }}"
+          title: ${{ github.event.pull_request.title }}
         run: |
           export MODE='Snapshot'
           export ENV='${{ github.event.number }}'
-          export TITLE="$title"
           export DRAFT=${{ github.event.pull_request.draft }}
+          export TITLE="$title"
           ssh -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Clear up
