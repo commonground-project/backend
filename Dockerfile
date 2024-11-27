@@ -4,7 +4,7 @@ FROM eclipse-temurin:21
 RUN groupadd -r spring && useradd -r -g spring spring
 
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends jq=1.7.1
+RUN apt-get install -y --no-install-recommends jq=1.7.1-3build1
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
