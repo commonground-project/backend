@@ -97,7 +97,7 @@ jobs:
 
       - name: Get PR URL
         id: prUrl
-        uses: ammaratef45/pr-url-action@v1
+        uses: kceb/pull-request-url-action@v1
 
       - name: Set up SSH
         run: |
