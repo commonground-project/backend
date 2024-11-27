@@ -6,7 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-public class ViewpointReactionResponse {
-    private String reaction;
+public class ViewpointReactionResponse extends ViewpointReactionBase {
+    public ViewpointReactionResponse(String reaction) {
+        this.setReaction(reaction);
+    }
 }

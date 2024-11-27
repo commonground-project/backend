@@ -1,8 +1,8 @@
 package tw.commonground.backend.service.viewpoint.dto;
 
 
-import tw.commonground.backend.service.viewpoint.entity.ViewpointReaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ public final class ViewpointMapper {
         // hide the constructor
     }
 
-    public static ViewpointReactionResponse toReactionResponse(ViewpointReaction viewpointReaction) {
-        return new ViewpointReactionResponse(viewpointReaction.getReaction().name());
+    public static ViewpointReactionResponse toReactionResponse(ViewpointReactionEntity viewpointReactionEntity) {
+        return new ViewpointReactionResponse(viewpointReactionEntity.getReaction().name());
     }
 
     public static ViewpointResponse toResponse(ViewpointEntity viewpointEntity) {
@@ -26,7 +26,7 @@ public final class ViewpointMapper {
                 .authorId(viewpointEntity.getAuthorId())
                 .authorName(viewpointEntity.getAuthorName())
                 .authorAvatar(viewpointEntity.getAuthorAvatar())
-                .userReaction(viewpointEntity.getUserReaction())
+//                .userReaction(viewpointEntity.getUserReaction())
                 .likeCount(viewpointEntity.getLikeCount())
                 .reasonableCount(viewpointEntity.getReasonableCount())
                 .dislikeCount(viewpointEntity.getDislikeCount())
@@ -46,7 +46,7 @@ public final class ViewpointMapper {
                         .authorId(viewpointEntity.getAuthorId())
                         .authorName(viewpointEntity.getAuthorName())
                         .authorAvatar(viewpointEntity.getAuthorAvatar())
-                        .userReaction(viewpointEntity.getUserReaction())
+//                        .userReaction(viewpointEntity.getUserReaction())
                         .likeCount(viewpointEntity.getLikeCount())
                         .reasonableCount(viewpointEntity.getReasonableCount())
                         .dislikeCount(viewpointEntity.getDislikeCount())

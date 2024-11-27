@@ -1,16 +1,15 @@
 package tw.commonground.backend.service.viewpoint;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
 //import tw.commonground.backend.service.fact.entity.FactEntity;
-import tw.commonground.backend.service.viewpoint.dto.ViewpointMapper;
-import tw.commonground.backend.service.viewpoint.dto.ViewpointReactionResponse;
-import tw.commonground.backend.service.viewpoint.dto.ViewpointResponse;
-import tw.commonground.backend.service.viewpoint.dto.ViewpointUpdateRequest;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointReaction;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.service.viewpoint.dto.*;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 
 import java.util.UUID;
 
@@ -62,11 +61,15 @@ public class ViewpointController {
         return ResponseEntity.noContent().build();
     }
 
+
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/viewpoint/{id}/reaction/me")
-    public ResponseEntity<ViewpointResponse> reactToViewPoint(
+    public ResponseEntity<ViewpointReactionResponse> reactToViewPoint(
+            @AuthenticationPrincipal DefaultOAuth2User user,
             @PathVariable @NotNull UUID id,
-            @RequestBody ViewpointReaction reaction) {
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.reactToViewpoint(id, reaction));
+            @RequestBody ViewpointReactionRequest reactionRequest) {
+        Long userId = user.getAttribute("id");
+        ViewpointReactionResponse response = ViewpointMapper.toReactionResponse(viewpointService.reactToViewpoint(userId, id, reactionRequest.getReaction()));
         return ResponseEntity.ok(response);
     }
 

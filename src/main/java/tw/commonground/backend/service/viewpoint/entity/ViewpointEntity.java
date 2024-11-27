@@ -19,10 +19,8 @@ public class ViewpointEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-//    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-//    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
@@ -31,29 +29,20 @@ public class ViewpointEntity {
     @Column
     private String content;
 
-//    @Column(nullable = false)
     private UUID authorId;
 
-//    @Column(nullable = false)
     private String authorName;
 
-//    @Column(nullable = false)
     private URI authorAvatar;
 
-    @Embedded
-    private ViewpointReaction userReaction = new ViewpointReaction();
-
-//    @Column(nullable = false)
     @ColumnDefault("0")
     private Integer likeCount;
 
     // Don't use integer default 0 in columnDefinition
 
-//    @Column(nullable = false, columnDefinition = "integer default 0")
     @ColumnDefault("0")
     private Integer reasonableCount;
 
-//    @Column(nullable = false, columnDefinition = "integer default 0")
     @ColumnDefault("0")
     private Integer dislikeCount;
 
