@@ -95,10 +95,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Get PR URL
-        id: prUrl
-        uses: kceb/pull-request-url-action@v1
-
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
@@ -109,8 +105,7 @@ jobs:
         run: |
           export MODE='Snapshot'
           export ENV='${{ github.event.number }}'
-          export URL='${{ steps.prUrl.outputs.url }}'
-          ssh -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=URL -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+          ssh -o SendEnv=MODE -o SendEnv=ENV -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
