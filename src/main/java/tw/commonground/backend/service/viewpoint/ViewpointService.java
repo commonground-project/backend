@@ -1,6 +1,7 @@
 package tw.commonground.backend.service.viewpoint;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 //import tw.commonground.backend.service.fact.entity.FactEntity;
 //import tw.commonground.backend.service.fact.entity.FactRepository;
@@ -54,9 +55,15 @@ public class ViewpointService {
         viewpointRepository.flush();
     }
 
-    public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, String reaction) {
-        ViewpointReactionId viewpointReactionId = new ViewpointReactionId(userId, viewpointId);
+    @Transactional
+    public ViewpointReactionEntity reactToViewpoint(String email, UUID viewpointId, String reaction) {
+
         // check if the user and viewpoint exist in the database
+        Long userId = userRepository.findIdByEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("User", "email", email)).getId();;
+
+        ViewpointReactionId viewpointReactionId = new ViewpointReactionId(userId, viewpointId);
+
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("User", "id", valueOf(userId)));
         ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(viewpointId).orElseThrow(
@@ -71,18 +78,21 @@ public class ViewpointService {
             return newViewpointReactionEntity;
         });
 
+        // test
+//        return viewpointReactionEntity;
+
         Reaction previousReaction = viewpointReactionEntity.getReaction();
         switch (previousReaction) {
             case NONE:
                 break;
             case LIKE:
-                viewpointEntity.setLikeCount(viewpointEntity.getLikeCount() - 1);
+                viewpointRepository.decrementLikeCount(viewpointId);
                 break;
             case REASONABLE:
-                viewpointEntity.setReasonableCount(viewpointEntity.getReasonableCount() - 1);
+                viewpointRepository.decrementReasonableCount(viewpointId);
                 break;
             case DISLIKE:
-                viewpointEntity.setDislikeCount(viewpointEntity.getDislikeCount() - 1);
+                viewpointRepository.decrementDislikeCount(viewpointId);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid reaction: " + previousReaction);
@@ -96,23 +106,22 @@ public class ViewpointService {
                 break;
             case LIKE:
                 viewpointReactionEntity.setReaction(LIKE);
-                viewpointEntity.setLikeCount(viewpointEntity.getLikeCount() + 1);
+                viewpointRepository.incrementLikeCount(viewpointId);
                 viewpointReactionRepository.save(viewpointReactionEntity);
                 break;
             case REASONABLE:
                 viewpointReactionEntity.setReaction(REASONABLE);
-                viewpointEntity.setReasonableCount(viewpointEntity.getReasonableCount() + 1);
+                viewpointRepository.incrementReasonableCount(viewpointId);
                 viewpointReactionRepository.save(viewpointReactionEntity);
                 break;
             case DISLIKE:
                 viewpointReactionEntity.setReaction(DISLIKE);
-                viewpointEntity.setDislikeCount(viewpointEntity.getDislikeCount() + 1);
+                viewpointRepository.incrementDislikeCount(viewpointId);
                 viewpointReactionRepository.save(viewpointReactionEntity);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid reaction: " + reaction);
         }
-        viewpointRepository.save(viewpointEntity);
         return viewpointReactionEntity;
     }
 

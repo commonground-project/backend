@@ -15,7 +15,7 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     Optional<FullUserEntity> findUserEntityById(Long id);
 
-    SimpleUserEntity findIdByEmail(String email);
+    Optional<FullUserEntity> findIdByEmail(String email);
 
     Optional<UserEntity> getUserEntityByUsername(String username);
 
@@ -28,5 +28,7 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     @Transactional
     @Query("UPDATE UserEntity u SET u.username = ?2, u.nickname = ?3, u.role = ?4 WHERE u.id = ?1")
     void setupUserById(Long id, String username, String nickname, UserRole role);
+
+
 }
 

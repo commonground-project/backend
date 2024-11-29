@@ -68,8 +68,8 @@ public class ViewpointController {
             @AuthenticationPrincipal DefaultOAuth2User user,
             @PathVariable @NotNull UUID id,
             @RequestBody ViewpointReactionRequest reactionRequest) {
-        Long userId = user.getAttribute("id");
-        ViewpointReactionResponse response = ViewpointMapper.toReactionResponse(viewpointService.reactToViewpoint(userId, id, reactionRequest.getReaction()));
+        String email = user.getName();
+        ViewpointReactionResponse response = ViewpointMapper.toReactionResponse(viewpointService.reactToViewpoint(email, id, reactionRequest.getReaction()));
         return ResponseEntity.ok(response);
     }
 
