@@ -102,10 +102,14 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy image
+        env:
+          title: ${{ github.event.pull_request.title }}
         run: |
           export MODE='Snapshot'
           export ENV='${{ github.event.number }}'
-          ssh -o SendEnv=MODE -o SendEnv=ENV -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+          export DRAFT='${{ github.event.pull_request.draft }}'
+          export TITLE='${{ env.title }}'
+          ssh -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
