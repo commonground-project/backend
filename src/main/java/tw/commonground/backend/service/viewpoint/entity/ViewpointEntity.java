@@ -36,15 +36,15 @@ public class ViewpointEntity {
     private URI authorAvatar;
 
     @ColumnDefault("0")
-    private Integer likeCount;
+    private Integer likeCount = 0;
 
     // Don't use integer default 0 in columnDefinition
 
     @ColumnDefault("0")
-    private Integer reasonableCount;
+    private Integer reasonableCount = 0;
 
     @ColumnDefault("0")
-    private Integer dislikeCount;
+    private Integer dislikeCount = 0;
 
 //    @ManyToMany
 //    private List<FactEntity> facts;
