@@ -13,17 +13,14 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     Optional<FullUserEntity> findUserEntityByUsername(String username);
 
-    SimpleUserEntity findIdByEmail(String email);
+    SimpleUserEntity findByEmail(String email);
+
+    @Query("SELECT u.id FROM UserEntity u WHERE u.uuid = ?1")
+    Long getIdByUid(String uid);
 
     @Modifying
     @Transactional
     @Query("UPDATE UserEntity u SET u.username = ?2, u.nickname = ?3, u.role = ?4 WHERE u.id = ?1")
     void setupUserById(Long id, String username, String nickname, UserRole role);
-
-    // Method using projection to get ID by email
-    default Long getIdByEmail(String email) {
-        SimpleUserEntity projection = findIdByEmail(email);
-        return projection != null ? projection.getId() : null;
-    }
 }
 

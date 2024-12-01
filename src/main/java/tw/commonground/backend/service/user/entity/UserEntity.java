@@ -4,6 +4,8 @@ package tw.commonground.backend.service.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 
 @Entity
 @Getter
@@ -17,6 +19,9 @@ public class UserEntity implements SimpleUserEntity, FullUserEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(unique = true, updatable = false, nullable = false)
+    private UUID uuid;
+
     @Column(unique = true)
     private String username;
 
@@ -29,4 +34,11 @@ public class UserEntity implements SimpleUserEntity, FullUserEntity {
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @PrePersist
+    public void prePersist() {
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+        }
+    }
 }

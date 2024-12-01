@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.user.dto.UserMapper;
@@ -51,16 +50,15 @@ public class UserController {
 
     @GetMapping("/user/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal DefaultOAuth2User user) {
-        FullUserEntity userEntity = userService.getMe(user.getName());
-        UserResponse response = UserMapper.toResponse(userEntity);
+    public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal FullUserEntity user) {
+        UserResponse response = UserMapper.toResponse(user);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/user/setup")
     public ResponseEntity<UserResponse> userSetup(@Valid @RequestBody UserSetupRequest setupRequest,
-                                                  @AuthenticationPrincipal DefaultOAuth2User user) {
-        FullUserEntity userEntity = userService.completeSetup(setupRequest, user.getName());
+                                                  @AuthenticationPrincipal FullUserEntity user) {
+        FullUserEntity userEntity = userService.completeSetup(setupRequest, user.getEmail());
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
