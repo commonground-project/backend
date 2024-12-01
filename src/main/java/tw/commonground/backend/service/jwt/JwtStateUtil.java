@@ -22,7 +22,7 @@ public class JwtStateUtil {
     @Value("${jwt.secret:secret}")
     private String secret;
 
-    @Value("${jwt.stateExpiration:PT10S}")
+    @Value("${jwt.state.expiration:PT10s}")
     private String stateExpiration;
 
     @Value("${jwt.issuer:commonground}")

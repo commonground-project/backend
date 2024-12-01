@@ -32,10 +32,10 @@ public class JwtAccessUtil {
     @Value("${jwt.secret:secret}")
     private String secret;
 
-    @Value("${jwt.accessTokenExpiration:PT15M}")
+    @Value("${jwt.access-token.expiration:PT15M}")
     private String accessTokenExpiration;
 
-    @Value("${jwt.refreshTokenExpiration:P30D}")
+    @Value("${jwt.refresh.token.expiration:P30D}")
     private String refreshTokenExpiration;
 
     @Value("${jwt.issuer:commonground}")

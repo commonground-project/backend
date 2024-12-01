@@ -11,6 +11,36 @@
       "type": "java.lang.String",
       "description": "Description for feature.debug.jwt.custom-callback-url.enabled.",
       "defaultValue": "false"
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Description for jwt.secret.",
+      "defaultValue": ""
+    },
+    {
+      "name": "jwt.issuer",
+      "type": "java.lang.String",
+      "description": "Description for jwt.issuer.",
+      "defaultValue": ""
+    },
+    {
+      "name": "jwt.access-token.expiration",
+      "type": "java.lang.String",
+      "description": "Description for jwt.access-token.expiration.",
+      "defaultValue": ""
+    },
+    {
+      "name": "jwt.refresh.token.expiration",
+      "type": "java.lang.String",
+      "description": "Description for jwt.refresh.token.expiration.",
+      "defaultValue": ""
+    },
+    {
+      "name": "jwt.state.expiration",
+      "type": "java.lang.String",
+      "description": "Description for jwt.state.expiration.",
+      "defaultValue": ""
     }
   ]
 }
