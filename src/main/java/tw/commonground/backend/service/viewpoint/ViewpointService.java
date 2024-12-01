@@ -58,30 +58,22 @@ public class ViewpointService {
     @Transactional
     public ViewpointReactionEntity reactToViewpoint(String email, UUID viewpointId, String reaction) {
 
-        // check if the user and viewpoint exist in the database
         Long userId = userRepository.findIdByEmail(email).orElseThrow(
                 () -> new EntityNotFoundException("User", "email", email)).getId();;
 
         ViewpointReactionId viewpointReactionId = new ViewpointReactionId(userId, viewpointId);
 
+        // check if the user and viewpoint exist in the database
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("User", "id", valueOf(userId)));
         ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(viewpointId).orElseThrow(
                 () -> new EntityNotFoundException("Viewpoint", "id", viewpointId.toString()));
 
         // check if the viewpointReactionEntity exists in the database, if not means the user has not reacted to the viewpoint
-        ViewpointReactionEntity viewpointReactionEntity = viewpointReactionRepository.findById(viewpointReactionId).orElseGet(() -> {
-            ViewpointReactionEntity newViewpointReactionEntity = new ViewpointReactionEntity();
-            // create a new ViewpointReactionEntity with the given userId and viewpointId
-            newViewpointReactionEntity.setId(viewpointReactionId);
-            newViewpointReactionEntity.setReaction(Reaction.NONE);
-            return newViewpointReactionEntity;
+        Reaction previousReaction = viewpointReactionRepository.findReactionById(viewpointReactionId).orElseGet(() -> {
+            return Reaction.NONE;
         });
 
-        // test
-//        return viewpointReactionEntity;
-
-        Reaction previousReaction = viewpointReactionEntity.getReaction();
         switch (previousReaction) {
             case NONE:
                 break;
@@ -98,7 +90,11 @@ public class ViewpointService {
                 throw new IllegalArgumentException("Invalid reaction: " + previousReaction);
         }
 
+        ViewpointReactionEntity viewpointReactionEntity = new ViewpointReactionEntity();
+        // create a new ViewpointReactionEntity with the given userId and viewpointId
+        viewpointReactionEntity.setId(viewpointReactionId);
         viewpointReactionEntity.setReaction(Reaction.valueOf(reaction));
+
         switch (Reaction.valueOf(reaction)) {
             case NONE: // delete the viewpointReactionEntity if the reaction is NONE
                 viewpointReactionRepository.delete(viewpointReactionEntity);

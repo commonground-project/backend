@@ -12,9 +12,8 @@ import java.util.Optional;
 public interface ViewpointReactionRepository extends JpaRepository<ViewpointReactionEntity, ViewpointReactionId> {
     Optional<ViewpointReactionEntity> findById(ViewpointReactionId id);
 
-    // @Modifying
-    //@Query("UPDATE ViewpointEntity v SET v.likeCount = v.likeCount - 1 WHERE v.id = :viewpointId AND v.likeCount > 0")
-    //void decrementLikeCount(@Param("viewpointId") Long viewpointId);
+    @Query("SELECT v.reaction FROM ViewpointReactionEntity v WHERE v.id = :id")
+    Optional<Reaction> findReactionById(ViewpointReactionId id);
 
     // need to query who liked the viewpoint
 

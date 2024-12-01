@@ -23,7 +23,6 @@ public class ViewpointResponse {
     private UUID authorId;
     private String authorName;
     private URI authorAvatar;
-    private ViewpointReactionEntity userReaction;
     private Integer likeCount;
     private Integer reasonableCount;
     private Integer dislikeCount;
