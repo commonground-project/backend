@@ -69,6 +69,7 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/jwt/refresh/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/setup/**").hasRole("SETUP_REQUIRED")
                         .requestMatchers("/api/debug/**").anonymous()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
