@@ -46,6 +46,6 @@ public class IssueEntity implements SimpleIssueEntity {
 
 //  Added for POST /api/issue/{id}/viewpoints endpoint
     @OneToMany(mappedBy = "issue")
-    private Set<ManualFactEntity> manualFacts;
+    private Set<ManualIssueFactEntity> manualFacts;
 
 }

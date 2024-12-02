@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.UUID;
 
 @SuppressWarnings("MethodName")
-public interface ManualFactRepository extends JpaRepository<ManualFactEntity, IssueFactKey> {
-    Page<ManualFactEntity> findAllByKey_IssueId(UUID issueId, Pageable pageable);
+public interface ManualFactRepository extends JpaRepository<ManualIssueFactEntity, IssueFactKey> {
+    Page<ManualIssueFactEntity> findAllByKey_IssueId(UUID issueId, Pageable pageable);
 
-    Page<ManualFactEntity> findAllByKey_FactId(UUID factId, Pageable pageable);
+    Page<ManualIssueFactEntity> findAllByKey_FactId(UUID factId, Pageable pageable);
 
     @Modifying
-    @Query(value = "INSERT INTO manual_fact_entity (issue_id, fact_id) VALUES (?1, ?2)", nativeQuery = true)
+    @Query(value = "INSERT INTO issue_fact_entity (issue_id, fact_id) VALUES (?1, ?2)", nativeQuery = true)
     void saveByIssueIdAndFactId(UUID issueId, UUID factId);
 }
