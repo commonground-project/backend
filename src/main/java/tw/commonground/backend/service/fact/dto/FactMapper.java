@@ -3,6 +3,11 @@ package tw.commonground.backend.service.fact.dto;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reference.ReferenceMapper;
 
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 public final class FactMapper {
 
     private FactMapper() {
@@ -21,4 +26,9 @@ public final class FactMapper {
                 .build();
     }
 
+    public static Set<FactEntity> toEntities(Collection<UUID> factIds) {
+        return factIds.stream()
+                .map(factId -> FactEntity.builder().id(factId).build())
+                .collect(Collectors.toSet());
+    }
 }

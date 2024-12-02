@@ -8,7 +8,7 @@ import java.util.List;
 
 public final class ViewpointMapper {
 
-    public ViewpointMapper() {
+    private ViewpointMapper() {
         // hide the constructor
     }
 
@@ -51,6 +51,4 @@ public final class ViewpointMapper {
                         .build())
                 .toList(); //     viewpointEntity.getFacts()
     }
-
-
 }
