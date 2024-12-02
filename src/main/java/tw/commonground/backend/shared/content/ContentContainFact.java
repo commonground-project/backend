@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.issue.insight;
+package tw.commonground.backend.shared.content;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class Insight {
+public class ContentContainFact {
 
     private String text;
 
