@@ -1,9 +1,14 @@
-package tw.commonground.backend.service.pagination;
+package tw.commonground.backend.pagination;
 
 import org.springframework.data.domain.Page;
 
-public class PaginationMapper {
-    public PaginationResponse toResponse(Page page) {
+public final class PaginationMapper {
+
+    private PaginationMapper() {
+        // hide the constructor
+    }
+
+    public static PaginationResponse toResponse(Page<?> page) {
         return PaginationResponse.builder()
                 .totalElement(page.getTotalElements())
                 .totalPage(page.getTotalPages())

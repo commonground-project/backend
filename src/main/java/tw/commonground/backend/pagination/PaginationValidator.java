@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.pagination;
+package tw.commonground.backend.pagination;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;

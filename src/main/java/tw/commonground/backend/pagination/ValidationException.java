@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.pagination;
+package tw.commonground.backend.pagination;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
