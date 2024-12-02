@@ -16,18 +16,6 @@ public final class InsightParser {
         // hide constructor
     }
 
-    public static void main(String[] args) {
-        String insight = "[San Francisco, CA](0) — In a significant leap forward for electric vehicle (EV) technology, researchers at [GreenTech Innovations](1) announced today the development of a [new battery](1,2) that could revolutionize the industry";
-        System.out.println(insight);
-
-        String text = convertLinkIntToUuid(insight, List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()));
-        System.out.println(text);
-
-        Insight insightObj = separateInsightAndFacts(text);
-        System.out.println(insightObj.getText());
-        System.out.println(insightObj.getFacts());
-    }
-
     public static String convertLinkIntToUuid(String insight, List<UUID> facts) {
         StringBuilder replacedText = new StringBuilder();
 
@@ -73,7 +61,8 @@ public final class InsightParser {
                 positions.add(uuids.indexOf(uuid));
             }
 
-            String newLink = "[" + linkText + "](" + String.join(",", positions.stream().map(Object::toString).toList()) + ")";
+            String newLink = "[" + linkText + "](" +
+                    String.join(",", positions.stream().map(Object::toString).toList()) + ")";
             matcher.appendReplacement(replacedText, newLink);
         }
 

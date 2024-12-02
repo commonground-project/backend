@@ -24,7 +24,8 @@ public class IssueService {
 
     private final FactRepository factRepository;
 
-    public IssueService(IssueRepository issueRepository, ManualFactRepository manualFactRepository, FactRepository factRepository) {
+    public IssueService(IssueRepository issueRepository, ManualFactRepository manualFactRepository,
+                        FactRepository factRepository) {
         this.issueRepository = issueRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
@@ -77,7 +78,8 @@ public class IssueService {
         });
 
         try {
-            issueEntity.setInsight(InsightParser.convertLinkIntToUuid(issueRequest.getInsight(), issueRequest.getFacts()));
+            issueEntity.setInsight(InsightParser.convertLinkIntToUuid(issueRequest.getInsight(),
+                    issueRequest.getFacts()));
         } catch (Exception e) {
             throw new ValidationException("Insight is invalid: " + e.getMessage());
         }

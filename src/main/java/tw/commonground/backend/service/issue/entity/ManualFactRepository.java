@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.UUID;
 
+@SuppressWarnings("MethodName")
 public interface ManualFactRepository extends JpaRepository<ManualFactEntity, IssueFactKey> {
     Page<ManualFactEntity> findAllByKey_IssueId(UUID issueId, Pageable pageable);
 
