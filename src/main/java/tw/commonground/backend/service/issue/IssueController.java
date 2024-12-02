@@ -22,10 +22,7 @@ import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
 import tw.commonground.backend.service.issue.insight.Insight;
 import tw.commonground.backend.service.issue.insight.InsightParser;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 public class IssueController {
@@ -92,7 +89,8 @@ public class IssueController {
     @GetMapping("/api/issue/{id}/facts")
     public WrappedPaginationResponse<List<FactResponse>> getIssueFacts(@PathVariable UUID id,
                                                                        @Valid PaginationRequest pagination) {
-        Pageable pageable = paginationValidator.validatePaginationRequest(pagination);
+        PaginationValidator validator = new PaginationValidator(Collections.emptySet(), MAX_SIZE);
+        Pageable pageable = validator.validatePaginationRequest(pagination);
         Page<FactEntity> pageFacts = issueService.getIssueFacts(id, pageable);
 
         List<FactResponse> factResponses = pageFacts.getContent()

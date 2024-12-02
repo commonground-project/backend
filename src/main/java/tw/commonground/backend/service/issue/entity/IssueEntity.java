@@ -32,9 +32,10 @@ public class IssueEntity implements SimpleIssueEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String insight;
 
     private String authorId;

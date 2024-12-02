@@ -4,10 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.exception.ValidationException;
-import tw.commonground.backend.service.fact.dto.FactMapper;
-import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
@@ -98,7 +97,7 @@ public class IssueService {
 
     public Page<FactEntity> getIssueFacts(UUID id, Pageable pageable) {
         List<FactEntity> factEntities = new ArrayList<>();
-        Page<ManualFactEntity> manualFactEntities = manualFactRepository.findAllByIssueId(id, pageable);
+        Page<ManualFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);
 
         for (ManualFactEntity manualFactEntity : manualFactEntities) {
             factEntities.add(manualFactEntity.getFact());
@@ -108,27 +107,26 @@ public class IssueService {
         return new PageImpl<>(factEntities, pageable, manualFactEntities.getTotalElements());
     }
 
+    @Transactional
     public List<FactEntity> createManualFact(UUID id, List<UUID> factIds) {
         if (!issueRepository.existsById(id)) {
             throw new EntityNotFoundException("Issue", "id", id.toString());
         }
 
-        List<ManualFactEntity> manualFactEntities = new ArrayList<>();
         List<FactEntity> factEntities = new ArrayList<>();
         for (UUID factId : factIds) {
             if (!factRepository.existsById(factId)) {
                 throw new EntityNotFoundException("Fact", "id", factId.toString());
             }
 
-            manualFactEntities.add(new ManualFactEntity(id, factId));
             FactEntity factEntity = factRepository.findById(factId).orElseThrow(
                     () -> new EntityNotFoundException("Fact", "id", factId.toString())
             );
 
+            manualFactRepository.saveByIssueIdAndFactId(id, factId);
             factEntities.add(factEntity);
         }
 
-        manualFactRepository.saveAll(manualFactEntities);
         return factEntities;
     }
 }

@@ -22,19 +22,23 @@ public class PaginationValidator {
             throw new ValidationException("Page size must be less than or equal to " + maxSize);
         }
 
-        List<Order> orders = new ArrayList<>();
-        Arrays.stream(paginationRequest.getSort().split(",")).toList().forEach(order -> {
-            List<String> sep = Arrays.stream(order.split(";")).toList();
-            if (!sortableColumn.contains(sep.getFirst())) {
-                throw new EntityNotFoundException("Invalid sort column");
-            }
-            if (Objects.equals(sep.getLast(), "desc")) {
-                orders.add(Order.desc(sep.getFirst()));
-            } else {
-                orders.add(Order.asc(sep.getFirst()));
-            }
-        });
+        if (paginationRequest.getSort() == null) {
+            return PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize());
+        } else {
+            List<Order> orders = new ArrayList<>();
+            Arrays.stream(paginationRequest.getSort().split(",")).toList().forEach(order -> {
+                List<String> sep = Arrays.stream(order.split(";")).toList();
+                if (!sortableColumn.contains(sep.getFirst())) {
+                    throw new EntityNotFoundException("Invalid sort column");
+                }
+                if (Objects.equals(sep.getLast(), "desc")) {
+                    orders.add(Order.desc(sep.getFirst()));
+                } else {
+                    orders.add(Order.asc(sep.getFirst()));
+                }
+            });
 
-        return PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize(), Sort.by(orders));
+            return PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize(), Sort.by(orders));
+        }
     }
 }
