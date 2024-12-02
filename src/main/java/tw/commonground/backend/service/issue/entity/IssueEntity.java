@@ -34,6 +34,7 @@ public class IssueEntity implements SimpleIssueEntity {
 
     private String description;
 
+    @Lob
     private String insight;
 
     private String authorId;

@@ -5,16 +5,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
+import tw.commonground.backend.service.issue.insight.InsightParser;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class IssueService {
@@ -42,10 +42,23 @@ public class IssueService {
     }
 
     public IssueEntity createIssue(IssueRequest issueRequest) {
+        issueRequest.getFacts().forEach(factId -> {
+            if (!factRepository.existsById(factId)) {
+                throw new EntityNotFoundException("Fact", "id", factId.toString());
+            }
+        });
+
+        String insight;
+        try {
+            insight = InsightParser.convertLinkIntToUuid(issueRequest.getInsight(), issueRequest.getFacts());
+        } catch (Exception e) {
+            throw new ValidationException("Insight is invalid: " + e.getMessage());
+        }
+
         IssueEntity issueEntity = IssueEntity.builder()
                 .title(issueRequest.getTitle())
                 .description(issueRequest.getDescription())
-                .insight(issueRequest.getInsight())
+                .insight(insight)
 //                .authorId(issueRequest.getAuthorId())
 //                .authorName(issueRequest.getAuthorName())
 //                .authorAvatar(issueRequest.getAuthorAvatar())
@@ -57,9 +70,21 @@ public class IssueService {
         IssueEntity issueEntity = issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
         );
+
+        issueRequest.getFacts().forEach(factId -> {
+            if (!factRepository.existsById(factId)) {
+                throw new EntityNotFoundException("Fact", "id", factId.toString());
+            }
+        });
+
+        try {
+            issueEntity.setInsight(InsightParser.convertLinkIntToUuid(issueRequest.getInsight(), issueRequest.getFacts()));
+        } catch (Exception e) {
+            throw new ValidationException("Insight is invalid: " + e.getMessage());
+        }
+
         issueEntity.setTitle(issueRequest.getTitle());
         issueEntity.setDescription(issueRequest.getDescription());
-        issueEntity.setInsight(issueRequest.getInsight());
 //        issueEntity.setAuthorId(issueRequest.getAuthorId());
 //        issueEntity.setAuthorName(issueRequest.getAuthorName());
 //        issueEntity.setAuthorAvatar(issueRequest.getAuthorAvatar());
@@ -79,7 +104,7 @@ public class IssueService {
             factEntities.add(manualFactEntity.getFact());
         }
 
-//      Todo: parse insight facts
+//      Todo: parse viewpoint facts
         return new PageImpl<>(factEntities, pageable, manualFactEntities.getTotalElements());
     }
 

@@ -44,6 +44,9 @@ public class FactService {
         return new WrappedPaginationResponse<>(factResponses, PaginationMapper.toResponse(pageFacts));
     }
 
+    public List<FactEntity> getFacts(List<UUID> ids) {
+        return factRepository.findAllById(ids);
+    }
 
     public FactResponse getFact(UUID id) {
 
