@@ -13,8 +13,8 @@ import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.*;
-import tw.commonground.backend.service.pagination.PaginationMapper;
-import tw.commonground.backend.service.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.pagination.PaginationMapper;
+import tw.commonground.backend.pagination.WrappedPaginationResponse;
 
 import java.net.URL;
 import java.net.URLDecoder;
@@ -28,10 +28,6 @@ public class FactService {
 
     private final ReferenceRepository referenceRepository;
 
-    private final FactMapper factMapper = new FactMapper();
-    private final ReferenceMapper referenceMapper = new ReferenceMapper();
-    private final PaginationMapper paginationMapper = new PaginationMapper();
-
     public FactService(FactRepository factRepository, ReferenceRepository referenceRepository) {
         this.factRepository = factRepository;
         this.referenceRepository = referenceRepository;
@@ -42,12 +38,15 @@ public class FactService {
 
         List<FactResponse> factResponses = pageFacts.getContent()
                 .stream()
-                .map(factMapper::toResponse)
+                .map(FactMapper::toResponse)
                 .toList();
 
-        return new WrappedPaginationResponse<>(factResponses, paginationMapper.toResponse(pageFacts));
+        return new WrappedPaginationResponse<>(factResponses, PaginationMapper.toResponse(pageFacts));
     }
 
+    public List<FactEntity> getFacts(List<UUID> ids) {
+        return factRepository.findAllById(ids);
+    }
 
     public FactResponse getFact(UUID id) {
 
@@ -55,7 +54,7 @@ public class FactService {
                 () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
 
-        return factMapper.toResponse(factEntity);
+        return FactMapper.toResponse(factEntity);
     }
 
     public FactResponse createFact(FactRequest factRequest) {
@@ -71,7 +70,7 @@ public class FactService {
         Set<ReferenceEntity> referenceEntities = parseReferenceEntity(factRequest.getUrls());
         factEntity.setReferences(referenceEntities);
 
-        return factMapper.toResponse(factRepository.save(factEntity));
+        return FactMapper.toResponse(factRepository.save(factEntity));
     }
 
     // sameUrls represent the urls which already save in ReferenceEntity
@@ -85,7 +84,7 @@ public class FactService {
         Set<ReferenceEntity> referenceEntities = parseReferenceEntity(factRequest.getUrls());
         factEntity.setReferences(referenceEntities);
 
-        return factMapper.toResponse(factRepository.save(factEntity));
+        return FactMapper.toResponse(factRepository.save(factEntity));
     }
 
     public void deleteFact(UUID id) {
@@ -97,7 +96,7 @@ public class FactService {
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Fact", "id", id.toString())
         );
-        return factEntity.getReferences().stream().map(referenceMapper::toResponse).toList();
+        return factEntity.getReferences().stream().map(ReferenceMapper::toResponse).toList();
     }
 
     public List<ReferenceResponse> createFactReferences(UUID id,
@@ -117,7 +116,7 @@ public class FactService {
 
         factRepository.save(factEntity);
 
-        return factEntity.getReferences().stream().map(referenceMapper::toResponse).toList();
+        return factEntity.getReferences().stream().map(ReferenceMapper::toResponse).toList();
     }
 
     public void deleteFactReferences(UUID id, UUID referenceId) {

@@ -3,8 +3,13 @@ package tw.commonground.backend.service.reference;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-public class ReferenceMapper {
-    public ReferenceResponse toResponse(ReferenceEntity referenceEntity) {
+public final class ReferenceMapper {
+
+    private ReferenceMapper() {
+        // hide the constructor
+    }
+
+    public static ReferenceResponse toResponse(ReferenceEntity referenceEntity) {
 
         String encodedUrl = URLEncoder.encode(referenceEntity.getUrl(), StandardCharsets.UTF_8);
         String encodedIcon;
