@@ -61,8 +61,8 @@ public final class InsightParser {
                 positions.add(uuids.indexOf(uuid));
             }
 
-            String newLink = "[" + linkText + "](" +
-                    String.join(",", positions.stream().map(Object::toString).toList()) + ")";
+            String newLink = "[" + linkText + "]("
+                    + String.join(",", positions.stream().map(Object::toString).toList()) + ")";
             matcher.appendReplacement(replacedText, newLink);
         }
 
