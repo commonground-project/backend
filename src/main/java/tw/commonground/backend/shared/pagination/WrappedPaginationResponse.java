@@ -1,4 +1,4 @@
-package tw.commonground.backend.pagination;
+package tw.commonground.backend.shared.pagination;
 
 import lombok.*;
 
