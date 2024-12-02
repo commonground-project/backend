@@ -3,11 +3,13 @@ package tw.commonground.backend.service.fact.dto;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reference.ReferenceMapper;
 
-public class FactMapper {
+public final class FactMapper {
 
-    private final ReferenceMapper referenceMapper = new ReferenceMapper();
+    private FactMapper() {
+        // hide the constructor
+    }
 
-    public FactResponse toResponse(FactEntity factEntity) {
+    public static FactResponse toResponse(FactEntity factEntity) {
         return FactResponse.builder()
                 .id(factEntity.getId())
                 .title(factEntity.getTitle())
@@ -15,7 +17,7 @@ public class FactMapper {
                 .updateAt(factEntity.getUpdatedAt())
                 .authorId(factEntity.getAuthorId())
                 .authorName(factEntity.getAuthorName())
-                .references(factEntity.getReferences().stream().map(referenceMapper::toResponse).toList())
+                .references(factEntity.getReferences().stream().map(ReferenceMapper::toResponse).toList())
                 .build();
     }
 

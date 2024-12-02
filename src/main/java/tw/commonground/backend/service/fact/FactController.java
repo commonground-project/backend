@@ -7,11 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.dto.FactRequest;
 import tw.commonground.backend.service.fact.dto.FactResponse;
-import tw.commonground.backend.service.pagination.PaginationValidator;
+import tw.commonground.backend.pagination.PaginationValidator;
 import tw.commonground.backend.service.reference.ReferenceRequest;
 import tw.commonground.backend.service.reference.ReferenceResponse;
-import tw.commonground.backend.service.pagination.PaginationRequest;
-import tw.commonground.backend.service.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.pagination.PaginationRequest;
+import tw.commonground.backend.pagination.WrappedPaginationResponse;
 
 import java.util.*;
 
@@ -24,7 +24,6 @@ public class FactController {
     private final Set<String> sortableColumn = Set.of("title", "createAt", "updateAt", "authorId", "authorName");
 
     private final PaginationValidator paginationValidator = new PaginationValidator(sortableColumn, MAX_SIZE);
-
 
     public FactController(FactService factService) {
         this.factService = factService;
