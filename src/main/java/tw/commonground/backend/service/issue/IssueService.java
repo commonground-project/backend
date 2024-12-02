@@ -7,11 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.exception.ValidationException;
+import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
-import tw.commonground.backend.service.issue.insight.InsightParser;
+import tw.commonground.backend.shared.content.ContentContainFactParser;
 
 import java.util.*;
 
@@ -24,11 +25,14 @@ public class IssueService {
 
     private final FactRepository factRepository;
 
+    private final FactService factService;
+
     public IssueService(IssueRepository issueRepository, ManualFactRepository manualFactRepository,
-                        FactRepository factRepository) {
+                        FactRepository factRepository, FactService factService) {
         this.issueRepository = issueRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
+        this.factService = factService;
     }
 
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
@@ -41,27 +45,23 @@ public class IssueService {
         );
     }
 
-    public IssueEntity createIssue(IssueRequest issueRequest) {
-        issueRequest.getFacts().forEach(factId -> {
-            if (!factRepository.existsById(factId)) {
-                throw new EntityNotFoundException("Fact", "id", factId.toString());
-            }
-        });
+    public IssueEntity createIssue(IssueRequest request) {
+        factService.throwIfFactsNotExist(request.getFacts());
 
         String insight;
         try {
-            insight = InsightParser.convertLinkIntToUuid(issueRequest.getInsight(), issueRequest.getFacts());
+            insight = ContentContainFactParser.convertLinkIntToUuid(request.getInsight(), request.getFacts());
         } catch (Exception e) {
             throw new ValidationException("Insight is invalid: " + e.getMessage());
         }
 
         IssueEntity issueEntity = IssueEntity.builder()
-                .title(issueRequest.getTitle())
-                .description(issueRequest.getDescription())
+                .title(request.getTitle())
+                .description(request.getDescription())
                 .insight(insight)
-//                .authorId(issueRequest.getAuthorId())
-//                .authorName(issueRequest.getAuthorName())
-//                .authorAvatar(issueRequest.getAuthorAvatar())
+//                .authorId(request.getAuthorId())
+//                .authorName(request.getAuthorName())
+//                .authorAvatar(request.getAuthorAvatar())
                 .build();
         return issueRepository.save(issueEntity);
     }
@@ -78,7 +78,7 @@ public class IssueService {
         });
 
         try {
-            issueEntity.setInsight(InsightParser.convertLinkIntToUuid(issueRequest.getInsight(),
+            issueEntity.setInsight(ContentContainFactParser.convertLinkIntToUuid(issueRequest.getInsight(),
                     issueRequest.getFacts()));
         } catch (Exception e) {
             throw new ValidationException("Insight is invalid: " + e.getMessage());
@@ -99,10 +99,10 @@ public class IssueService {
 
     public Page<FactEntity> getIssueFacts(UUID id, Pageable pageable) {
         List<FactEntity> factEntities = new ArrayList<>();
-        Page<ManualFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);
+        Page<ManualIssueFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);
 
-        for (ManualFactEntity manualFactEntity : manualFactEntities) {
-            factEntities.add(manualFactEntity.getFact());
+        for (ManualIssueFactEntity manualIssueFactEntity : manualFactEntities) {
+            factEntities.add(manualIssueFactEntity.getFact());
         }
 
 //      Todo: parse viewpoint facts
@@ -111,16 +111,14 @@ public class IssueService {
 
     @Transactional
     public List<FactEntity> createManualFact(UUID id, List<UUID> factIds) {
+        factService.throwIfFactsNotExist(factIds);
+
         if (!issueRepository.existsById(id)) {
             throw new EntityNotFoundException("Issue", "id", id.toString());
         }
 
         List<FactEntity> factEntities = new ArrayList<>();
         for (UUID factId : factIds) {
-            if (!factRepository.existsById(factId)) {
-                throw new EntityNotFoundException("Fact", "id", factId.toString());
-            }
-
             FactEntity factEntity = factRepository.findById(factId).orElseThrow(
                     () -> new EntityNotFoundException("Fact", "id", factId.toString())
             );
