@@ -1,15 +1,16 @@
-package tw.commonground.backend.service.viewpoint;
+package tw.commonground.backend.service.viewpoint.entity;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID> {
-    Optional<ViewpointEntity> findViewpointEntityById(UUID viewpointId);
+
+    Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
 
     // @Modifying
     //@Query("UPDATE ViewpointEntity v SET v.likeCount = v.likeCount - 1 WHERE v.id = :viewpointId AND v.likeCount > 0")

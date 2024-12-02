@@ -1,11 +1,7 @@
-package tw.commonground.backend.service.viewpoint;
+package tw.commonground.backend.service.viewpoint.entity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import tw.commonground.backend.service.viewpoint.entity.Reaction;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionId;
 
 import java.util.Optional;
 

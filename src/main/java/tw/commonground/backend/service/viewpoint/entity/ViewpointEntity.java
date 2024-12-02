@@ -1,32 +1,41 @@
 package tw.commonground.backend.service.viewpoint.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-//import tw.commonground.backend.service.fact.entity.FactEntity;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import tw.commonground.backend.service.issue.entity.IssueEntity;
+
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class ViewpointEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @CreatedDate
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private String title;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private UUID authorId;
@@ -38,15 +47,15 @@ public class ViewpointEntity {
     @ColumnDefault("0")
     private Integer likeCount = 0;
 
-    // Don't use integer default 0 in columnDefinition
-
     @ColumnDefault("0")
     private Integer reasonableCount = 0;
 
     @ColumnDefault("0")
     private Integer dislikeCount = 0;
 
-//    @ManyToMany
-//    private List<FactEntity> facts;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private IssueEntity issue;
 
+    @OneToMany(mappedBy = "viewpoint")
+    private Set<ViewpointFactEntity> facts;
 }
