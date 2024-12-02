@@ -6,10 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
-//import tw.commonground.backend.service.fact.entity.FactEntity;
-import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.*;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 
 import java.util.UUID;
 
@@ -34,10 +31,9 @@ public class ViewpointController {
 //        return ResponseEntity.ok(viewpointService.getViewpoints(sort, page, size));
 //    }
 
-    // test
-    @PostMapping("/viewpointadd")
-    public ResponseEntity<ViewpointResponse> getViewPoint(@RequestBody ViewpointUpdateRequest updateRequest) {
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.createViewpoint(updateRequest));
+    @PostMapping("/viewpoints")
+    public ResponseEntity<ViewpointResponse> getViewPoint(@RequestBody ViewpointRequest request) {
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.createViewpoint(request));
         return ResponseEntity.ok(response);
     }
 
@@ -50,7 +46,7 @@ public class ViewpointController {
     @PutMapping("/viewpoint/{id}")
     public ResponseEntity<ViewpointResponse> updateViewPoint(
             @PathVariable @NotNull UUID id,
-            @RequestBody ViewpointUpdateRequest updateRequest) {
+            @RequestBody ViewpointRequest updateRequest) {
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.updateViewpoint(id, updateRequest));
         return ResponseEntity.ok(response);
     }

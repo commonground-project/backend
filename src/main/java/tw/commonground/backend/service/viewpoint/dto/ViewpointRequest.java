@@ -9,10 +9,11 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ViewpointUpdateRequest {
-    @NotBlank
+public class ViewpointRequest {
+    @NotBlank(message = "Title is required")
     private String title;
-    private String content;
-    private List<UUID> facts;
 
+    private String content;
+
+    private List<UUID> facts;
 }
