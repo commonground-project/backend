@@ -62,4 +62,9 @@ public class UserController {
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping(value = "/user/profile-image/{username}", produces = "image/png")
+    public ResponseEntity<byte[]> getProfileImage(@Valid @NotBlank @PathVariable String username) {
+        return ResponseEntity.ok(userService.getProfileImage(username));
+    }
 }

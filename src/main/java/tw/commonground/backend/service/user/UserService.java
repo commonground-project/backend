@@ -89,4 +89,10 @@ public class UserService {
         Optional<FullUserEntity> userEntityOptional = userRepository.findUserEntityByEmail(email);
         return userEntityOptional.orElseThrow(() -> new EntityNotFoundException("User", "email", email));
     }
+
+    public byte[] getProfileImage(String username) {
+        return userRepository.getUserEntityByUsername(username).orElseThrow(
+                () -> new EntityNotFoundException("User", "email", username)
+        ).getProfileImage();
+    }
 }
