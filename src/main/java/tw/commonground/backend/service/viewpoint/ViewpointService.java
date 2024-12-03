@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
-import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentContainFactParser;
@@ -24,16 +23,14 @@ public class ViewpointService {
 
     private final FactService factService;
 
-    private final FactRepository factRepository;
-
     private final ViewpointFactRepository viewpointFactRepository;
 
     public ViewpointService(ViewpointRepository viewpointRepository,
                             ViewpointReactionRepository viewpointReactionRepository,
-                            FactRepository factRepository, FactService factService, ViewpointFactRepository viewpointFactRepository) {
+                            FactService factService,
+                            ViewpointFactRepository viewpointFactRepository) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
-        this.factRepository = factRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
     }

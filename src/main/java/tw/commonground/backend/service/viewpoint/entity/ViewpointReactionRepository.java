@@ -11,12 +11,12 @@ public interface ViewpointReactionRepository extends JpaRepository<ViewpointReac
     Optional<Reaction> findReactionById(ViewpointReactionKey id);
 
     @Modifying
-    @Query(value = "INSERT INTO viewpoint_reaction_entity (viewpoint_id, user_id, reaction) " +
-            "VALUES (:#{#id.viewpointId}, :#{#id.userId}, :reaction)", nativeQuery = true)
+    @Query(value = "INSERT INTO viewpoint_reaction_entity (viewpoint_id, user_id, reaction) "
+            + "VALUES (:#{#id.viewpointId}, :#{#id.userId}, :reaction)", nativeQuery = true)
     void insertReaction(ViewpointReactionKey id, String reaction);
 
     @Modifying
-    @Query(value = "UPDATE viewpoint_reaction_entity SET reaction = :reaction " +
-            "WHERE viewpoint_id = :#{#id.viewpointId} AND user_id = :#{#id.userId}", nativeQuery = true)
+    @Query(value = "UPDATE viewpoint_reaction_entity SET reaction = :reaction "
+            + "WHERE viewpoint_id = :#{#id.viewpointId} AND user_id = :#{#id.userId}", nativeQuery = true)
     void updateReaction(ViewpointReactionKey id, String reaction);
 }

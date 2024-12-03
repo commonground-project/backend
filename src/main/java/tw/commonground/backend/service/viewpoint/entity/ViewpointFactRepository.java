@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public interface ViewpointFactRepository extends JpaRepository<ViewpointFactEntity, UUID> {
 
-    @Query("SELECT vf.viewpoint.id AS viewpointId, vf.fact AS fact " +
-            "FROM ViewpointFactEntity vf " +
-            "WHERE vf.viewpoint.id IN :viewpointIds")
+    @Query("SELECT vf.viewpoint.id AS viewpointId, vf.fact AS fact "
+            + "FROM ViewpointFactEntity vf "
+            + "WHERE vf.viewpoint.id IN :viewpointIds")
     List<ViewpointFactProjection> findFactsByViewpointIds(@Param("viewpointIds") List<UUID> viewpointIds);
 
     @Query("SELECT vf.fact FROM ViewpointFactEntity vf WHERE vf.viewpoint.id = :viewpointId")

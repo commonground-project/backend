@@ -57,7 +57,8 @@ public class IssueController {
     @PostMapping("/api/issues")
     public IssueResponse createIssue(@Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.createIssue(issueRequest);
-        ContentContainFact contentContainFact = ContentContainFactParser.separateContentAndFacts(issueEntity.getInsight());
+        ContentContainFact contentContainFact = ContentContainFactParser
+                .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         return IssueMapper.toResponse(issueEntity, factResponses);
@@ -66,7 +67,8 @@ public class IssueController {
     @GetMapping("/api/issue/{id}")
     public IssueResponse getIssue(@PathVariable UUID id) {
         IssueEntity issueEntity = issueService.getIssue(id);
-        ContentContainFact contentContainFact = ContentContainFactParser.separateContentAndFacts(issueEntity.getInsight());
+        ContentContainFact contentContainFact = ContentContainFactParser
+                .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         return IssueMapper.toResponse(issueEntity, factResponses);
@@ -75,7 +77,8 @@ public class IssueController {
     @PutMapping("/api/issue/{id}")
     public IssueResponse updateIssue(@PathVariable UUID id, @Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.updateIssue(id, issueRequest);
-        ContentContainFact contentContainFact = ContentContainFactParser.separateContentAndFacts(issueEntity.getInsight());
+        ContentContainFact contentContainFact = ContentContainFactParser
+                .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         return IssueMapper.toResponse(issueEntity, factResponses);

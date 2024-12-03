@@ -96,7 +96,8 @@ public class ViewpointController {
             @RequestBody ViewpointReactionRequest reactionRequest) {
 
         Long userId = user.getId();
-        ViewpointReactionEntity reactionEntity = viewpointService.reactToViewpoint(userId, id, reactionRequest.getReaction());
+        ViewpointReactionEntity reactionEntity = viewpointService.reactToViewpoint(userId, id,
+                reactionRequest.getReaction());
 
         ViewpointReactionResponse response = ViewpointMapper.toReactionResponse(reactionEntity);
         return ResponseEntity.ok(response);
