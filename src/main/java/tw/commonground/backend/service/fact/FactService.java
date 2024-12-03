@@ -13,8 +13,8 @@ import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.*;
-import tw.commonground.backend.pagination.PaginationMapper;
-import tw.commonground.backend.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.shared.pagination.PaginationMapper;
+import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 
 import java.net.URL;
 import java.net.URLDecoder;
@@ -129,6 +129,16 @@ public class FactService {
         factEntity.setReferences(referenceEntities);
 
         factRepository.save(factEntity);
+    }
+
+    public void throwIfFactsNotExist(List<UUID> factIds) {
+        List<UUID> existingFactIds = factRepository.findExistingIdsByIds(factIds);
+        List<UUID> missingFacts = factIds.stream()
+                .filter(factId -> !existingFactIds.contains(factId))
+                .toList();
+        if (!missingFacts.isEmpty()) {
+            throw new EntityNotFoundException("Fact", "ids", missingFacts.toString());
+        }
     }
 
     private Set<ReferenceEntity> parseReferenceEntity(List<String> urls) {

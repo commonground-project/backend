@@ -14,9 +14,10 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class ManualFactEntity {
+@Table(name = "issue_fact_entity")
+public class ManualIssueFactEntity {
 
-    public ManualFactEntity(UUID issueId, UUID factId) {
+    public ManualIssueFactEntity(UUID issueId, UUID factId) {
         this.key = new IssueFactKey(issueId, factId);
     }
 
@@ -25,11 +26,9 @@ public class ManualFactEntity {
 
     @ManyToOne
     @MapsId("issueId")
-    @JoinColumn(name = "issue_id")
     private IssueEntity issue;
 
     @ManyToOne
     @MapsId("factId")
-    @JoinColumn(name = "fact_id")
     private FactEntity fact;
 }

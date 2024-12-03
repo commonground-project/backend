@@ -10,6 +10,7 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -89,6 +90,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         exception.setDetail(detail.toString());
 
         return super.handleExceptionInternal(exception, null, headers, status, request);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        ErrorResponseException exception = createValidException();
+        exception.setDetail(ex.getMessage());
+
+        return super.handleExceptionInternal(exception, null, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     private ErrorResponseException createValidException() {

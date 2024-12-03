@@ -1,4 +1,6 @@
-package tw.commonground.backend.service.issue.insight;
+package tw.commonground.backend.shared.content;
+
+import tw.commonground.backend.exception.ValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,20 +8,20 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class InsightParser {
+public final class ContentContainFactParser {
 
-    public static final String INSIGHT_LINK_REGEX = "\\[([^]]+)]\\(([^)]+)\\)";
+    public static final String CONTENT_LINK_REGEX = "\\[([^]]+)]\\(([^)]+)\\)";
 
-    public static final Pattern INSIGHT_LINK_PATTERN = Pattern.compile(INSIGHT_LINK_REGEX);
+    public static final Pattern CONTENT_LINK_PATTERN = Pattern.compile(CONTENT_LINK_REGEX);
 
-    private InsightParser() {
+    private ContentContainFactParser() {
         // hide constructor
     }
 
-    public static String convertLinkIntToUuid(String insight, List<UUID> facts) {
+    public static String convertLinkIntToUuid(String content, List<UUID> facts) {
         StringBuilder replacedText = new StringBuilder();
 
-        Matcher matcher = INSIGHT_LINK_PATTERN.matcher(insight);
+        Matcher matcher = CONTENT_LINK_PATTERN.matcher(content);
         while (matcher.find()) {
             String linkText = matcher.group(1);
             String linkPositions = matcher.group(2);
@@ -28,6 +30,10 @@ public final class InsightParser {
             for (String pos : linkPositions.split(",")) {
                 pos = pos.trim();
                 int posInt = Integer.parseInt(pos);
+                if (posInt < 0 || posInt >= facts.size()) {
+                    throw new ValidationException("Invalid position: " + posInt + ", in link text: " + linkText);
+                }
+
                 uuids.add(facts.get(posInt));
             }
 
@@ -40,10 +46,10 @@ public final class InsightParser {
         return replacedText.toString();
     }
 
-    public static Insight separateInsightAndFacts(String text) {
+    public static ContentContainFact separateContentAndFacts(String text) {
         StringBuilder replacedText = new StringBuilder();
 
-        Matcher matcher = INSIGHT_LINK_PATTERN.matcher(text);
+        Matcher matcher = CONTENT_LINK_PATTERN.matcher(text);
         List<UUID> uuids = new ArrayList<>();
         while (matcher.find()) {
             String linkText = matcher.group(1);
@@ -68,10 +74,10 @@ public final class InsightParser {
 
         matcher.appendTail(replacedText);
 
-        Insight insight = new Insight();
-        insight.setText(replacedText.toString());
-        insight.setFacts(uuids);
+        ContentContainFact contentContainFact = new ContentContainFact();
+        contentContainFact.setText(replacedText.toString());
+        contentContainFact.setFacts(uuids);
 
-        return insight;
+        return contentContainFact;
     }
 }
