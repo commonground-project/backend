@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import tw.commonground.backend.service.user.entity.BaseEntityWithAuthor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class IssueEntity implements SimpleIssueEntity {
+public class IssueEntity extends BaseEntityWithAuthor implements SimpleIssueEntity {
 
     public IssueEntity(UUID id) {
         this.id = id;
@@ -42,13 +43,7 @@ public class IssueEntity implements SimpleIssueEntity {
     @Column(columnDefinition = "TEXT")
     private String insight;
 
-    private String authorId;
-
-    private String authorName;
-
-    private String authorAvatar;
-
-//  Added for POST /api/issue/{id}/viewpoints endpoint
+    //  Added for POST /api/issue/{id}/viewpoints endpoint
     @OneToMany(mappedBy = "issue")
     private Set<ManualIssueFactEntity> manualFacts;
 

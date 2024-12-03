@@ -7,8 +7,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.user.entity.BaseEntityWithAuthor;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class ViewpointEntity {
+public class ViewpointEntity extends BaseEntityWithAuthor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -37,12 +37,6 @@ public class ViewpointEntity {
 
     @Column(columnDefinition = "TEXT")
     private String content;
-
-    private UUID authorId;
-
-    private String authorName;
-
-    private URI authorAvatar;
 
     @ColumnDefault("0")
     private Integer likeCount = 0;

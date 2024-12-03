@@ -3,6 +3,7 @@ package tw.commonground.backend.service.issue;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.dto.FactMapper;
@@ -14,6 +15,7 @@ import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.dto.IssueResponse;
 import tw.commonground.backend.service.issue.dto.SimpleIssueResponse;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.PaginationParser;
@@ -56,8 +58,10 @@ public class IssueController {
     }
 
     @PostMapping("/issues")
-    public IssueResponse createIssue(@Valid @RequestBody IssueRequest issueRequest) {
-        IssueEntity issueEntity = issueService.createIssue(issueRequest);
+    public IssueResponse createIssue(@AuthenticationPrincipal FullUserEntity user,
+                                     @Valid @RequestBody IssueRequest issueRequest) {
+
+        IssueEntity issueEntity = issueService.createIssue(issueRequest, user);
         ContentContainFact contentContainFact = ContentContainFactParser
                 .separateContentAndFacts(issueEntity.getInsight());
 

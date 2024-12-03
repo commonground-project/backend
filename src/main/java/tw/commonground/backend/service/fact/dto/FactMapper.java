@@ -22,6 +22,7 @@ public final class FactMapper {
                 .updateAt(factEntity.getUpdatedAt())
                 .authorId(factEntity.getAuthorId())
                 .authorName(factEntity.getAuthorName())
+                .authorAvatar(factEntity.getAuthorAvatar())
                 .references(factEntity.getReferences().stream().map(ReferenceMapper::toResponse).toList())
                 .build();
     }

@@ -12,6 +12,7 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.content.ContentContainFactParser;
 
 import java.util.*;
@@ -45,7 +46,7 @@ public class IssueService {
         );
     }
 
-    public IssueEntity createIssue(IssueRequest request) {
+    public IssueEntity createIssue(IssueRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
 
         String insight;
@@ -55,14 +56,11 @@ public class IssueService {
             throw new ValidationException("Insight is invalid: " + e.getMessage());
         }
 
-        IssueEntity issueEntity = IssueEntity.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .insight(insight)
-//                .authorId(request.getAuthorId())
-//                .authorName(request.getAuthorName())
-//                .authorAvatar(request.getAuthorAvatar())
-                .build();
+        IssueEntity issueEntity = new IssueEntity();
+        issueEntity.setTitle(request.getTitle());
+        issueEntity.setDescription(request.getDescription());
+        issueEntity.setInsight(insight);
+        issueEntity.setAuthor(user);
         return issueRepository.save(issueEntity);
     }
 
@@ -86,9 +84,6 @@ public class IssueService {
 
         issueEntity.setTitle(issueRequest.getTitle());
         issueEntity.setDescription(issueRequest.getDescription());
-//        issueEntity.setAuthorId(issueRequest.getAuthorId());
-//        issueEntity.setAuthorName(issueRequest.getAuthorName());
-//        issueEntity.setAuthorAvatar(issueRequest.getAuthorAvatar());
         return issueRepository.save(issueEntity);
     }
 

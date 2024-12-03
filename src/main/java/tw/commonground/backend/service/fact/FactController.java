@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.dto.FactRequest;
 import tw.commonground.backend.service.fact.dto.FactResponse;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationParser;
 import tw.commonground.backend.service.reference.ReferenceRequest;
 import tw.commonground.backend.service.reference.ReferenceResponse;
@@ -36,8 +38,9 @@ public class FactController {
     }
 
     @PostMapping("/api/facts")
-    public FactResponse createFact(@Valid @RequestBody FactRequest factRequest) {
-        return factService.createFact(factRequest);
+    public FactResponse createFact(@AuthenticationPrincipal FullUserEntity user,
+                                   @Valid @RequestBody FactRequest factRequest) {
+        return factService.createFact(factRequest, user);
     }
 
     @GetMapping("/api/fact/{id}")

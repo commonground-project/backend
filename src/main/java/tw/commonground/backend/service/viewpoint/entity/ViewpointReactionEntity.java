@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @Entity
@@ -16,12 +18,12 @@ public class ViewpointReactionEntity {
     @Enumerated(EnumType.STRING)
     private Reaction reaction;
 
-    @ManyToOne
     @MapsId("userId")
+    @ManyToOne(fetch = FetchType.LAZY)
     private UserEntity user;
 
-    @ManyToOne
     @MapsId("viewpointId")
+    @ManyToOne(fetch = FetchType.LAZY)
     private ViewpointEntity viewpoint;
 
     public ViewpointReactionEntity() {
@@ -33,5 +35,9 @@ public class ViewpointReactionEntity {
         this.user = user;
         this.viewpoint = viewpoint;
         this.reaction = reaction;
+    }
+
+    public UUID getViewpointId() {
+        return id.getViewpointId();
     }
 }
