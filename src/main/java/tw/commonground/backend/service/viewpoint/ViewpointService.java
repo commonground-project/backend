@@ -9,6 +9,7 @@ import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentContainFactParser;
@@ -49,7 +50,7 @@ public class ViewpointService {
     }
 
     @Transactional
-    public ViewpointEntity createIssueViewpoint(UUID issueId, ViewpointRequest request) {
+    public ViewpointEntity createIssueViewpoint(UUID issueId, ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
         issueService.throwIfIssueNotExist(issueId);
 
@@ -59,6 +60,7 @@ public class ViewpointService {
         viewpointEntity.setTitle(request.getTitle());
         viewpointEntity.setContent(content);
         viewpointEntity.setIssue(new IssueEntity(issueId));
+        viewpointEntity.setAuthor(user);
         viewpointRepository.save(viewpointEntity);
 
         for (UUID factId : request.getFacts()) {
@@ -74,7 +76,7 @@ public class ViewpointService {
     }
 
     @Transactional
-    public ViewpointEntity createViewpoint(ViewpointRequest request) {
+    public ViewpointEntity createViewpoint(ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
 
         String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
@@ -82,6 +84,7 @@ public class ViewpointService {
         ViewpointEntity viewpointEntity = new ViewpointEntity();
         viewpointEntity.setTitle(request.getTitle());
         viewpointEntity.setContent(content);
+        viewpointEntity.setAuthor(user);
         viewpointRepository.save(viewpointEntity);
 
         for (UUID factId : request.getFacts()) {

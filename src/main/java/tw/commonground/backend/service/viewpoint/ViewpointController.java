@@ -47,9 +47,10 @@ public class ViewpointController {
     }
 
     @PostMapping("/issue/{id}/viewpoints")
-    public ResponseEntity<ViewpointResponse> createViewpointForIssue(@PathVariable UUID id,
+    public ResponseEntity<ViewpointResponse> createViewpointForIssue(@AuthenticationPrincipal FullUserEntity user,
+                                                                     @PathVariable UUID id,
                                                                      @RequestBody ViewpointRequest request) {
-        ViewpointEntity viewpointEntity = viewpointService.createIssueViewpoint(id, request);
+        ViewpointEntity viewpointEntity = viewpointService.createIssueViewpoint(id, request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
 
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, facts);
@@ -64,8 +65,9 @@ public class ViewpointController {
     }
 
     @PostMapping("/viewpoints")
-    public ResponseEntity<ViewpointResponse> createViewpoint(@RequestBody ViewpointRequest request) {
-        ViewpointEntity viewpointEntity = viewpointService.createViewpoint(request);
+    public ResponseEntity<ViewpointResponse> createViewpoint(@AuthenticationPrincipal FullUserEntity user,
+                                                             @RequestBody ViewpointRequest request) {
+        ViewpointEntity viewpointEntity = viewpointService.createViewpoint(request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
 
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, facts);

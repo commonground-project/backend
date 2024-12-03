@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import tw.commonground.backend.service.fact.dto.FactResponse;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +28,7 @@ public class ViewpointResponse {
 
     private String authorName;
 
-    private URI authorAvatar;
+    private String authorAvatar;
 
     private Integer likeCount;
 
