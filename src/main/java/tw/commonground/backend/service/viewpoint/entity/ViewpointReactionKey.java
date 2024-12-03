@@ -12,9 +12,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @Embeddable
-@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-public class ViewpointReactionId implements Serializable {
-    protected Long userId;
-    protected UUID viewpointId;
+public class ViewpointReactionKey implements Serializable {
+    private Long userId;
+    private UUID viewpointId;
 }

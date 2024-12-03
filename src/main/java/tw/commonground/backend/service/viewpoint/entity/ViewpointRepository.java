@@ -1,43 +1,56 @@
 package tw.commonground.backend.service.viewpoint.entity;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.UUID;
 
-public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID> {
+public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID>, ViewpointRepositoryCustom {
 
     Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
 
-    // @Modifying
-    //@Query("UPDATE ViewpointEntity v SET v.likeCount = v.likeCount - 1 WHERE v.id = :viewpointId AND v.likeCount > 0")
-    //void decrementLikeCount(@Param("viewpointId") Long viewpointId);
+}
 
-    @Modifying
-    @Query("UPDATE ViewpointEntity v SET v.likeCount = v.likeCount + 1 WHERE v.id = :viewpointId")
-    void incrementLikeCount(UUID viewpointId);
+interface ViewpointRepositoryCustom {
+    void updateReactionCount(UUID viewpointId, Reaction reaction, int delta);
+}
 
-    @Modifying
-    @Query("UPDATE ViewpointEntity v SET v.likeCount = v.likeCount - 1 WHERE v.id = :viewpointId AND v.likeCount > 0")
-    void decrementLikeCount(UUID viewpointId);
+class ViewpointRepositoryImpl implements ViewpointRepositoryCustom {
 
-    @Modifying
-    @Query("UPDATE ViewpointEntity v SET v.dislikeCount = v.dislikeCount + 1 WHERE v.id = :viewpointId")
-    void incrementDislikeCount(UUID viewpointId);
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    @Modifying
-    @Query("UPDATE ViewpointEntity v SET v.dislikeCount = v.dislikeCount - 1 WHERE v.id = :viewpointId AND v.dislikeCount > 0")
-    void decrementDislikeCount(UUID viewpointId);
+    @Override
+    public void updateReactionCount(UUID viewpointId, Reaction reaction, int delta) {
+        String column = getColumnForReaction(reaction);
+        if (column == null) {
+            return;
+        }
 
-    @Modifying
-    @Query("UPDATE ViewpointEntity v SET v.reasonableCount = v.reasonableCount + 1 WHERE v.id = :viewpointId")
-    void incrementReasonableCount(UUID viewpointId);
+        String sql = buildUpdateQuery(column);
+        executeUpdateQuery(sql, viewpointId, delta);
+    }
 
-    @Modifying
-    @Query("UPDATE ViewpointEntity v SET v.reasonableCount = v.reasonableCount - 1 WHERE v.id = :viewpointId AND v.reasonableCount > 0")
-    void decrementReasonableCount(UUID viewpointId);
+    private String getColumnForReaction(Reaction reaction) {
+        return switch (reaction) {
+            case NONE -> null;
+            case LIKE -> "like_count";
+            case DISLIKE -> "dislike_count";
+            case REASONABLE -> "reasonable_count";
+        };
+    }
 
+    private String buildUpdateQuery(String column) {
+        return "UPDATE viewpoint_entity SET " + column + " = " + column + " + :delta WHERE id = :viewpointId";
+    }
+
+    private void executeUpdateQuery(String sql, UUID viewpointId, int delta) {
+        entityManager.createNativeQuery(sql)
+                .setParameter("delta", delta)
+                .setParameter("viewpointId", viewpointId)
+                .executeUpdate();
+    }
 }

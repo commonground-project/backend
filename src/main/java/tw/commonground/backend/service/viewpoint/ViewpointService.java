@@ -5,30 +5,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
-//import tw.commonground.backend.service.fact.entity.FactEntity;
-//import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.fact.FactService;
-import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
-import tw.commonground.backend.service.user.entity.UserEntity;
-import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentContainFactParser;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.lang.String.valueOf;
-import static tw.commonground.backend.service.viewpoint.entity.Reaction.*;
 
 @Service
 public class ViewpointService {
     private final ViewpointRepository viewpointRepository;
-
-    private final UserRepository userRepository;
 
     private final ViewpointReactionRepository viewpointReactionRepository;
 
@@ -40,17 +30,13 @@ public class ViewpointService {
 
     public ViewpointService(ViewpointRepository viewpointRepository,
                             ViewpointReactionRepository viewpointReactionRepository,
-                            UserRepository userRepository,
                             FactRepository factRepository, FactService factService, ViewpointFactRepository viewpointFactRepository) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
-        this.userRepository = userRepository;
         this.factRepository = factRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
     }
-
-    // TODO: issue viewpoint api
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
         return viewpointRepository.findAll(pageable);
@@ -102,76 +88,80 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
-    // TODO: issue viewpoint api
     public void deleteViewpoint(UUID id) {
         viewpointRepository.deleteById(id);
     }
 
     @Transactional
-    public ViewpointReactionEntity reactToViewpoint(String email, UUID viewpointId, String reaction) {
+    public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
+        throwIfViewpointNotExist(viewpointId);
 
-        Long userId = userRepository.findIdByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("User", "email", email)).getId();
-        ;
+        ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
 
-        ViewpointReactionId viewpointReactionId = new ViewpointReactionId(userId, viewpointId);
+        Optional<ViewpointReactionEntity> reactionOptional = viewpointReactionRepository.findById(viewpointReactionKey);
+        return reactionOptional
+                .map(viewpointReactionEntity -> handleExistingReaction(viewpointReactionEntity, viewpointId, reaction))
+                .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
+    }
 
-        // check if the user and viewpoint exist in the database
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User", "id", valueOf(userId)));
-        ViewpointEntity viewpointEntity = viewpointRepository.findById(viewpointId).orElseThrow(
-                () -> new EntityNotFoundException("Viewpoint", "id", viewpointId.toString()));
+    private ViewpointReactionEntity handleNewReaction(ViewpointReactionKey reactionKey, UUID viewpointId,
+                                                      Reaction reaction) {
 
-        // check if the viewpointReactionEntity exists in the database, if not means the user has not reacted to the viewpoint
-        Reaction previousReaction = viewpointReactionRepository.findReactionById(viewpointReactionId).orElseGet(() -> {
-            return Reaction.NONE;
-        });
-
-        switch (previousReaction) {
-            case NONE:
-                break;
-            case LIKE:
-                viewpointRepository.decrementLikeCount(viewpointId);
-                break;
-            case REASONABLE:
-                viewpointRepository.decrementReasonableCount(viewpointId);
-                break;
-            case DISLIKE:
-                viewpointRepository.decrementDislikeCount(viewpointId);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid reaction: " + previousReaction);
+        if (reaction != Reaction.NONE) {
+            viewpointReactionRepository.insertReaction(reactionKey, reaction.name());
+            updateReactionCount(viewpointId, reaction, 1);
         }
 
-        ViewpointReactionEntity viewpointReactionEntity = new ViewpointReactionEntity();
-        // create a new ViewpointReactionEntity with the given userId and viewpointId
-        viewpointReactionEntity.setId(viewpointReactionId);
-        viewpointReactionEntity.setReaction(Reaction.valueOf(reaction));
+        ViewpointReactionEntity reactionEntity = new ViewpointReactionEntity();
+        reactionEntity.setId(reactionKey);
+        reactionEntity.setReaction(reaction);
 
-        switch (Reaction.valueOf(reaction)) {
-            case NONE: // delete the viewpointReactionEntity if the reaction is NONE
-                viewpointReactionRepository.delete(viewpointReactionEntity);
-                viewpointRepository.flush();
-                break;
-            case LIKE:
-                viewpointReactionEntity.setReaction(LIKE);
-                viewpointRepository.incrementLikeCount(viewpointId);
-                viewpointReactionRepository.save(viewpointReactionEntity);
-                break;
-            case REASONABLE:
-                viewpointReactionEntity.setReaction(REASONABLE);
-                viewpointRepository.incrementReasonableCount(viewpointId);
-                viewpointReactionRepository.save(viewpointReactionEntity);
-                break;
-            case DISLIKE:
-                viewpointReactionEntity.setReaction(DISLIKE);
-                viewpointRepository.incrementDislikeCount(viewpointId);
-                viewpointReactionRepository.save(viewpointReactionEntity);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid reaction: " + reaction);
+        return reactionEntity;
+    }
+
+    private ViewpointReactionEntity handleExistingReaction(ViewpointReactionEntity reactionEntity, UUID viewpointId,
+                                                           Reaction newReaction) {
+
+        Reaction previousReaction = reactionEntity.getReaction();
+
+        if (previousReaction == newReaction) {
+            return reactionEntity;
         }
-        return viewpointReactionEntity;
+
+        if (previousReaction == Reaction.NONE) {
+            viewpointReactionRepository.updateReaction(reactionEntity.getId(), newReaction.name());
+            updateReactionCount(viewpointId, newReaction, 1);
+        } else {
+            viewpointReactionRepository.updateReaction(reactionEntity.getId(), newReaction.name());
+            updateReactionCount(viewpointId, previousReaction, -1);
+            updateReactionCount(viewpointId, newReaction, 1);
+        }
+
+        reactionEntity.setReaction(newReaction);
+        return reactionEntity;
+    }
+
+    private void updateReactionCount(UUID viewpointId, Reaction reaction, int delta) {
+        viewpointRepository.updateReactionCount(viewpointId, reaction, delta);
+    }
+
+    public void throwIfViewpointNotExist(UUID viewpointId) {
+        if (!viewpointRepository.existsById(viewpointId)) {
+            throw new EntityNotFoundException("Viewpoint", "id", viewpointId.toString());
+        }
+    }
+
+    public List<FactEntity> getFactsOfViewpoint(UUID viewpointId) {
+        return viewpointFactRepository.findFactsByViewpointId(viewpointId);
+    }
+
+    public Map<UUID, List<FactEntity>> getFactsForViewpoints(List<UUID> viewpointIds) {
+        List<ViewpointFactProjection> results = viewpointFactRepository.findFactsByViewpointIds(viewpointIds);
+        return results.stream()
+                .collect(Collectors.groupingBy(
+                        ViewpointFactProjection::getViewpointId,
+                        Collectors.mapping(ViewpointFactProjection::getFact, Collectors.toList())
+                ));
     }
 
 //    public ViewpointEntity addFactToViewpoint(UUID id, UUID factId) {
