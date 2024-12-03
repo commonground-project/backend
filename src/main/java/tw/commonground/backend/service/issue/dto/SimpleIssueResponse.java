@@ -13,7 +13,7 @@ public class SimpleIssueResponse {
 
     private String id;
 
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 

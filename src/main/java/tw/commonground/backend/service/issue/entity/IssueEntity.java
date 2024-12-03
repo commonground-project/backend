@@ -30,7 +30,7 @@ public class IssueEntity extends BaseEntityWithAuthor implements SimpleIssueEnti
 
     @CreatedDate
     @Column(nullable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     private LocalDateTime updatedAt;

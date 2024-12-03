@@ -14,9 +14,9 @@ public class FactResponse {
 
     private UUID id;
 
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 
     private String title;
 
