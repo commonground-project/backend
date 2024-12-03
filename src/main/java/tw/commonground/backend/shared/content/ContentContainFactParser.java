@@ -80,4 +80,35 @@ public final class ContentContainFactParser {
 
         return contentContainFact;
     }
+
+    public static ContentContainFact separateContentAndFacts(String text, List<UUID> existingFacts) {
+        StringBuilder replacedText = new StringBuilder();
+
+        Matcher matcher = CONTENT_LINK_PATTERN.matcher(text);
+        List<UUID> uuids = new ArrayList<>(existingFacts);
+        while (matcher.find()) {
+            String linkText = matcher.group(1);
+            String linkPositions = matcher.group(2);
+
+            List<Integer> positions = new ArrayList<>();
+            for (String uid : linkPositions.split(",")) {
+                uid = uid.trim();
+                UUID uuid = UUID.fromString(uid);
+                positions.add(uuids.indexOf(uuid));
+            }
+
+            String newLink = "[" + linkText + "]("
+                    + String.join(",", positions.stream().map(Object::toString).toList()) + ")";
+            matcher.appendReplacement(replacedText, newLink);
+        }
+
+        matcher.appendTail(replacedText);
+
+        ContentContainFact contentContainFact = new ContentContainFact();
+        contentContainFact.setText(replacedText.toString());
+        contentContainFact.setFacts(uuids);
+
+        return contentContainFact;
+    }
 }
+
