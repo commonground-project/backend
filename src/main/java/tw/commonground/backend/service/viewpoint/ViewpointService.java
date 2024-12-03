@@ -190,7 +190,9 @@ public class ViewpointService {
     }
 
     public Map<UUID, Reaction> getReactionsForViewpoints(Long userId, List<UUID> viewpointIds) {
-        List<ViewpointReactionEntity> reactions = viewpointReactionRepository.findReactionsByUserIdAndViewpointIds(userId, viewpointIds);
+        List<ViewpointReactionEntity> reactions = viewpointReactionRepository
+                .findReactionsByUserIdAndViewpointIds(userId, viewpointIds);
+
         return reactions.stream()
                 .collect(Collectors.toMap(
                         ViewpointReactionEntity::getViewpointId,

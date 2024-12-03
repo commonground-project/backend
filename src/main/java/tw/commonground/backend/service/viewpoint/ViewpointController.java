@@ -126,14 +126,16 @@ public class ViewpointController {
         return ResponseEntity.ok(response);
     }
 
-    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(Long userId,
-                                                                                     Page<ViewpointEntity> pageViewpoints) {
+    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
+            Long userId,
+            Page<ViewpointEntity> pageViewpoints) {
 
         Map<UUID, List<FactEntity>> factsMap = viewpointService.getFactsForViewpoints(pageViewpoints.getContent()
                 .stream().map(ViewpointEntity::getId).toList());
 
-        Map<UUID, Reaction> reactionsMap = viewpointService.getReactionsForViewpoints(userId, pageViewpoints.getContent()
-                .stream().map(ViewpointEntity::getId).toList());
+        Map<UUID, Reaction> reactionsMap = viewpointService.getReactionsForViewpoints(
+                userId,
+                pageViewpoints.getContent().stream().map(ViewpointEntity::getId).toList());
 
         List<ViewpointResponse> viewpointResponses = pageViewpoints.getContent()
                 .stream()
