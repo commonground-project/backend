@@ -24,5 +24,7 @@ public class FactResponse {
 
     private String authorName;
 
+    private String authorAvatar;
+
     private List<ReferenceResponse> references;
 }
