@@ -19,6 +19,10 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 public class IssueEntity implements SimpleIssueEntity {
 
+    public IssueEntity(UUID id) {
+        this.id = id;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

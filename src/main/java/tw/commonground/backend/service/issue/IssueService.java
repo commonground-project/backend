@@ -129,4 +129,10 @@ public class IssueService {
 
         return factEntities;
     }
+
+    public void throwIfIssueNotExist(UUID id) {
+        if (!issueRepository.existsById(id)) {
+            throw new EntityNotFoundException("Issue", "id", id.toString());
+        }
+    }
 }

@@ -7,13 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.service.issue.IssueService;
+import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentContainFactParser;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 public class ViewpointService {
@@ -23,16 +24,20 @@ public class ViewpointService {
 
     private final FactService factService;
 
+    private final IssueService issueService;
+
     private final ViewpointFactRepository viewpointFactRepository;
 
     public ViewpointService(ViewpointRepository viewpointRepository,
                             ViewpointReactionRepository viewpointReactionRepository,
                             FactService factService,
-                            ViewpointFactRepository viewpointFactRepository) {
+                            ViewpointFactRepository viewpointFactRepository,
+                            IssueService issueService) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
+        this.issueService = issueService;
     }
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
@@ -41,6 +46,26 @@ public class ViewpointService {
 
     public Page<ViewpointEntity> getIssueViewpoints(UUID issueId, Pageable pageable) {
         return viewpointRepository.findAllByIssueId(issueId, pageable);
+    }
+
+    @Transactional
+    public ViewpointEntity createIssueViewpoint(UUID issueId, ViewpointRequest request) {
+        factService.throwIfFactsNotExist(request.getFacts());
+        issueService.throwIfIssueNotExist(issueId);
+
+        String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+
+        ViewpointEntity viewpointEntity = new ViewpointEntity();
+        viewpointEntity.setTitle(request.getTitle());
+        viewpointEntity.setContent(content);
+        viewpointEntity.setIssue(new IssueEntity(issueId));
+        viewpointRepository.save(viewpointEntity);
+
+        for (UUID factId : request.getFacts()) {
+            viewpointFactRepository.saveByViewpointIdAndFactId(viewpointEntity.getId(), factId);
+        }
+
+        return viewpointEntity;
     }
 
     public ViewpointEntity getViewpoint(UUID id) {
