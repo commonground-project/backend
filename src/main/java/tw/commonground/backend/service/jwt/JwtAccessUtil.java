@@ -97,7 +97,7 @@ public class JwtAccessUtil {
 
     public JwtUserDetails verifyAccessToken(String token) {
         DecodedJWT jwt = accessTokenVerifier.verify(token);
-        return new JwtUserDetails(jwt, () -> userRepository.getIdByUid(jwt.getSubject()));
+        return new JwtUserDetails(jwt, () -> userRepository.getIdByUid(UUID.fromString(jwt.getSubject())));
     }
 
     public RefreshTokenEntity generateRefreshToken(FullUserEntity user) {
