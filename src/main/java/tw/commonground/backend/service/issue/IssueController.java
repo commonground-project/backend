@@ -25,6 +25,7 @@ import tw.commonground.backend.shared.content.ContentContainFactParser;
 import java.util.*;
 
 @RestController
+@RequestMapping("/api")
 public class IssueController {
     private static final int MAX_SIZE = 200;
 
@@ -41,7 +42,7 @@ public class IssueController {
         this.factService = factService;
     }
 
-    @GetMapping("/api/issues")
+    @GetMapping("/issues")
     public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(@Valid PaginationRequest pagination) {
         Pageable pageable = paginationParser.parsePageable(pagination);
         Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
@@ -54,7 +55,7 @@ public class IssueController {
         return new WrappedPaginationResponse<>(issueResponses, PaginationMapper.toResponse(pageIssues));
     }
 
-    @PostMapping("/api/issues")
+    @PostMapping("/issues")
     public IssueResponse createIssue(@Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.createIssue(issueRequest);
         ContentContainFact contentContainFact = ContentContainFactParser
@@ -64,7 +65,7 @@ public class IssueController {
         return IssueMapper.toResponse(issueEntity, factResponses);
     }
 
-    @GetMapping("/api/issue/{id}")
+    @GetMapping("/issue/{id}")
     public IssueResponse getIssue(@PathVariable UUID id) {
         IssueEntity issueEntity = issueService.getIssue(id);
         ContentContainFact contentContainFact = ContentContainFactParser
@@ -74,7 +75,7 @@ public class IssueController {
         return IssueMapper.toResponse(issueEntity, factResponses);
     }
 
-    @PutMapping("/api/issue/{id}")
+    @PutMapping("/issue/{id}")
     public IssueResponse updateIssue(@PathVariable UUID id, @Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.updateIssue(id, issueRequest);
         ContentContainFact contentContainFact = ContentContainFactParser
@@ -84,12 +85,12 @@ public class IssueController {
         return IssueMapper.toResponse(issueEntity, factResponses);
     }
 
-    @DeleteMapping("/api/issue/{id}")
+    @DeleteMapping("/issue/{id}")
     public void deleteIssue(@PathVariable String id) {
         issueService.deleteIssue(UUID.fromString(id));
     }
 
-    @GetMapping("/api/issue/{id}/facts")
+    @GetMapping("/issue/{id}/facts")
     public WrappedPaginationResponse<List<FactResponse>> getIssueFacts(@PathVariable UUID id,
                                                                        @Valid PaginationRequest pagination) {
         PaginationParser validator = new PaginationParser(Collections.emptySet(), MAX_SIZE);
@@ -104,7 +105,7 @@ public class IssueController {
         return new WrappedPaginationResponse<>(factResponses, PaginationMapper.toResponse(pageFacts));
     }
 
-    @PostMapping("/api/issue/{id}/facts")
+    @PostMapping("/issue/{id}/facts")
     public Map<String, List<FactResponse>> linkFactsToIssue(@PathVariable UUID id,
                                                             @Valid @RequestBody LinkFactsRequest request) {
         List<FactEntity> factEntities = issueService.createManualFact(id, request.getFactIds());
