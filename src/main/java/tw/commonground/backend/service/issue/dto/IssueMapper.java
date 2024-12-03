@@ -12,7 +12,7 @@ public final class IssueMapper {
         // hide the constructor
     }
 
-    public static IssueResponse toResponse(IssueEntity entity, List<FactEntity> insightFacts) {
+    public static IssueResponse toResponse(IssueEntity entity, List<FactEntity> factEntities) {
         return IssueResponse.builder()
                 .id(entity.getId().toString())
                 .createAt(entity.getCreateAt())
@@ -23,7 +23,7 @@ public final class IssueMapper {
                 .authorId(entity.getAuthorId())
                 .authorName(entity.getAuthorName())
                 .authorAvatar(entity.getAuthorAvatar())
-                .insightFacts(insightFacts.stream().map(FactMapper::toResponse).toList())
+                .insightFacts(factEntities.stream().map(FactMapper::toResponse).toList())
                 .build();
     }
 

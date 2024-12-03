@@ -32,7 +32,7 @@ public class IssueController {
 
     private final FactService factService;
 
-    private final Set<String> sortableColumn = Set.of("title", "createAt", "updateAt", "authorId", "authorName");
+    private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
