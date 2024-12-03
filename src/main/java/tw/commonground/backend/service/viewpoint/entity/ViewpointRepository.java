@@ -15,7 +15,9 @@ public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID
 }
 
 interface ViewpointRepositoryCustom {
+
     void updateReactionCount(UUID viewpointId, Reaction reaction, int delta);
+
 }
 
 class ViewpointRepositoryImpl implements ViewpointRepositoryCustom {
