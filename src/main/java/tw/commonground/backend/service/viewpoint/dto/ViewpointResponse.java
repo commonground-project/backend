@@ -36,5 +36,7 @@ public class ViewpointResponse {
 
     private Integer dislikeCount;
 
+    private ViewpointReactionResponse userReaction;
+
     private List<FactResponse> facts;
 }

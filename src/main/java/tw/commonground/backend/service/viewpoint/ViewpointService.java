@@ -189,6 +189,20 @@ public class ViewpointService {
                 ));
     }
 
+    public Map<UUID, Reaction> getReactionsForViewpoints(Long userId, List<UUID> viewpointIds) {
+        List<ViewpointReactionEntity> reactions = viewpointReactionRepository.findReactionsByUserIdAndViewpointIds(userId, viewpointIds);
+        return reactions.stream()
+                .collect(Collectors.toMap(
+                        ViewpointReactionEntity::getViewpointId,
+                        ViewpointReactionEntity::getReaction
+                ));
+    }
+
+    public Reaction getReactionForViewpoint(Long userId, UUID viewpointId) {
+        ViewpointReactionKey id = new ViewpointReactionKey(userId, viewpointId);
+        return viewpointReactionRepository.findReactionById(id).orElse(Reaction.NONE);
+    }
+
 //    public ViewpointEntity addFactToViewpoint(UUID id, UUID factId) {
 //        ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(id).orElseThrow(
 //                () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));

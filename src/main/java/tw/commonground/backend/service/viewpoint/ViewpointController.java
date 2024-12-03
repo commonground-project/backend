@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.*;
+import tw.commonground.backend.service.viewpoint.entity.Reaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
@@ -39,11 +40,14 @@ public class ViewpointController {
     }
 
     @GetMapping("/issue/{id}/viewpoints")
-    public WrappedPaginationResponse<List<ViewpointResponse>> getViewpointsForIssue(@PathVariable UUID id,
-                                                                                    @Valid PaginationRequest request) {
+    public WrappedPaginationResponse<List<ViewpointResponse>> getViewpointsForIssue(
+            @AuthenticationPrincipal FullUserEntity user,
+            @PathVariable UUID id,
+            @Valid PaginationRequest request) {
+
         Pageable pageable = paginationParser.parsePageable(request);
         Page<ViewpointEntity> pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
-        return getPaginationResponse(pageViewpoints);
+        return getPaginationResponse(user.getId(), pageViewpoints);
     }
 
     @PostMapping("/issue/{id}/viewpoints")
@@ -52,16 +56,20 @@ public class ViewpointController {
                                                                      @RequestBody ViewpointRequest request) {
         ViewpointEntity viewpointEntity = viewpointService.createIssueViewpoint(id, request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
+        Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/viewpoints")
-    public WrappedPaginationResponse<List<ViewpointResponse>> getViewpoints(@Valid PaginationRequest pagination) {
+    public WrappedPaginationResponse<List<ViewpointResponse>> getViewpoints(
+            @AuthenticationPrincipal FullUserEntity user,
+            @Valid PaginationRequest pagination) {
+
         Pageable pageable = paginationParser.parsePageable(pagination);
         Page<ViewpointEntity> pageViewpoints = viewpointService.getViewpoints(pageable);
-        return getPaginationResponse(pageViewpoints);
+        return getPaginationResponse(user.getId(), pageViewpoints);
     }
 
     @PostMapping("/viewpoints")
@@ -70,26 +78,30 @@ public class ViewpointController {
         ViewpointEntity viewpointEntity = viewpointService.createViewpoint(request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE, facts);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/viewpoint/{id}")
-    public ResponseEntity<ViewpointResponse> getViewpoint(@PathVariable @NotNull UUID id) {
+    public ResponseEntity<ViewpointResponse> getViewpoint(@AuthenticationPrincipal FullUserEntity user,
+                                                          @PathVariable @NotNull UUID id) {
         ViewpointEntity viewpointEntity = viewpointService.getViewpoint(id);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
+        Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/viewpoint/{id}")
-    public ResponseEntity<ViewpointResponse> updateViewpoint(@PathVariable @NotNull UUID id,
+    public ResponseEntity<ViewpointResponse> updateViewpoint(@AuthenticationPrincipal FullUserEntity user,
+                                                             @PathVariable @NotNull UUID id,
                                                              @RequestBody ViewpointRequest updateRequest) {
         ViewpointEntity viewpointEntity = viewpointService.updateViewpoint(id, updateRequest);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
+        Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
         return ResponseEntity.ok(response);
     }
 
@@ -114,16 +126,21 @@ public class ViewpointController {
         return ResponseEntity.ok(response);
     }
 
-    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
-            Page<ViewpointEntity> pageViewpoints) {
+    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(Long userId,
+                                                                                     Page<ViewpointEntity> pageViewpoints) {
 
         Map<UUID, List<FactEntity>> factsMap = viewpointService.getFactsForViewpoints(pageViewpoints.getContent()
+                .stream().map(ViewpointEntity::getId).toList());
+
+        Map<UUID, Reaction> reactionsMap = viewpointService.getReactionsForViewpoints(userId, pageViewpoints.getContent()
                 .stream().map(ViewpointEntity::getId).toList());
 
         List<ViewpointResponse> viewpointResponses = pageViewpoints.getContent()
                 .stream()
                 .map(viewpointEntity ->
-                        ViewpointMapper.toResponse(viewpointEntity, factsMap.get(viewpointEntity.getId())))
+                        ViewpointMapper.toResponse(viewpointEntity,
+                                reactionsMap.getOrDefault(viewpointEntity.getId(), Reaction.NONE),
+                                factsMap.getOrDefault(viewpointEntity.getId(), List.of())))
                 .toList();
 
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));
