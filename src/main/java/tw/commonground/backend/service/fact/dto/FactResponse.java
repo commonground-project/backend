@@ -13,8 +13,8 @@ import java.util.UUID;
 public class FactResponse {
 
     private UUID id;
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String title;
     private Long authorId;
     private String authorName;
