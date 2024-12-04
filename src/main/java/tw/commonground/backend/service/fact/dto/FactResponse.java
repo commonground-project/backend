@@ -13,10 +13,18 @@ import java.util.UUID;
 public class FactResponse {
 
     private UUID id;
+
     private LocalDateTime createdAt;
+  
     private LocalDateTime updatedAt;
+
     private String title;
-    private Long authorId;
+
+    private UUID authorId;
+
     private String authorName;
+
+    private String authorAvatar;
+
     private List<ReferenceResponse> references;
 }

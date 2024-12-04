@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("/user/{username}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getUserByUsername(@PathVariable @NotBlank String username) {
         FullUserEntity userEntity = userService.getUserByUsername(username).orElseThrow(
                 () -> new EntityNotFoundException("User", "username", username));
@@ -63,7 +63,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(value = "/user/profile-image/{username}", produces = "image/png")
+    @GetMapping(value = "/user/avatar/{username}", produces = "image/png")
     public ResponseEntity<byte[]> getProfileImage(@Valid @NotBlank @PathVariable String username) {
         return ResponseEntity.ok(userService.getProfileImage(username));
     }

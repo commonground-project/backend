@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.commonground.backend.service.reference.ReferenceEntity;
+import tw.commonground.backend.service.user.entity.BaseEntityWithAuthor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class FactEntity {
+public class FactEntity extends BaseEntityWithAuthor {
 
     @Id
     @GeneratedValue
@@ -36,13 +37,6 @@ public class FactEntity {
 
     @Column(nullable = false)
     private String title;
-
-    // TODO: Waiting User Entity
-    private Long authorId;
-
-    private String authorName;
-
-    private String authorAvatar;
 
     @ManyToMany
     private Set<ReferenceEntity> references;

@@ -13,6 +13,7 @@ import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.*;
+import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 
@@ -57,15 +58,13 @@ public class FactService {
         return FactMapper.toResponse(factEntity);
     }
 
-    public FactResponse createFact(FactRequest factRequest) {
-        //TODO: Map to logged in user
+    public FactResponse createFact(FactRequest factRequest, FullUserEntity user) {
         FactEntity factEntity = FactEntity.builder()
                 .title(factRequest.getTitle())
-                .authorId(1L)
-                .authorName("aaa")
-                .authorAvatar("asd")
                 .references(new HashSet<>())
                 .build();
+
+        factEntity.setAuthor(user);
 
         Set<ReferenceEntity> referenceEntities = parseReferenceEntity(factRequest.getUrls());
         factEntity.setReferences(referenceEntities);

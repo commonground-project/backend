@@ -7,6 +7,7 @@ import tw.commonground.backend.service.fact.dto.FactResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -25,7 +26,7 @@ public class IssueResponse {
 
     private String insight;
 
-    private String authorId;
+    private UUID authorId;
 
     private String authorName;
 
