@@ -189,10 +189,14 @@ public class FactService {
     }
 
     private List<String> urlHandling(List<String> urls) {
-        List<String> decodedUrl = new ArrayList<>();
+        List<String> decodedUrls = new ArrayList<>();
         for (String url : urls) {
-            decodedUrl.add(URLDecoder.decode(url, StandardCharsets.UTF_8));
+            String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
+            if (!decodedUrl.startsWith("https://")) {
+                decodedUrl = "https://" + decodedUrl;
+            }
+            decodedUrls.add(decodedUrl);
         }
-        return decodedUrl;
+        return decodedUrls;
     }
 }
