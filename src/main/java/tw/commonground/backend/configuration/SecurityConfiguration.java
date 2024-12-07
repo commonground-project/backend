@@ -68,6 +68,7 @@ public class SecurityConfiguration {
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/user/avatar/**").permitAll()
                         .requestMatchers("/api/jwt/refresh/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/setup/**").hasRole("SETUP_REQUIRED")
@@ -75,6 +76,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/completed-sign-in.html").permitAll()
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/**").permitAll()
+                        .requestMatchers("/static/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo

@@ -16,7 +16,7 @@ public class IssueResponse {
 
     private String id;
 
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
@@ -32,5 +32,5 @@ public class IssueResponse {
 
     private String authorAvatar;
 
-    private List<FactResponse> insightFacts;
+    private List<FactResponse> facts;
 }

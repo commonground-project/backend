@@ -21,7 +21,7 @@ public final class IssueMapper {
 
         return IssueResponse.builder()
                 .id(entity.getId().toString())
-                .createAt(entity.getCreateAt())
+                .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .title(entity.getTitle())
                 .description(entity.getDescription())
@@ -29,13 +29,15 @@ public final class IssueMapper {
                 .authorId(entity.getAuthorId())
                 .authorName(entity.getAuthorName())
                 .authorAvatar(entity.getAuthorAvatar())
-                .insightFacts(factEntities.stream().map(FactMapper::toResponse).toList())
+                .facts(factEntities.stream().map(FactMapper::toResponse).toList())
                 .build();
     }
 
     public static SimpleIssueResponse toResponse(SimpleIssueEntity entity) {
         return SimpleIssueResponse.builder()
                 .id(entity.getId().toString())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .title(entity.getTitle())
                 .description(entity.getDescription())
                 .build();

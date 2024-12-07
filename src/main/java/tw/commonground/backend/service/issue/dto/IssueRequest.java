@@ -20,4 +20,20 @@ public class IssueRequest {
     private String insight;
 
     private List<UUID> facts;
+
+    public String getInsight() {
+        if (insight == null) {
+            return "";
+        }
+
+        return insight;
+    }
+
+    public List<UUID> getFacts() {
+        if (facts == null) {
+            return List.of();
+        }
+
+        return facts;
+    }
 }
