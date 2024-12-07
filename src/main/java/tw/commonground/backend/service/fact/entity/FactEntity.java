@@ -27,7 +27,7 @@ public class FactEntity extends BaseEntityWithAuthor {
 
     @CreatedDate
     @Column(nullable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column
