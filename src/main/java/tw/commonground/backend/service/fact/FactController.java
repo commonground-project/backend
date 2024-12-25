@@ -37,8 +37,8 @@ public class FactController {
     }
 
     @GetMapping("/api/facts")
-    public ResponseEntity<WrappedPaginationResponse<List<FactResponse>>> listFacts
-            (@Valid PaginationRequest pagination) {
+    public ResponseEntity<WrappedPaginationResponse<List<FactResponse>>> listFacts(
+            @Valid PaginationRequest pagination) {
         Pageable pageable = paginationParser.parsePageable(pagination);
         Page<FactEntity> factEntityPage = factService.getFacts(pageable);
 
