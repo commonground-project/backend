@@ -83,7 +83,8 @@ public class IssueController {
     }
 
     @PutMapping("/issue/{id}")
-    public ResponseEntity<IssueResponse> updateIssue(@PathVariable UUID id, @Valid @RequestBody IssueRequest issueRequest) {
+    public ResponseEntity<IssueResponse> updateIssue(@PathVariable UUID id,
+                                                     @Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.updateIssue(id, issueRequest);
         ContentContainFact contentContainFact = ContentContainFactParser
                 .separateContentAndFacts(issueEntity.getInsight());
