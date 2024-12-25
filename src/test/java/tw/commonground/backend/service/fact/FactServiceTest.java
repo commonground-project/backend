@@ -125,7 +125,7 @@ public class FactServiceTest {
 
     @Test
     void testUrlHandling_withEncodedUrlWithoutProtocol() {
-        List<String> input = List.of("https%3A%2F%2Fgoogle.com");
+        List<String> input = List.of("https%3A%2F%2Fwww.google.com");
 
         List<String> result = factService.urlHandling(input);
 
