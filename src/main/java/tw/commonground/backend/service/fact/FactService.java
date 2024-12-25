@@ -150,35 +150,7 @@ public class FactService {
         for (String urlString : urls) {
             referenceRepository.findByUrl(urlString).ifPresentOrElse(referenceEntities::add,
                 () -> {
-                    ReferenceEntity referenceEntity = new ReferenceEntity(urlString);
-                    try {
-                        Document document = Jsoup.connect(urlString).get();
-                        referenceEntity.setTitle(document.title());
-
-                        URL url = Paths.get(urlString).toUri().toURL();
-                        Element iconTag = document.selectFirst("link[rel~=(?i)^(icon|shortcut icon)$]");
-
-                        if (iconTag != null) {
-                            referenceEntity.setFavicon(iconTag.attr("href"));
-                        }
-
-                        iconTag = document.selectFirst("meta[itemprop~=(?i)^(image)]");
-                        if (iconTag != null) {
-                            String host = url.getHost();
-                            if (!host.startsWith("www.")) {
-                                host = "www." + host;
-                            }
-
-                            String iconUrl = url.getProtocol() + "://" + host + iconTag.attr("content");
-                            referenceEntity.setFavicon(iconUrl);
-                        }
-
-                    } catch (Exception ignored) {
-                        referenceEntity.setFavicon("");
-                        referenceEntity.setTitle("");
-                    }
-
-                    newReferenceEntities.add(referenceEntity);
+                    newReferenceEntities.add(getUrlDetails(urlString));
                 }
             );
         }
@@ -187,6 +159,37 @@ public class FactService {
 
         referenceEntities.addAll(newReferenceEntities);
         return referenceEntities;
+    }
+
+    protected ReferenceEntity getUrlDetails(String urlString) {
+        ReferenceEntity referenceEntity = new ReferenceEntity(urlString);
+        try {
+            Document document = Jsoup.connect(urlString).get();
+            referenceEntity.setTitle(document.title());
+
+            URL url = Paths.get(urlString).toUri().toURL();
+            Element iconTag = document.selectFirst("link[rel~=(?i)^(icon|shortcut icon)$]");
+
+            if (iconTag != null) {
+                referenceEntity.setFavicon(iconTag.attr("href"));
+            }
+
+            iconTag = document.selectFirst("meta[itemprop~=(?i)^(image)]");
+            if (iconTag != null) {
+                String host = url.getHost();
+                if (!host.startsWith("www.")) {
+                    host = "www." + host;
+                }
+
+                String iconUrl = url.getProtocol() + "://" + host + iconTag.attr("content");
+                referenceEntity.setFavicon(iconUrl);
+            }
+
+        } catch (Exception ignored) {
+            referenceEntity.setFavicon("");
+            referenceEntity.setTitle("");
+        }
+        return referenceEntity;
     }
 
     protected List<String> urlHandling(List<String> urls) {
