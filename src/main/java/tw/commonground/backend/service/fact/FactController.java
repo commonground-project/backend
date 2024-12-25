@@ -37,7 +37,8 @@ public class FactController {
     }
 
     @GetMapping("/api/facts")
-    public WrappedPaginationResponse<List<FactResponse>> listFacts(@Valid PaginationRequest pagination) {
+    public ResponseEntity<WrappedPaginationResponse<List<FactResponse>>> listFacts
+            (@Valid PaginationRequest pagination) {
         Pageable pageable = paginationParser.parsePageable(pagination);
         Page<FactEntity> factEntityPage = factService.getFacts(pageable);
 
@@ -46,23 +47,25 @@ public class FactController {
                 .map(FactMapper::toResponse)
                 .toList();
 
-        return new WrappedPaginationResponse<>(factResponses, PaginationMapper.toResponse(factEntityPage));
+        return ResponseEntity.ok(new WrappedPaginationResponse<>(factResponses,
+                                                                 PaginationMapper.toResponse(factEntityPage)));
     }
 
     @PostMapping("/api/facts")
-    public FactResponse createFact(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<FactResponse> createFact(@AuthenticationPrincipal FullUserEntity user,
                                    @Valid @RequestBody FactRequest factRequest) {
-        return FactMapper.toResponse(factService.createFact(factRequest, user));
+        return ResponseEntity.ok(FactMapper.toResponse(factService.createFact(factRequest, user)));
     }
 
     @GetMapping("/api/fact/{id}")
-    public FactResponse getFact(@PathVariable String id) {
-        return FactMapper.toResponse(factService.getFact(UUID.fromString(id)));
+    public ResponseEntity<FactResponse> getFact(@PathVariable String id) {
+        return ResponseEntity.ok(FactMapper.toResponse(factService.getFact(UUID.fromString(id))));
     }
 
     @PutMapping("/api/fact/{id}")
-    public FactResponse updateFact(@PathVariable String id, @Valid @RequestBody FactRequest factRequest) {
-        return FactMapper.toResponse(factService.updateFact(UUID.fromString(id), factRequest));
+    public ResponseEntity<FactResponse> updateFact(@PathVariable String id,
+                                                   @Valid @RequestBody FactRequest factRequest) {
+        return ResponseEntity.ok(FactMapper.toResponse(factService.updateFact(UUID.fromString(id), factRequest)));
     }
 
     @DeleteMapping("/api/fact/{id}")
@@ -72,16 +75,17 @@ public class FactController {
     }
 
     @GetMapping("/api/fact/{id}/references")
-    public List<ReferenceResponse> getFactReferences(@PathVariable String id) {
-        return factService.getFactReferences(UUID.fromString(id)).stream().map(ReferenceMapper::toResponse).toList();
+    public ResponseEntity<List<ReferenceResponse>> getFactReferences(@PathVariable String id) {
+        return ResponseEntity.ok(factService.getFactReferences(UUID.fromString(id))
+                .stream().map(ReferenceMapper::toResponse).toList());
     }
 
     @PostMapping("/api/fact/{id}/references")
-    public List<ReferenceResponse> updateFactReferences(@PathVariable String id,
+    public ResponseEntity<List<ReferenceResponse>> updateFactReferences(@PathVariable String id,
                                                         @RequestBody List<@Valid ReferenceRequest> referenceRequests) {
 
-        return factService.createFactReferences(UUID.fromString(id), referenceRequests)
-                .stream().map(ReferenceMapper::toResponse).toList();
+        return ResponseEntity.ok(factService.createFactReferences(UUID.fromString(id), referenceRequests)
+                .stream().map(ReferenceMapper::toResponse).toList());
     }
 
     @DeleteMapping("/api/fact/{id}/reference/{referenceId}")
