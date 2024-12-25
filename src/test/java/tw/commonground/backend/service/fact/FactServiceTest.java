@@ -40,7 +40,7 @@ public class FactServiceTest {
     private ArgumentCaptor<List<ReferenceEntity>> captor;
 
     @Test
-    void testParseReferenceEntity() throws IOException {
+    void testParseReferenceEntity_withExisted() throws IOException {
 
         List<String> input = List.of("https://www.google.com", "https://www.github.com");
 
