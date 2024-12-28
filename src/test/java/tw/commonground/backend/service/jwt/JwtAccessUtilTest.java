@@ -35,6 +35,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  * </ul>
  *
  */
+@SuppressWarnings("MethodName")
 @ExtendWith(MockitoExtension.class)
 class JwtAccessUtilTest {
 
@@ -44,7 +45,7 @@ class JwtAccessUtilTest {
     @Mock
     private UserRepository userRepository;
 
-    JwtAccessUtil jwtAccessUtil;
+    private JwtAccessUtil jwtAccessUtil;
 
     @BeforeEach
     void setUp() {
