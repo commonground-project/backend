@@ -98,7 +98,13 @@ public class SecurityConfiguration {
                         .deleteCookies("JSESSIONID")
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(List.of("*"));
+                    configuration.setAllowedMethods(List.of("*"));
+                    configuration.setAllowedHeaders(List.of("*"));
+                    return configuration;
+                }))
 
                 // Only handle exceptions thrown by Spring Security
                 .exceptionHandling(this::exceptionHandling);
