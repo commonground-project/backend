@@ -21,6 +21,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import tw.commonground.backend.exception.ProblemTemplate;
 import tw.commonground.backend.service.jwt.security.JwtAuthenticationFilter;
 import tw.commonground.backend.service.jwt.JwtService;
@@ -162,5 +165,18 @@ public class SecurityConfiguration {
             var authorities = List.of(new SimpleGrantedAuthority(userEntity.getRole().name()));
             return new DefaultOAuth2User(authorities, attributes, "email");
         };
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("*");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
