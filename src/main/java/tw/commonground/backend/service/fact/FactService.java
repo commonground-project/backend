@@ -20,7 +20,6 @@ import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -149,9 +148,7 @@ public class FactService {
 
         for (String urlString : urls) {
             referenceRepository.findByUrl(urlString).ifPresentOrElse(referenceEntities::add,
-                () -> {
-                    newReferenceEntities.add(getUrlDetails(urlString));
-                }
+                () -> newReferenceEntities.add(getUrlDetails(urlString))
             );
         }
 
@@ -167,22 +164,26 @@ public class FactService {
             Document document = Jsoup.connect(urlString).get();
             referenceEntity.setTitle(document.title());
 
-            URL url = Paths.get(urlString).toUri().toURL();
-            Element iconTag = document.selectFirst("link[rel~=(?i)^(icon|shortcut icon)$]");
+            URL url = new URL(urlString);
 
-            if (iconTag != null) {
-                referenceEntity.setFavicon(iconTag.attr("href"));
+            Element iconTag = document.selectFirst("link[rel~=(?i)^(icon|shortcut icon)$]");
+            if (iconTag == null) {
+                iconTag = document.selectFirst("meta[itemprop~=(?i)^(image)]");
             }
 
-            iconTag = document.selectFirst("meta[itemprop~=(?i)^(image)]");
             if (iconTag != null) {
-                String host = url.getHost();
-                if (!host.startsWith("www.")) {
-                    host = "www." + host;
-                }
+                String iconUrl = iconTag.attr("href");
+                if (iconUrl.isEmpty()) {
+                    String host = url.getHost();
+                    if (!host.startsWith("www.")) {
+                        host = "www." + host;
+                    }
 
-                String iconUrl = url.getProtocol() + "://" + host + iconTag.attr("content");
+                    iconUrl = url.getProtocol() + "://" + host + iconTag.attr("content");
+                }
                 referenceEntity.setFavicon(iconUrl);
+            } else {
+                referenceEntity.setFavicon("");
             }
 
         } catch (Exception ignored) {
