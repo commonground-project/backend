@@ -94,6 +94,7 @@ public class SecurityConfiguration {
                         .deleteCookies("JSESSIONID")
                 )
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
 
                 // Only handle exceptions thrown by Spring Security
                 .exceptionHandling(this::exceptionHandling);
