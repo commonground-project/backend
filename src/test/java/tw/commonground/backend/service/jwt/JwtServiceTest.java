@@ -19,6 +19,8 @@ import java.util.UUID;
 @ExtendWith(MockitoExtension.class)
 class JwtServiceTest {
 
+    private static final Long EXPIRATION_TIME = System.currentTimeMillis() + 1000;
+
     @Mock
     private JwtAccessUtil jwtAccessUtil;
 
@@ -31,7 +33,7 @@ class JwtServiceTest {
     @Test
     void testGenerateTokens() {
         UserEntity user = createUser();
-        RefreshTokenEntity refreshTokenEntity = createActiveRefreshToken(System.currentTimeMillis() + 1000);
+        RefreshTokenEntity refreshTokenEntity = createActiveRefreshToken(EXPIRATION_TIME);
 
         Mockito.when(jwtAccessUtil.generateAccessToken(user)).thenReturn("accessToken");
         Mockito.when(jwtAccessUtil.generateRefreshToken(user)).thenReturn(refreshTokenEntity);
@@ -40,7 +42,6 @@ class JwtServiceTest {
 
         Mockito.verify(jwtAccessUtil, Mockito.times(1)).generateAccessToken(user);
         Mockito.verify(jwtAccessUtil, Mockito.times(1)).generateRefreshToken(user);
-//        todo: verify refreshTokenRepository method call
 
         assertThat(response.getAccessToken()).isEqualTo("accessToken");
         assertThat(response.getRefreshToken()).isEqualTo(refreshTokenEntity.getId().toString());
