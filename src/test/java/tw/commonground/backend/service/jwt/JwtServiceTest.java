@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("MethodName")
 @ExtendWith(MockitoExtension.class)
 class JwtServiceTest {
 
