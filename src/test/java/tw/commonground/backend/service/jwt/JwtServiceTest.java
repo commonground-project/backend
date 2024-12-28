@@ -82,7 +82,9 @@ class JwtServiceTest {
         RefreshTokenResponse response = jwtService.refreshToken(refreshTokenEntity.getId());
 
         Mockito.verify(refreshTokenRepository, Mockito.times(1))
-                .findByIdAndIsActiveAndExpirationTimeAfter(Mockito.eq(refreshTokenEntity.getId()), Mockito.eq(true), Mockito.anyLong());
+                .findByIdAndIsActiveAndExpirationTimeAfter(
+                        Mockito.eq(refreshTokenEntity.getId()),
+                        Mockito.eq(true), Mockito.anyLong());
 
         Mockito.verify(jwtAccessUtil, Mockito.times(1))
                 .generateAccessToken(Mockito.argThat(u -> user.getId().equals(u.getId())));
@@ -112,7 +114,10 @@ class JwtServiceTest {
         assertThrows(RefreshTokenInvalidException.class, () -> jwtService.refreshToken(refreshToken));
 
         Mockito.verify(refreshTokenRepository, Mockito.times(1))
-                .findByIdAndIsActiveAndExpirationTimeAfter(Mockito.eq(refreshTokenEntity.getId()), Mockito.eq(true), Mockito.anyLong());
+                .findByIdAndIsActiveAndExpirationTimeAfter(
+                        Mockito.eq(refreshTokenEntity.getId()),
+                        Mockito.eq(true),
+                        Mockito.anyLong());
 
         Mockito.verify(jwtAccessUtil, Mockito.never()).generateAccessToken(Mockito.any());
         Mockito.verify(jwtAccessUtil, Mockito.never()).generateRefreshToken(Mockito.any());
