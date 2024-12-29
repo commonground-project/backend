@@ -102,8 +102,7 @@ public class IssueController {
     @GetMapping("/issue/{id}/facts")
     public WrappedPaginationResponse<List<FactResponse>> getIssueFacts(@PathVariable UUID id,
                                                                        @Valid PaginationRequest pagination) {
-        PaginationParser validator = new PaginationParser(Collections.emptySet(), MAX_SIZE);
-        Pageable pageable = validator.parsePageable(pagination);
+        Pageable pageable = paginationParser.parsePageable(pagination);
         Page<FactEntity> pageFacts = issueService.getIssueFacts(id, pageable);
 
         List<FactResponse> factResponses = pageFacts.getContent()
