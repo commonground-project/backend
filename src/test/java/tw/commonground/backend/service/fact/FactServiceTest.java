@@ -1,7 +1,5 @@
 package tw.commonground.backend.service.fact;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
@@ -79,13 +77,10 @@ public class FactServiceTest {
                 .attr("rel", "icon")
                 .attr("href", "https://www.github.com/favicon.ico");
 
-        Connection mockConnection = Mockito.mock(Connection.class);
-        Mockito.when(mockConnection.get()).thenReturn(mockDocument);
+        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
+        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        when(Jsoup.connect("https://www.github.com")).thenReturn(mockConnection);
-
-        Set<ReferenceEntity> result = factService.parseReferenceEntity(input);
-        System.out.println(result);
+        Set<ReferenceEntity> result = spyFactService.parseReferenceEntity(input);
 
         assertThat(result).hasSize(1);
 
