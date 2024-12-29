@@ -5,13 +5,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.ReferenceEntity;
 import tw.commonground.backend.service.reference.ReferenceRepository;
@@ -24,16 +20,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("MethodName")
-@SpringBootTest(classes = FactService.class)
+@ExtendWith(MockitoExtension.class)
 public class FactServiceTest {
 
-    @Autowired
+    @InjectMocks
     private FactService factService;
 
-    @MockBean
+    @Mock
     private FactRepository factRepository;
 
-    @MockBean
+    @Mock
     private ReferenceRepository referenceRepository;
 
     @Captor
