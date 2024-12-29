@@ -82,8 +82,7 @@ public class FactServiceTest {
         Connection mockConnection = Mockito.mock(Connection.class);
         Mockito.when(mockConnection.get()).thenReturn(mockDocument);
 
-        MockedStatic<Jsoup> mockedJsoup = Mockito.mockStatic(Jsoup.class);
-        mockedJsoup.when(() -> Jsoup.connect("https://www.github.com")).thenReturn(mockConnection);
+        when(Jsoup.connect("https://www.github.com")).thenReturn(mockConnection);
 
         Set<ReferenceEntity> result = factService.parseReferenceEntity(input);
         System.out.println(result);
@@ -104,13 +103,10 @@ public class FactServiceTest {
         Document mockDocument = new Document("https://www.github.com");
         mockDocument.title("Github");
 
-        Connection mockConnection = Mockito.mock(Connection.class);
-        Mockito.when(mockConnection.get()).thenReturn(mockDocument);
+        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
+        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        MockedStatic<Jsoup> mockedJsoup = Mockito.mockStatic(Jsoup.class);
-        mockedJsoup.when(() -> Jsoup.connect("https://www.github.com")).thenReturn(mockConnection);
-
-        ReferenceEntity referenceEntity = factService.getUrlDetails("https://www.github.com");
+        ReferenceEntity referenceEntity = spyFactService.getUrlDetails("https://www.github.com");
         assertThat(referenceEntity.getUrl()).isEqualTo("https://www.github.com");
         assertThat(referenceEntity.getTitle()).isEqualTo("Github");
         assertThat(referenceEntity.getFavicon()).isEqualTo("");
@@ -125,13 +121,10 @@ public class FactServiceTest {
                 .attr("rel", "icon")
                 .attr("href", "https://www.github.com/favicon.ico");
 
-        Connection mockConnection = Mockito.mock(Connection.class);
-        Mockito.when(mockConnection.get()).thenReturn(mockDocument);
+        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
+        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        MockedStatic<Jsoup> mockedJsoup = Mockito.mockStatic(Jsoup.class);
-        mockedJsoup.when(() -> Jsoup.connect("https://www.github.com")).thenReturn(mockConnection);
-
-        ReferenceEntity referenceEntity = factService.getUrlDetails("https://www.github.com");
+        ReferenceEntity referenceEntity = spyFactService.getUrlDetails("https://www.github.com");
         assertThat(referenceEntity.getUrl()).isEqualTo("https://www.github.com");
         assertThat(referenceEntity.getTitle()).isEqualTo("Github");
         assertThat(referenceEntity.getFavicon()).isEqualTo("https://www.github.com/favicon.ico");
@@ -146,13 +139,10 @@ public class FactServiceTest {
                 .attr("itemprop", "image")
                 .attr("content", "/favicon.ico");
 
-        Connection mockConnection = Mockito.mock(Connection.class);
-        Mockito.when(mockConnection.get()).thenReturn(mockDocument);
+        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
+        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        MockedStatic<Jsoup> mockedJsoup = Mockito.mockStatic(Jsoup.class);
-        mockedJsoup.when(() -> Jsoup.connect("https://www.github.com")).thenReturn(mockConnection);
-
-        ReferenceEntity referenceEntity = factService.getUrlDetails("https://www.github.com");
+        ReferenceEntity referenceEntity = spyFactService.getUrlDetails("https://www.github.com");
         assertThat(referenceEntity.getUrl()).isEqualTo("https://www.github.com");
         assertThat(referenceEntity.getTitle()).isEqualTo("Github");
         assertThat(referenceEntity.getFavicon()).isEqualTo("https://www.github.com/favicon.ico");
