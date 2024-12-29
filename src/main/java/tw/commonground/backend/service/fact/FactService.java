@@ -17,6 +17,7 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -161,7 +162,7 @@ public class FactService {
     protected ReferenceEntity getUrlDetails(String urlString) {
         ReferenceEntity referenceEntity = new ReferenceEntity(urlString);
         try {
-            Document document = Jsoup.connect(urlString).get();
+            Document document = getDocument(urlString);
             referenceEntity.setTitle(document.title());
 
             URL url = new URL(urlString);
@@ -191,6 +192,10 @@ public class FactService {
             referenceEntity.setTitle("");
         }
         return referenceEntity;
+    }
+
+    protected Document getDocument(String url) throws IOException {
+        return Jsoup.connect(url).get();
     }
 
     protected List<String> urlHandling(List<String> urls) {
