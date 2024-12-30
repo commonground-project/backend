@@ -179,7 +179,7 @@ public class FactService {
         List<String> decodedUrls = new ArrayList<>();
         for (String url : urls) {
             String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
-            if (!decodedUrl.startsWith("https://")) {
+            if (!decodedUrl.startsWith("https://") && !decodedUrl.startsWith("http://")) {
                 decodedUrl = "https://" + decodedUrl;
             }
             decodedUrls.add(decodedUrl);
