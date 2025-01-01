@@ -13,6 +13,7 @@ import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -127,7 +128,7 @@ public class FactService {
         }
     }
 
-    private Set<ReferenceEntity> parseReferenceEntity(List<String> urls) {
+    protected Set<ReferenceEntity> parseReferenceEntity(List<String> urls) {
         urls = urlHandling(urls);
 
         Set<ReferenceEntity> referenceEntities = new HashSet<>();
@@ -135,37 +136,7 @@ public class FactService {
 
         for (String urlString : urls) {
             referenceRepository.findByUrl(urlString).ifPresentOrElse(referenceEntities::add,
-                    () -> {
-                        ReferenceEntity referenceEntity = new ReferenceEntity(urlString);
-                        try {
-                            Document document = Jsoup.connect(urlString).get();
-                            referenceEntity.setTitle(document.title());
-
-                            URL url = new URL(urlString);
-                            Element iconTag = document.selectFirst("link[rel~=(?i)^(icon|shortcut icon)$]");
-
-                            if (iconTag != null) {
-                                referenceEntity.setFavicon(iconTag.attr("href"));
-                            }
-
-                            iconTag = document.selectFirst("meta[itemprop~=(?i)^(image)]");
-                            if (iconTag != null) {
-                                String host = url.getHost();
-                                if (!host.startsWith("www.")) {
-                                    host = "www." + host;
-                                }
-
-                                String iconUrl = url.getProtocol() + "://" + host + iconTag.attr("content");
-                                referenceEntity.setFavicon(iconUrl);
-                            }
-
-                        } catch (Exception ignored) {
-                            referenceEntity.setFavicon("");
-                            referenceEntity.setTitle("");
-                        }
-
-                        newReferenceEntities.add(referenceEntity);
-                    }
+                () -> newReferenceEntities.add(getUrlDetails(urlString))
             );
         }
 
@@ -175,7 +146,46 @@ public class FactService {
         return referenceEntities;
     }
 
-    private List<String> urlHandling(List<String> urls) {
+    protected ReferenceEntity getUrlDetails(String urlString) {
+        ReferenceEntity referenceEntity = new ReferenceEntity(urlString);
+        try {
+            Document document = getDocument(urlString);
+            referenceEntity.setTitle(document.title());
+
+            URL url = new URL(urlString);
+
+            Element iconTag = document.selectFirst("link[rel~=(?i)^(icon|shortcut icon)$]");
+            if (iconTag == null) {
+                iconTag = document.selectFirst("meta[itemprop~=(?i)^(image)]");
+            }
+
+            if (iconTag != null) {
+                String iconUrl = iconTag.attr("href");
+                if (iconUrl.isEmpty()) {
+                    String host = url.getHost();
+                    if (!host.startsWith("www.")) {
+                        host = "www." + host;
+                    }
+
+                    iconUrl = url.getProtocol() + "://" + host + iconTag.attr("content");
+                }
+                referenceEntity.setFavicon(iconUrl);
+            } else {
+                referenceEntity.setFavicon("");
+            }
+
+        } catch (Exception ignored) {
+            referenceEntity.setFavicon("");
+            referenceEntity.setTitle("");
+        }
+        return referenceEntity;
+    }
+
+    protected Document getDocument(String url) throws IOException {
+        return Jsoup.connect(url).get();
+    }
+
+    protected List<String> urlHandling(List<String> urls) {
         List<String> decodedUrls = new ArrayList<>();
         for (String url : urls) {
             String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
