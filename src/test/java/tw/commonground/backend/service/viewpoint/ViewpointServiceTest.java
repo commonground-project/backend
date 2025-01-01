@@ -35,7 +35,7 @@ public class ViewpointServiceTest {
 
     @Test
     @Transactional
-    void testReactToViewpoint_NewReaction() {
+    void testReactToViewpointNewReaction() {
         UUID viewpointId = UUID.randomUUID();
         Long userId = 1L;
         Reaction reaction = Reaction.LIKE;
@@ -44,14 +44,15 @@ public class ViewpointServiceTest {
         when(viewpointReactionRepository.findById(any(ViewpointReactionKey.class))).thenReturn(Optional.empty());
 
         ViewpointReactionEntity result = viewpointService.reactToViewpoint(userId, viewpointId, reaction);
-        verify(viewpointReactionRepository, times(1)).insertReaction(any(ViewpointReactionKey.class), eq(reaction.name()));
+        verify(viewpointReactionRepository, times(1))
+                .insertReaction(any(ViewpointReactionKey.class), eq(reaction.name()));
         verify(viewpointRepository, times(1)).updateReactionCount(viewpointId, reaction, 1);
         assertEquals(reaction, result.getReaction());
     }
 
     @Test
     @Transactional
-    void testReactToViewpoint_ExistingReaction() {
+    void testReactToViewpointExistingReaction() {
         UUID viewpointId = UUID.randomUUID();
         Long userId = 1L;
         Reaction oldReaction = Reaction.LIKE;
@@ -63,7 +64,8 @@ public class ViewpointServiceTest {
         existingReaction.setReaction(oldReaction);
 
         when(viewpointRepository.existsById(viewpointId)).thenReturn(true);
-        when(viewpointReactionRepository.findById(any(ViewpointReactionKey.class))).thenReturn(Optional.of(existingReaction));
+        when(viewpointReactionRepository.findById(any(ViewpointReactionKey.class)))
+                .thenReturn(Optional.of(existingReaction));
 
         ViewpointReactionEntity result = viewpointService.reactToViewpoint(userId, viewpointId, newReaction);
 
@@ -76,7 +78,7 @@ public class ViewpointServiceTest {
     }
 
     @Test
-    void testReactToViewpoint_ViewpointNotFound() {
+    void testReactToViewpointViewpointNotFound() {
         Long userId = 1L;
         UUID viewpointId = UUID.randomUUID();
         Reaction reaction = Reaction.LIKE;
@@ -85,5 +87,4 @@ public class ViewpointServiceTest {
         assertThatThrownBy(() -> viewpointService.reactToViewpoint(userId, viewpointId, reaction))
                 .isInstanceOf(EntityNotFoundException.class);
     }
-
 }
