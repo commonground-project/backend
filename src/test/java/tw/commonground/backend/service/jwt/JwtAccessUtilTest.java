@@ -16,6 +16,8 @@ import tw.commonground.backend.service.user.entity.UserRole;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link JwtAccessUtil} class.
@@ -63,11 +65,11 @@ class JwtAccessUtilTest {
         FullUserEntity user = createUser();
         String token = jwtAccessUtil.generateAccessToken(user);
         JwtUserDetails jwtUserDetails = jwtAccessUtil.verifyAccessToken(token);
-        Mockito.when(userRepository.getIdByUid(user.getUuid())).thenReturn(1L);
+        when(userRepository.getIdByUid(user.getUuid())).thenReturn(1L);
 
         assertThat(jwtUserDetails.getId()).isEqualTo(1L);
 
-        Mockito.verify(userRepository, Mockito.times(1)).getIdByUid(user.getUuid());
+        verify(userRepository, Mockito.times(1)).getIdByUid(user.getUuid());
     }
 
     @Test
@@ -80,7 +82,7 @@ class JwtAccessUtilTest {
 
         jwtUserDetails.getId();
 
-        Mockito.verify(userRepository, Mockito.never()).getIdByUid(user.getUuid());
+        verify(userRepository, Mockito.never()).getIdByUid(user.getUuid());
         assertThat(jwtUserDetails.getId()).isEqualTo(1L);
     }
 
@@ -89,14 +91,14 @@ class JwtAccessUtilTest {
         FullUserEntity user = createUser();
         String token = jwtAccessUtil.generateAccessToken(user);
         JwtUserDetails jwtUserDetails = jwtAccessUtil.verifyAccessToken(token);
-        Mockito.when(userRepository.getIdByUid(user.getUuid())).thenReturn(1L);
+        when(userRepository.getIdByUid(user.getUuid())).thenReturn(1L);
 
         assertThat(jwtUserDetails.getId()).isEqualTo(1L);
 
         Object fieldValue = ReflectionTestUtils.getField(jwtUserDetails, "id");
         assertThat(fieldValue).isEqualTo(1L);
 
-        Mockito.verify(userRepository, Mockito.times(1)).getIdByUid(user.getUuid());
+        verify(userRepository, Mockito.times(1)).getIdByUid(user.getUuid());
     }
 
     private UserEntity createUser() {
