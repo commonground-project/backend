@@ -1,6 +1,5 @@
 package tw.commonground.backend.service.jwt;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,9 +39,6 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("MethodName")
 @ExtendWith(MockitoExtension.class)
 class JwtAccessUtilTest {
-
-    @Mock
-    private DecodedJWT mockJwt;
 
     @Mock
     private UserRepository userRepository;
