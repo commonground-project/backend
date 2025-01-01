@@ -4,6 +4,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tw.commonground.backend.service.fact.entity.FactRepository;
@@ -19,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("MethodName")
 @ExtendWith(MockitoExtension.class)
-public class FactServiceTest {
+class FactServiceTest {
 
     @InjectMocks
     private FactService factService;
@@ -104,7 +106,7 @@ public class FactServiceTest {
         ReferenceEntity referenceEntity = spyFactService.getUrlDetails("https://www.github.com");
         assertThat(referenceEntity.getUrl()).isEqualTo("https://www.github.com");
         assertThat(referenceEntity.getTitle()).isEqualTo("Github");
-        assertThat(referenceEntity.getFavicon()).isEqualTo("");
+        assertThat(referenceEntity.getFavicon()).isEmpty();
     }
 
     @Test
@@ -143,46 +145,16 @@ public class FactServiceTest {
         assertThat(referenceEntity.getFavicon()).isEqualTo("https://www.github.com/favicon.ico");
     }
 
-    @Test
-    void testUrlHandling() {
-        List<String> input = List.of("https://www.google.com");
+    @ParameterizedTest
+    @CsvSource({"https://www.google.com, https://www.google.com",
+            "www.google.com, https://www.google.com",
+            "https%3A%2F%2Fwww.google.com, https://www.google.com",
+            "www.github.com%2Fcommonground-project%2Fbackend, https://www.github.com/commonground-project/backend"})
+    void testUrlHandling(String input, String output){
+        List<String> url = List.of(input);
+        List<String> result = factService.urlHandling(url);
 
-        List<String> result = factService.urlHandling(input);
-
-        List<String> expected = List.of("https://www.google.com");
-
-        assertThat(result).isEqualTo(expected);
-    }
-
-    @Test
-    void testUrlHandling_withUrlWithoutProtocol() {
-        List<String> input = List.of("www.google.com");
-
-        List<String> result = factService.urlHandling(input);
-
-        List<String> expected = List.of("https://www.google.com");
-
-        assertThat(result).isEqualTo(expected);
-    }
-
-    @Test
-    void testUrlHandling_withEncodedUrl() {
-        List<String> input = List.of("https%3A%2F%2Fwww.google.com");
-
-        List<String> result = factService.urlHandling(input);
-
-        List<String> expected = List.of("https://www.google.com");
-
-        assertThat(result).isEqualTo(expected);
-    }
-
-    @Test
-    void testUrlHandling_withEncodedUrlWithoutProtocol() {
-        List<String> input = List.of("https%3A%2F%2Fwww.google.com");
-
-        List<String> result = factService.urlHandling(input);
-
-        List<String> expected = List.of("https://www.google.com");
+        List<String> expected = List.of(output);
 
         assertThat(result).isEqualTo(expected);
     }
