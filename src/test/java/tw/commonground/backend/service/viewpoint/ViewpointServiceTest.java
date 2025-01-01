@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,14 +68,13 @@ public class ViewpointServiceTest {
         existingReaction.setReaction(oldReaction);
 
         when(viewpointRepository.existsById(viewpointId)).thenReturn(true);
-        when(viewpointReactionRepository.findById(reactionKey)).thenReturn(Optional.of(existingReaction));
+        when(viewpointReactionRepository.findById(any(ViewpointReactionKey.class))).thenReturn(Optional.of(existingReaction));
 
         ViewpointReactionEntity result = viewpointService.reactToViewpoint(userId, viewpointId, newReaction);
 
         verify(viewpointReactionRepository, times(1)).updateReaction(reactionKey, newReaction.name());
         // if oldReaction != NONE
         verify(viewpointRepository, times(1)).updateReactionCount(viewpointId, oldReaction, -1);
-        // if newReaction != NONE
         verify(viewpointRepository, times(1)).updateReactionCount(viewpointId, newReaction, 1);
 
         assertEquals(newReaction, result.getReaction());
@@ -90,4 +90,5 @@ public class ViewpointServiceTest {
         assertThatThrownBy(() -> viewpointService.reactToViewpoint(userId, viewpointId, reaction))
                 .isInstanceOf(EntityNotFoundException.class);
     }
+
 }
