@@ -150,7 +150,7 @@ class FactServiceTest {
             "www.google.com, https://www.google.com",
             "https%3A%2F%2Fwww.google.com, https://www.google.com",
             "www.github.com%2Fcommonground-project%2Fbackend, https://www.github.com/commonground-project/backend"})
-    void testUrlHandling(String input, String output){
+    void testUrlHandling(String input, String output) {
         List<String> url = List.of(input);
         List<String> result = factService.urlHandling(url);
 
