@@ -9,6 +9,7 @@ import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 public class ViewpointService {
     private static final String VIEWPOINT_KEY = "Viewpoint";
 
+    private static final String VIEWPOINT_REACTION_LOCK_FORMAT = "viewpoint.reaction.%s.%d";
+
     private final ViewpointRepository viewpointRepository;
 
     private final ViewpointReactionRepository viewpointReactionRepository;
@@ -30,20 +33,21 @@ public class ViewpointService {
 
     private final IssueService issueService;
 
-    private final ViewpointFactRepository viewpointFactRepository;
+    private final LockService lockService;
 
-    private final Map<String, Object> userReactionsLock = new ConcurrentHashMap<>();
+    private final ViewpointFactRepository viewpointFactRepository;
 
     public ViewpointService(ViewpointRepository viewpointRepository,
                             ViewpointReactionRepository viewpointReactionRepository,
                             FactService factService,
                             ViewpointFactRepository viewpointFactRepository,
-                            IssueService issueService) {
+                            IssueService issueService, LockService lockService) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
         this.issueService = issueService;
+        this.lockService = lockService;
     }
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
@@ -124,24 +128,18 @@ public class ViewpointService {
 
     @Transactional
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
-        throwIfViewpointNotExist(viewpointId);
+        String lockKey = String.format(VIEWPOINT_REACTION_LOCK_FORMAT, viewpointId, userId);
 
-        String lockKey = userId + "-" + viewpointId;
-        Object lock = userReactionsLock.computeIfAbsent(lockKey, k -> new Object());
-        try {
-            synchronized (lock) {
-                ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
+        return lockService.executeWithLock(lockKey, () -> {
+            ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
 
-                Optional<ViewpointReactionEntity> reactionOptional =
-                        viewpointReactionRepository.findById(viewpointReactionKey);
+            Optional<ViewpointReactionEntity> reactionOptional =
+                    viewpointReactionRepository.findById(viewpointReactionKey);
 
-                return reactionOptional
-                        .map(reactionEntity -> handleExistingReaction(reactionEntity, viewpointId, reaction))
-                        .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
-            }
-        } finally {
-            userReactionsLock.remove(lockKey);
-        }
+            return reactionOptional
+                    .map(reactionEntity -> handleExistingReaction(reactionEntity, viewpointId, reaction))
+                    .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
+        });
     }
 
     private ViewpointReactionEntity handleNewReaction(ViewpointReactionKey reactionKey, UUID viewpointId,
