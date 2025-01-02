@@ -127,15 +127,20 @@ public class ViewpointService {
         throwIfViewpointNotExist(viewpointId);
 
         String lockKey = userId + "-" + viewpointId;
-        synchronized (userReactionsLock.computeIfAbsent(lockKey, k -> new Object())) {
-            ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
+        Object lock = userReactionsLock.computeIfAbsent(lockKey, k -> new Object());
+        try {
+            synchronized (lock) {
+                ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
 
-            Optional<ViewpointReactionEntity> reactionOptional =
-                    viewpointReactionRepository.findById(viewpointReactionKey);
+                Optional<ViewpointReactionEntity> reactionOptional =
+                        viewpointReactionRepository.findById(viewpointReactionKey);
 
-            return reactionOptional
-                    .map(reactionEntity -> handleExistingReaction(reactionEntity, viewpointId, reaction))
-                    .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
+                return reactionOptional
+                        .map(reactionEntity -> handleExistingReaction(reactionEntity, viewpointId, reaction))
+                        .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
+            }
+        } finally {
+            userReactionsLock.remove(lockKey);
         }
     }
 
