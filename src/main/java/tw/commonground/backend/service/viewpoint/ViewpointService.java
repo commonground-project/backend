@@ -130,9 +130,11 @@ public class ViewpointService {
         synchronized (userReactionsLock.computeIfAbsent(lockKey, k -> new Object())) {
             ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
 
-            Optional<ViewpointReactionEntity> reactionOptional = viewpointReactionRepository.findById(viewpointReactionKey);
+            Optional<ViewpointReactionEntity> reactionOptional =
+                    viewpointReactionRepository.findById(viewpointReactionKey);
+
             return reactionOptional
-                    .map(viewpointReactionEntity -> handleExistingReaction(viewpointReactionEntity, viewpointId, reaction))
+                    .map(reactionEntity -> handleExistingReaction(reactionEntity, viewpointId, reaction))
                     .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
         }
     }
