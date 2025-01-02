@@ -3,6 +3,7 @@ package tw.commonground.backend.service.viewpoint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.fact.FactService;
@@ -125,7 +126,7 @@ public class ViewpointService {
         viewpointRepository.deleteById(id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
         String lockKey = String.format(VIEWPOINT_REACTION_LOCK_FORMAT, viewpointId, userId);
 
