@@ -14,7 +14,9 @@ import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
 
 import java.util.UUID;
 
+
 @DataJpaTest
+@SuppressWarnings("MethodName")
 public class ViewpointRepositoryTest {
 
     @Autowired

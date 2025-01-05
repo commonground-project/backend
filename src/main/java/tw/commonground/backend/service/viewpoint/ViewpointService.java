@@ -5,11 +5,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentContainFactParser;
@@ -28,17 +30,19 @@ public class ViewpointService {
     private final IssueService issueService;
 
     private final ViewpointFactRepository viewpointFactRepository;
+    private final UserRepository userRepository;
 
     public ViewpointService(ViewpointRepository viewpointRepository,
                             ViewpointReactionRepository viewpointReactionRepository,
                             FactService factService,
                             ViewpointFactRepository viewpointFactRepository,
-                            IssueService issueService) {
+                            IssueService issueService, UserRepository userRepository) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
         this.issueService = issueService;
+        this.userRepository = userRepository;
     }
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
@@ -120,6 +124,7 @@ public class ViewpointService {
     @Transactional
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
         throwIfViewpointNotExist(viewpointId);
+        throwIfUserNotExist(userId);
 
         ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
 
@@ -129,11 +134,20 @@ public class ViewpointService {
                 .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
     }
 
+    private void throwIfUserNotExist(Long userId) {
+        if(!userRepository.existsById(userId)) {
+            throw new ValidationException("User not found");
+            // can't determine this is just user not found or null user id
+        }
+    }
+
     private ViewpointReactionEntity handleNewReaction(ViewpointReactionKey reactionKey, UUID viewpointId,
                                                       Reaction reaction) {
 
+
         if (reaction != Reaction.NONE) {
             viewpointReactionRepository.insertReaction(reactionKey, reaction.name());
+            // can cause NullPointerException here
             updateReactionCount(viewpointId, reaction, 1);
         }
 
@@ -172,7 +186,7 @@ public class ViewpointService {
 
     public void throwIfViewpointNotExist(UUID viewpointId) {
         if (!viewpointRepository.existsById(viewpointId)) {
-            throw new EntityNotFoundException("Viewpoint", "id", viewpointId.toString());
+            throw new ValidationException("Viewpoint not found");
         }
     }
 
