@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ProblemDetail;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.user.entity.UserRepository;
@@ -20,7 +21,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -68,11 +68,15 @@ public class ViewpointServiceTest {
         UUID viewpointId = UUID.randomUUID();
         Reaction reaction = Reaction.LIKE;
 
-        when(userRepository.existsById(userId)).thenReturn(userId != null && userId > 0);
+        when(userRepository.existsById(userId)).thenReturn(false);
         when(viewpointRepository.existsById(viewpointId)).thenReturn(true);
 
-        assertThatThrownBy(() -> viewpointService.reactToViewpoint(userId, viewpointId, reaction))
-                .isInstanceOf(ValidationException.class);
+        try {
+            viewpointService.reactToViewpoint(userId, viewpointId, reaction);
+        } catch (ValidationException e) {
+            ProblemDetail problemDetail = e.getBody();
+            assertEquals("User not found", problemDetail.getDetail());
+        }
     }
 
     private static Stream<Object[]> provideInvalidUserId() {
@@ -89,11 +93,14 @@ public class ViewpointServiceTest {
         Long userId = 1L;
         Reaction reaction = Reaction.LIKE;
 
-//        when(userRepository.existsById(userId)).thenReturn(true);
-        when(viewpointRepository.existsById(viewpointId)).thenReturn(viewpointId != null);
+        when(viewpointRepository.existsById(viewpointId)).thenReturn(false);
 
-        assertThatThrownBy(() -> viewpointService.reactToViewpoint(userId, viewpointId, reaction))
-                .isInstanceOf(ValidationException.class);
+        try {
+            viewpointService.reactToViewpoint(userId, viewpointId, reaction);
+        } catch (ValidationException e) {
+            ProblemDetail problemDetail = e.getBody();
+            assertEquals("Viewpoint not found", problemDetail.getDetail());
+        }
     }
 
     private static Stream<Object[]> provideInvalidViewpointId() {
@@ -116,6 +123,7 @@ public class ViewpointServiceTest {
         existingReaction.setId(reactionKey);
         existingReaction.setReaction(oldReaction);
 
+        when(userRepository.existsById(userId)).thenReturn(true);
         when(viewpointRepository.existsById(viewpointId)).thenReturn(true);
         when(viewpointReactionRepository.findById(any(ViewpointReactionKey.class)))
                 .thenReturn(Optional.of(existingReaction));
@@ -127,36 +135,7 @@ public class ViewpointServiceTest {
         verify(viewpointRepository, times(1)).updateReactionCount(viewpointId, oldReaction, -1);
         verify(viewpointRepository, times(1)).updateReactionCount(viewpointId, newReaction, 1);
 
+
         assertEquals(newReaction, result.getReaction());
     }
-
-//    @Test
-//    @Transactional
-//    void testReactToViewpoint_UserNotFound() {
-//        UUID viewpointId = UUID.randomUUID();
-//        Long userId = null;
-//        Reaction reaction = Reaction.LIKE;
-//
-//        when(userRepository.existsById(userId)).thenReturn(false);
-//        when(viewpointRepository.existsById(viewpointId)).thenReturn(true);
-//
-//        assertThatThrownBy(() -> viewpointService.reactToViewpoint(userId, viewpointId, reaction))
-//                .isInstanceOf(ValidationException.class);
-//    }
-
-    // Null and Not found should be seperated to two tests?
-
-
-//    @Test
-//    void testReactToViewpoint_ViewpointNotFound() {
-//        Long userId = 1L;
-//        UUID viewpointId = UUID.randomUUID();
-//        Reaction reaction = Reaction.LIKE;
-//
-//        when(viewpointRepository.existsById(viewpointId)).thenReturn(false);
-//        assertThatThrownBy(() -> viewpointService.reactToViewpoint(userId, viewpointId, reaction))
-//                .isInstanceOf(ValidationException.class);
-//    }
-
-
 }
