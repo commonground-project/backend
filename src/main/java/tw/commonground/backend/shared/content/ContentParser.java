@@ -1,6 +1,7 @@
 package tw.commonground.backend.shared.content;
 
 import tw.commonground.backend.exception.ValidationException;
+import tw.commonground.backend.service.reply.dto.QuoteReply;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ public final class ContentParser {
 
     public static final String CONTENT_FACT_LINK_REGEX = "\\[([^]]+)]\\(([^)]+)\\)";
 
-    public static final String CONTENT_QUOTE_LINK_REGEX = "\\[\\[([^]]+)]]\\(([^)]+)\\)";
+    public static final String CONTENT_QUOTE_LINK_REGEX = "\\[\\[Quote]]\\(([^)]+)\\)";
 
     public static final Pattern CONTENT_FACT_LINK_PATTERN = Pattern.compile(CONTENT_FACT_LINK_REGEX);
 
@@ -27,26 +28,25 @@ public final class ContentParser {
 
         Matcher matcher = CONTENT_FACT_LINK_PATTERN.matcher(content);
 
-        replaceIntToUuid(facts, replacedText, matcher, false);
+        replaceIntToUuidForFact(facts, replacedText, matcher);
 
         return replacedText.toString();
     }
 
-    public static String convertLinkIntToUuid(String content, List<UUID> facts, List<UUID> quotes) {
+    public static String convertLinkIntToUuid(String content, List<UUID> facts, List<QuoteReply> quotes) {
         StringBuilder replacedFactText = new StringBuilder();
         StringBuilder replacedQuoteText = new StringBuilder();
 
         Matcher factMatcher = CONTENT_FACT_LINK_PATTERN.matcher(content);
-        replaceIntToUuid(facts, replacedFactText, factMatcher, false);
+        replaceIntToUuidForFact(facts, replacedFactText, factMatcher);
 
         Matcher quoteMatcher = CONTENT_QUOTE_LINK_PATTERN.matcher(replacedFactText.toString());
-        replaceIntToUuid(quotes, replacedQuoteText, quoteMatcher, true);
+        replaceIntToUuidForReply(quotes, replacedQuoteText, quoteMatcher);
 
         return replacedQuoteText.toString();
     }
 
-    private static void replaceIntToUuid(List<UUID> linkId, StringBuilder replacedText, Matcher matcher,
-                                         Boolean isQuote) {
+    private static void replaceIntToUuidForFact(List<UUID> linkId, StringBuilder replacedText, Matcher matcher) {
         while (matcher.find()) {
             String linkText = matcher.group(1);
             String linkPositions = matcher.group(2);
@@ -63,12 +63,26 @@ public final class ContentParser {
             }
 
             List<String> uuidStrings = uuids.stream().map(UUID::toString).toList();
-            String newLink;
-            if (isQuote) {
-                newLink = "[[" + linkText + "]](" + String.join(",", uuidStrings) + ")";
-            } else {
-                newLink = "[" + linkText + "](" + String.join(",", uuidStrings) + ")";
+            String newLink = "[" + linkText + "](" + String.join(",", uuidStrings) + ")";
+
+            matcher.appendReplacement(replacedText, newLink);
+        }
+
+        matcher.appendTail(replacedText);
+    }
+
+    private static void replaceIntToUuidForReply(List<QuoteReply> link, StringBuilder replacedText, Matcher matcher) {
+
+        while (matcher.find()) {
+            String linkPositions = matcher.group(1).trim();
+
+            int posInt = Integer.parseInt(linkPositions);
+            if (posInt < 0 || posInt >= link.size()) {
+                throw new ValidationException("Invalid position: " + posInt);
             }
+
+            QuoteReply quote = link.get(posInt);
+            String newLink = "[[Quote]](" + quote.getReplyId() + "," + quote.getStart() + "," + quote.getEnd() + ")";
 
             matcher.appendReplacement(replacedText, newLink);
         }
@@ -82,7 +96,7 @@ public final class ContentParser {
         Matcher matcher = CONTENT_FACT_LINK_PATTERN.matcher(text);
         List<UUID> uuids = new ArrayList<>();
 
-        replaceUuidToInt(uuids, replacedText, matcher, false);
+        replaceUuidToIntForFact(uuids, replacedText, matcher);
 
         ContentContainFact contentContainFact = new ContentContainFact();
         contentContainFact.setText(replacedText.toString());
@@ -97,7 +111,7 @@ public final class ContentParser {
         Matcher matcher = CONTENT_FACT_LINK_PATTERN.matcher(text);
         List<UUID> uuids = new ArrayList<>(existingFacts);
 
-        replaceUuidToInt(uuids, replacedText, matcher, false);
+        replaceUuidToIntForFact(uuids, replacedText, matcher);
 
         ContentContainFact contentContainFact = new ContentContainFact();
         contentContainFact.setText(replacedText.toString());
@@ -112,46 +126,43 @@ public final class ContentParser {
 
         Matcher factMatcher = CONTENT_FACT_LINK_PATTERN.matcher(text);
         List<UUID> factUuids = new ArrayList<>();
-        replaceUuidToInt(factUuids, replacedFactText, factMatcher, false);
+        replaceUuidToIntForFact(factUuids, replacedFactText, factMatcher);
 
         Matcher quoteMatcher = CONTENT_QUOTE_LINK_PATTERN.matcher(replacedFactText.toString());
-        List<UUID> quoteUuids = new ArrayList<>();
-        replaceUuidToInt(quoteUuids, replacedQuoteText, quoteMatcher, true);
+        List<QuoteReply> quotes = new ArrayList<>();
+        replaceUuidToIntForReply(quotes, replacedQuoteText, quoteMatcher);
 
         ContentReply contentReply = new ContentReply();
         contentReply.setText(replacedQuoteText.toString());
         contentReply.setFacts(factUuids);
-        contentReply.setQuotes(quoteUuids);
-
+        contentReply.setQuotes(quotes);
         return contentReply;
     }
 
     public static ContentReply separateContentAndReplies(String text,
-                                                       List<UUID> existingFactUuids,
-                                                       List<UUID> existingQuoteUuids) {
+                                                       List<UUID> existingFactUuids) {
         StringBuilder replacedFactText = new StringBuilder();
         StringBuilder replacedQuoteText = new StringBuilder();
 
         Matcher factMatcher = CONTENT_FACT_LINK_PATTERN.matcher(text);
         List<UUID> factUuids = new ArrayList<>(existingFactUuids);
-        replaceUuidToInt(factUuids, replacedFactText, factMatcher, false);
+        replaceUuidToIntForFact(factUuids, replacedFactText, factMatcher);
 
         Matcher quoteMatcher = CONTENT_QUOTE_LINK_PATTERN.matcher(replacedFactText.toString());
-        List<UUID> quoteUuids = new ArrayList<>(existingQuoteUuids);
-        replaceUuidToInt(quoteUuids, replacedQuoteText, quoteMatcher, true);
+        List<QuoteReply> quotes = new ArrayList<>();
+        replaceUuidToIntForReply(quotes, replacedQuoteText, quoteMatcher);
 
         ContentReply contentReply = new ContentReply();
         contentReply.setText(replacedQuoteText.toString());
         contentReply.setFacts(factUuids);
-        contentReply.setQuotes(quoteUuids);
+        contentReply.setQuotes(quotes);
 
         return contentReply;
     }
 
 
 
-    private static void replaceUuidToInt(List<UUID> uuids, StringBuilder replacedText, Matcher matcher,
-                                         Boolean isQuotes) {
+    private static void replaceUuidToIntForFact(List<UUID> uuids, StringBuilder replacedText, Matcher matcher) {
         while (matcher.find()) {
             String linkText = matcher.group(1);
             String linkPositions = matcher.group(2);
@@ -168,14 +179,30 @@ public final class ContentParser {
                 positions.add(uuids.indexOf(uuid));
             }
 
-            String newLink;
-            if (isQuotes) {
-                newLink = "[[" + linkText + "]]("
-                        + String.join(",", positions.stream().map(Object::toString).toList()) + ")";
-            } else {
-                newLink = "[" + linkText + "]("
-                        + String.join(",", positions.stream().map(Object::toString).toList()) + ")";
+            String newLink = "[" + linkText + "]("
+                    + String.join(",", positions.stream().map(Object::toString).toList()) + ")";
+            matcher.appendReplacement(replacedText, newLink);
+        }
+
+        matcher.appendTail(replacedText);
+    }
+
+    private static void replaceUuidToIntForReply(List<QuoteReply> quotes, StringBuilder replacedText, Matcher matcher) {
+        while (matcher.find()) {
+            String linkPositions = matcher.group(1);
+
+
+            String[] quote = linkPositions.split(",");
+            QuoteReply quoteReply = QuoteReply.builder()
+                    .replyId(UUID.fromString(quote[0]))
+                    .start(Integer.parseInt(quote[1]))
+                    .end(Integer.parseInt(quote[2])).build();
+
+            if (!quotes.contains(quoteReply)) {
+                quotes.add(quoteReply);
             }
+
+            String newLink = "[[Quote]](" + quotes.indexOf(quoteReply) + ")";
             matcher.appendReplacement(replacedText, newLink);
         }
 

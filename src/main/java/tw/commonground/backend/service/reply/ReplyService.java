@@ -14,6 +14,7 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.content.ContentReply;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,20 +32,16 @@ public class ReplyService {
 
     private final ViewpointService viewpointService;
 
-    private final QuoteReplyRepository quoteReplyRepository;
-
     public ReplyService(ReplyRepository replyRepository,
                         ReplyFactRepository replyFactRepository,
                         ReplyReactionRepository replyReactionRepository,
                         FactService factService,
-                        ViewpointService viewpointService,
-                        QuoteReplyRepository quoteReplyRepository) {
+                        ViewpointService viewpointService) {
         this.replyRepository = replyRepository;
         this.replyFactRepository = replyFactRepository;
         this.replyReactionRepository = replyReactionRepository;
         this.factService = factService;
         this.viewpointService = viewpointService;
-        this.quoteReplyRepository = quoteReplyRepository;
     }
 
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
@@ -58,7 +55,7 @@ public class ReplyService {
 
         String content = ContentParser.convertLinkIntToUuid(request.getContent(),
                 request.getFacts(),
-                request.getQuotes().stream().map(QuoteReplyRequest::getReplyId).toList());
+                request.getQuotes().stream().map(quote -> (QuoteReply) quote).toList());
 
         ReplyEntity replyEntity = new ReplyEntity();
         replyEntity.setContent(content);
@@ -66,10 +63,6 @@ public class ReplyService {
         replyEntity.setAuthor(user);
         replyRepository.save(replyEntity);
 
-        List<QuoteReplyEntity> quoteReplyEntities = addNewQuoteReply(request.getQuotes());
-        quoteReplyRepository.saveAll(quoteReplyEntities);
-
-        replyEntity.setQuotes(quoteReplyEntities);
         replyRepository.save(replyEntity);
 
         for (UUID factId : request.getFacts()) {
@@ -87,20 +80,14 @@ public class ReplyService {
 
     @Transactional
     public ReplyEntity updateReply(UUID id, ReplyRequest request) {
-        ReplyEntity replyEntity = replyRepository.findById(id).orElseThrow(() -> {
-            return new EntityNotFoundException("Reply", "id", id.toString());
-        });
+        ReplyEntity replyEntity = replyRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Reply", "id", id.toString()));
 
-        List<QuoteReplyEntity> oldQuoteReplyEntities = quoteReplyRepository.findAllIdsByReplyId(id);
-        quoteReplyRepository.deleteAll(oldQuoteReplyEntities);
+        String content = ContentParser.convertLinkIntToUuid(request.getContent(),
+                request.getFacts(),
+                request.getQuotes().stream().map(quote -> (QuoteReply) quote).toList());
 
-        String content = request.getContent();
         replyEntity.setContent(content);
 
-        List<QuoteReplyEntity> quoteReplyEntities = addNewQuoteReply(request.getQuotes());
-        quoteReplyRepository.saveAll(quoteReplyEntities);
-
-        replyEntity.setQuotes(quoteReplyEntities);
         replyRepository.save(replyEntity);
 
         for (UUID factId : request.getFacts()) {
@@ -111,8 +98,6 @@ public class ReplyService {
     }
 
     public void deleteReply(UUID id) {
-        List<QuoteReplyEntity> quoteReplyEntities = quoteReplyRepository.findAllIdsByReplyId(id);
-        quoteReplyRepository.deleteAll(quoteReplyEntities);
         replyRepository.deleteById(id);
     }
 
@@ -129,12 +114,16 @@ public class ReplyService {
                 ));
     }
 
-    public Map<UUID, List<QuoteReplyEntity>> getQuoteByReplies(List<UUID> replyIds) {
+    public Map<UUID, List<QuoteReply>> getQuoteByReplies(List<UUID> replyIds) {
         List<ReplyEntity> results = replyRepository.findAllByIds(replyIds);
         return results.stream().collect(Collectors.toMap(
                 ReplyEntity::getId,
-                ReplyEntity::getQuotes
+                replyEntity -> getQuotesOfReply(replyEntity.getId())
         ));
+    }
+
+    public List<ReplyEntity> getRepliesByQuotes(List<QuoteReply> quotes) {
+        return replyRepository.findAllByIds(quotes.stream().map(QuoteReply::getReplyId).collect(Collectors.toList()));
     }
 
     public Reaction getReactionForReply(Long userId, UUID replyId) {
@@ -163,6 +152,9 @@ public class ReplyService {
         ReplyReactionEntity reactionEntity = new ReplyReactionEntity();
         reactionEntity.setId(reactionKey);
         reactionEntity.setReaction(reaction);
+        reactionEntity.setReply(replyRepository.findById(replyId).orElseThrow(
+                () -> new EntityNotFoundException("Reply", "id", replyId.toString())
+        ));
 
         return reactionEntity;
     }
@@ -188,8 +180,11 @@ public class ReplyService {
         return reactionEntity;
     }
 
-    public List<QuoteReplyEntity> getQuotesOfReply(UUID id) {
-        return quoteReplyRepository.findAllIdsByReplyId(id);
+    public List<QuoteReply> getQuotesOfReply(UUID id) {
+        ContentReply contentReply = ContentParser.separateContentAndReplies(replyRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Reply", "id", id.toString())).getContent());
+
+        return contentReply.getQuotes();
     }
 
     public Map<UUID, Reaction> getReactionsForReplies(Long userId, List<UUID> replyIds) {
@@ -203,6 +198,12 @@ public class ReplyService {
                 ));
     }
 
+    public ReplyEntity getReplyByQuote(QuoteReply quoteReply) {
+        return replyRepository.findById(quoteReply.getReplyId()).orElseThrow(
+                () -> new EntityNotFoundException("Reply", "id", quoteReply.getReplyId().toString())
+        );
+    }
+
     private void throwIfReplyNotExist(UUID replyId) {
         if (!replyRepository.existsById(replyId)) {
             throw new EntityNotFoundException("Reply", "id", replyId.toString());
@@ -211,20 +212,6 @@ public class ReplyService {
 
     private void updateReactionCount(UUID replyId, Reaction reaction, int delta) {
         replyRepository.updateReplyReaction(replyId, reaction, delta);
-    }
-
-    private List<QuoteReplyEntity> addNewQuoteReply(List<QuoteReplyRequest> quotesRequests) {
-        List<QuoteReplyEntity> results = new ArrayList<>();
-        for (QuoteReplyRequest quoteReplyRequest : quotesRequests) {
-            QuoteReplyEntity quoteReplyEntity = new QuoteReplyEntity();
-            quoteReplyEntity.setReply(replyRepository.findById(quoteReplyRequest.getReplyId()).orElseThrow(
-                    () -> new EntityNotFoundException("Reply", "id", quoteReplyRequest.getReplyId().toString())
-            ));
-            quoteReplyEntity.setStart(quoteReplyRequest.getStart());
-            quoteReplyEntity.setEnd(quoteReplyRequest.getEnd());
-            results.add(quoteReplyEntity);
-        }
-        return results;
     }
 
 }

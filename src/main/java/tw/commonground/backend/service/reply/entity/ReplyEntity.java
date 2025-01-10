@@ -47,8 +47,5 @@ public class ReplyEntity extends BaseEntityWithAuthor {
     private ViewpointEntity viewpoint;
 
     @OneToMany(mappedBy = "reply")
-    private List<QuoteReplyEntity> quotes;
-
-    @OneToMany(mappedBy = "reply")
     private List<ReplyFactEntity> facts;
 }

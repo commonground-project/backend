@@ -16,12 +16,13 @@ public interface ReplyReactionRepository extends JpaRepository<ReplyReactionEnti
     @Query("select r from ReplyReactionEntity r where r.user.id = :userId and r.reply.id in :replyIds")
     List<ReplyReactionEntity> findReactionsByUserIdAndReplyIds(Long userId, List<UUID> replyIds);
 
-    @Query(value = "insert into reply_reaction_entity (reply_id, user_id, reaction) "
-            + "values (:#{#id.replyId}, :#{#id.userId}), :reaction", nativeQuery = true)
+    @Modifying
+    @Query(value = "INSERT INTO reply_reaction_entity (reply_id, user_id, reaction) "
+            + "VALUES (:#{#id.replyId}, :#{#id.userId}, :reaction)", nativeQuery = true)
     void insertReaction(ReplyReactionKey id, String reaction);
 
     @Modifying
-    @Query(value = "update reply_reaction_key set reaction = :reaction "
-            + "where reply_id = :#{#id.replyId} and user_id :#{#id.userId}", nativeQuery = true)
+    @Query(value = "update reply_reaction_entity set reaction = :reaction "
+            + "where reply_id = :#{#id.replyId} and user_id = :#{#id.userId}", nativeQuery = true)
     void updateReaction(ReplyReactionKey id, String reaction);
 }

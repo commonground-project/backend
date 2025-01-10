@@ -4,12 +4,10 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reply.dto.*;
-import tw.commonground.backend.service.reply.entity.QuoteReplyEntity;
 import tw.commonground.backend.service.reply.entity.Reaction;
 import tw.commonground.backend.service.reply.entity.ReplyEntity;
 import tw.commonground.backend.service.reply.entity.ReplyReactionEntity;
@@ -57,10 +55,11 @@ public class ReplyController {
                                                              @RequestBody ReplyRequest replyRequest) {
         ReplyEntity replyEntity = replyService.createViewpointReply(id, user, replyRequest);
         List<FactEntity> facts = replyService.getFactsOfReply(replyEntity.getId());
-        List<QuoteReplyEntity> quotes = replyService.getQuotesOfReply(replyEntity.getId());
+        List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
+        List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
         Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
 
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, quotes));
+        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
     }
 
     @GetMapping("/reply/{id}")
@@ -68,10 +67,11 @@ public class ReplyController {
                                                   @PathVariable UUID id) {
         ReplyEntity replyEntity = replyService.getReply(id);
         List<FactEntity> facts = replyService.getFactsOfReply(id);
-        List<QuoteReplyEntity> quotes = replyService.getQuotesOfReply(replyEntity.getId());
+        List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
+        List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
         Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
 
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, quotes));
+        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
     }
 
     @PutMapping("/reply/{id}")
@@ -80,10 +80,11 @@ public class ReplyController {
                                                      @RequestBody ReplyRequest replyRequest) {
         ReplyEntity replyEntity = replyService.updateReply(id, replyRequest);
         List<FactEntity> facts = replyService.getFactsOfReply(id);
-        List<QuoteReplyEntity> quotes = replyService.getQuotesOfReply(replyEntity.getId());
+        List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
+        List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
         Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
 
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, quotes));
+        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
     }
 
     @DeleteMapping("/reply/{id}")
@@ -109,7 +110,7 @@ public class ReplyController {
         Map<UUID, List<FactEntity>> factsMap = replyService.getFactsByReplies(pageReplies.getContent()
                 .stream().map(ReplyEntity::getId).toList());
 
-        Map<UUID, List<QuoteReplyEntity>> quotesMap = replyService.getQuoteByReplies(pageReplies.getContent()
+        Map<UUID, List<QuoteReply>> quotesMap = replyService.getQuoteByReplies(pageReplies.getContent()
             .stream().map(ReplyEntity::getId).toList());
 
         Map<UUID, Reaction> reactionsMap = replyService.getReactionsForReplies(
@@ -122,6 +123,8 @@ public class ReplyController {
                         ReplyMapper.toReplyResponse(replyEntity,
                                 reactionsMap.getOrDefault(replyEntity.getId(), Reaction.NONE),
                                 factsMap.getOrDefault(replyEntity.getId(), List.of()),
+                                quotesMap.getOrDefault(replyEntity.getId(), List.of())
+                                        .stream().map(replyService::getReplyByQuote).toList(),
                                 quotesMap.getOrDefault(replyEntity.getId(), List.of())))
                 .toList();
 

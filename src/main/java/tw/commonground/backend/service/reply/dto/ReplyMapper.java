@@ -7,6 +7,7 @@ import tw.commonground.backend.service.reply.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class ReplyMapper {
@@ -15,16 +16,16 @@ public final class ReplyMapper {
         // hide constructor
     }
 
-    public static QuoteReplyResponse quoteReplyToQuoteResponse(QuoteReplyEntity quoteReplyEntity, ReplyEntity replyEntity) {
+    public static QuoteReplyResponse quoteReplyToQuoteResponse(QuoteReply quoteReply, ReplyEntity replyEntity) {
 
-        int start = quoteReplyEntity.getStart();
-        int end = quoteReplyEntity.getEnd();
+        int start = quoteReply.getStart();
+        int end = quoteReply.getEnd();
 
         return QuoteReplyResponse.builder()
-                .replyId(quoteReplyEntity.getReply().getId())
-                .authorId(quoteReplyEntity.getReply().getAuthorId())
-                .authorName(quoteReplyEntity.getReply().getAuthorName())
-                .authorAvatar(quoteReplyEntity.getReply().getAuthorAvatar())
+                .replyId(quoteReply.getReplyId())
+                .authorId(replyEntity.getAuthorId())
+                .authorName(replyEntity.getAuthorName())
+                .authorAvatar(replyEntity.getAuthorAvatar())
                 .content(replyEntity.getContent().substring(start, end))
                 .start(start)
                 .end(end)
@@ -34,19 +35,23 @@ public final class ReplyMapper {
     public static ReplyResponse toReplyResponse(ReplyEntity replyEntity,
                                                 Reaction reaction,
                                                 List<FactEntity> factEntities,
-                                                List<QuoteReplyEntity> quoteReplyEntities) {
+                                                List<ReplyEntity> replyEntities,
+                                                List<QuoteReply> quoteReplies) {
 
         //Quotes
-        List<QuoteReplyResponse> quotes = quoteReplyEntities.stream()
-                .map(quote -> quoteReplyToQuoteResponse(quote, replyEntity))
-                .toList();
+
 
         //Facts
         List<FactResponse> facts = factEntities.stream().map(FactMapper::toResponse).toList();
 
         ContentReply content = ContentParser.separateContentAndReplies(replyEntity.getContent(),
-                facts.stream().map(FactResponse::getId).toList(),
-                quotes.stream().map(QuoteReplyResponse::getReplyId).toList());
+                facts.stream().map(FactResponse::getId).toList());
+
+        List<QuoteReplyResponse> quotes = new ArrayList<>();
+
+        for (int i = 0; i < replyEntities.size(); i++) {
+            quotes.add(quoteReplyToQuoteResponse(quoteReplies.get(i), replyEntities.get(i)));
+        }
 
 
         return ReplyResponse.builder()

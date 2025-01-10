@@ -1,20 +1,11 @@
 package tw.commonground.backend.service.reply.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.UUID;
 
-@Getter
-@Setter
-@Builder
-public class QuoteReplyRequest {
+public class QuoteReplyRequest extends QuoteReply {
 
-    private UUID replyId;
-
-    private Integer start;
-
-    private Integer end;
-
+    QuoteReplyRequest(UUID replyId, Integer start, Integer end) {
+        super(replyId, start, end);
+    }
 }

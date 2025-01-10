@@ -52,7 +52,7 @@ class ReplyRepositoryImpl implements ReplyRepositoryCustom {
     }
 
     private String buildQuery(String column) {
-        return "UPDATE reply_entity SET" + column + " = " + column + ":delta WHERE reply_id = :replyId";
+        return "UPDATE reply_entity SET " + column + " = " + column + " + :delta WHERE id = :replyId";
     }
 
     private void executeUpdateQuery(String sql, UUID replyId, int delta) {

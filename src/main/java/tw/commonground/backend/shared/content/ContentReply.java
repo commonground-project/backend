@@ -1,6 +1,7 @@
 package tw.commonground.backend.shared.content;
 
 import lombok.Data;
+import tw.commonground.backend.service.reply.dto.QuoteReply;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,5 +13,5 @@ public class ContentReply {
 
     private List<UUID> facts;
 
-    private List<UUID> quotes;
+    private List<QuoteReply> quotes;
 }
