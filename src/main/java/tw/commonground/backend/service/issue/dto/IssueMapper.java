@@ -5,7 +5,7 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
-import tw.commonground.backend.shared.content.ContentContainFactParser;
+import tw.commonground.backend.shared.content.ContentParser;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public final class IssueMapper {
 
     public static IssueResponse toResponse(IssueEntity entity, List<FactEntity> factEntities) {
 
-        ContentContainFact insight = ContentContainFactParser.separateContentAndFacts(entity.getInsight(),
+        ContentContainFact insight = ContentParser.separateContentAndFacts(entity.getInsight(),
                 factEntities.stream().map(FactEntity::getId).toList());
 
         return IssueResponse.builder()

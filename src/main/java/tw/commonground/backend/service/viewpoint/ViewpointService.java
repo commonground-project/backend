@@ -12,7 +12,7 @@ import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
-import tw.commonground.backend.shared.content.ContentContainFactParser;
+import tw.commonground.backend.shared.content.ContentParser;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,7 +54,7 @@ public class ViewpointService {
         factService.throwIfFactsNotExist(request.getFacts());
         issueService.throwIfIssueNotExist(issueId);
 
-        String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
 
         ViewpointEntity viewpointEntity = new ViewpointEntity();
         viewpointEntity.setTitle(request.getTitle());
@@ -79,7 +79,7 @@ public class ViewpointService {
     public ViewpointEntity createViewpoint(ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
 
-        String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
 
         ViewpointEntity viewpointEntity = new ViewpointEntity();
         viewpointEntity.setTitle(request.getTitle());
@@ -100,7 +100,7 @@ public class ViewpointService {
         ViewpointEntity viewpointEntity = viewpointRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
 
-        String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
 
         viewpointEntity.setTitle(request.getTitle());
         viewpointEntity.setContent(content);

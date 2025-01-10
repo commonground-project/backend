@@ -22,7 +22,7 @@ import tw.commonground.backend.shared.pagination.PaginationParser;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
-import tw.commonground.backend.shared.content.ContentContainFactParser;
+import tw.commonground.backend.shared.content.ContentParser;
 
 import java.util.*;
 
@@ -62,7 +62,7 @@ public class IssueController {
                                      @Valid @RequestBody IssueRequest issueRequest) {
 
         IssueEntity issueEntity = issueService.createIssue(issueRequest, user);
-        ContentContainFact contentContainFact = ContentContainFactParser
+        ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
@@ -72,7 +72,7 @@ public class IssueController {
     @GetMapping("/issue/{id}")
     public IssueResponse getIssue(@PathVariable UUID id) {
         IssueEntity issueEntity = issueService.getIssue(id);
-        ContentContainFact contentContainFact = ContentContainFactParser
+        ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
@@ -82,7 +82,7 @@ public class IssueController {
     @PutMapping("/issue/{id}")
     public IssueResponse updateIssue(@PathVariable UUID id, @Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.updateIssue(id, issueRequest);
-        ContentContainFact contentContainFact = ContentContainFactParser
+        ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
