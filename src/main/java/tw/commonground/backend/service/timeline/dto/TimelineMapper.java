@@ -5,7 +5,7 @@ import tw.commonground.backend.service.timeline.entity.NodeEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TimelineMapper {
+public final class TimelineMapper {
     private TimelineMapper() {
         // hide the constructor
     }

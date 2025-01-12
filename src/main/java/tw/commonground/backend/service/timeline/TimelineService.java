@@ -3,7 +3,6 @@ package tw.commonground.backend.service.timeline;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Node;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.issue.IssueService;

@@ -4,9 +4,9 @@ import tw.commonground.backend.service.timeline.entity.NodeEntity;
 
 import java.time.format.DateTimeFormatter;
 
-public class NodeMapper {
+public final class NodeMapper {
 
-    private static final DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private NodeMapper() {
         // hide the constructor
@@ -19,7 +19,7 @@ public class NodeMapper {
                 .updatedAt(entity.getUpdatedAt())
                 .title(entity.getTitle())
                 .description(entity.getDescription())
-                .date(entity.getDate().format(formatters))
+                .date(entity.getDate().format(FORMATTER))
                 .build();
     }
 }
