@@ -30,6 +30,8 @@ class JwtServiceTest {
 
     private static final Long EXPIRATION_TIME = 1736658684976L;
 
+    private static final Long REFRESH_TOKEN_EXPIRATION_MILLIS = 1000L;
+
     @Mock
     private JwtAccessUtil jwtAccessUtil;
 
@@ -54,7 +56,7 @@ class JwtServiceTest {
                 .thenReturn(refreshTokenEntity);
 
         when(jwtAccessUtil.getRefreshTokenExpirationMillis())
-                .thenReturn(1000L);
+                .thenReturn(REFRESH_TOKEN_EXPIRATION_MILLIS);
 
         RefreshTokenResponse response = jwtService.generateTokens(user);
 
@@ -65,7 +67,8 @@ class JwtServiceTest {
                 .generateRefreshToken(user);
 
         assertThat(response.getAccessToken()).isEqualTo("accessToken");
-        assertThat(response.getExpirationTime()).isEqualTo(clock.millis() + jwtAccessUtil.getRefreshTokenExpirationMillis());
+        assertThat(response.getExpirationTime()).isEqualTo(clock.millis() +
+                jwtAccessUtil.getRefreshTokenExpirationMillis());
         assertThat(response.getRefreshToken()).isEqualTo(refreshTokenEntity.getId().toString());
     }
 
