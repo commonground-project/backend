@@ -71,15 +71,13 @@ class JwtAccessUtilTest {
     @Test
     void testVerifyAccessToken_idIsNotNull_doesNotCallFetchEntityId() {
         FullUserEntity user = createUser();
-
         String token = jwtAccessUtil.generateAccessToken(user);
         JwtUserDetails jwtUserDetails = jwtAccessUtil.verifyAccessToken(token);
         ReflectionTestUtils.setField(jwtUserDetails, "id", 1L);
 
-        jwtUserDetails.getId();
+        assertThat(jwtUserDetails.getId()).isEqualTo(1L);
 
         verify(userRepository, Mockito.never()).getIdByUid(user.getUuid());
-        assertThat(jwtUserDetails.getId()).isEqualTo(1L);
     }
 
     @Test
