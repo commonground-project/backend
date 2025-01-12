@@ -1,6 +1,7 @@
 package tw.commonground.backend.service.reply;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class ReplyController {
     @GetMapping("/viewpoint/{id}/replies")
     public ResponseEntity<WrappedPaginationResponse<List<ReplyResponse>>> getReplies(
             @AuthenticationPrincipal FullUserEntity user,
-            @PathVariable UUID id,
+            @PathVariable @NotNull UUID id,
             @Valid PaginationRequest paginationRequest) {
         Pageable pageable = paginationParser.parsePageable(paginationRequest);
         Page<ReplyEntity> pageReplies = replyService.getViewpointReplies(id, pageable);
@@ -51,8 +52,8 @@ public class ReplyController {
 
     @PostMapping("/viewpoint/{id}/replies")
     public ResponseEntity<ReplyResponse> createReplies(@AuthenticationPrincipal FullUserEntity user,
-                                                             @PathVariable UUID id,
-                                                             @RequestBody ReplyRequest replyRequest) {
+                                                             @PathVariable @NotNull UUID id,
+                                                             @RequestBody @Valid ReplyRequest replyRequest) {
         ReplyEntity replyEntity = replyService.createViewpointReply(id, user, replyRequest);
         List<FactEntity> facts = replyService.getFactsOfReply(replyEntity.getId());
         List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
@@ -64,7 +65,7 @@ public class ReplyController {
 
     @GetMapping("/reply/{id}")
     public ResponseEntity<ReplyResponse> getReply(@AuthenticationPrincipal FullUserEntity user,
-                                                  @PathVariable UUID id) {
+                                                  @PathVariable @NotNull UUID id) {
         ReplyEntity replyEntity = replyService.getReply(id);
         List<FactEntity> facts = replyService.getFactsOfReply(id);
         List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
@@ -76,8 +77,8 @@ public class ReplyController {
 
     @PutMapping("/reply/{id}")
     public ResponseEntity<ReplyResponse> updateReply(@AuthenticationPrincipal FullUserEntity user,
-                                                     @PathVariable UUID id,
-                                                     @RequestBody ReplyRequest replyRequest) {
+                                                     @PathVariable @NotNull UUID id,
+                                                     @RequestBody @Valid ReplyRequest replyRequest) {
         ReplyEntity replyEntity = replyService.updateReply(id, replyRequest);
         List<FactEntity> facts = replyService.getFactsOfReply(id);
         List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
@@ -88,14 +89,14 @@ public class ReplyController {
     }
 
     @DeleteMapping("/reply/{id}")
-    public void deleteReply(@AuthenticationPrincipal FullUserEntity user, @PathVariable UUID id) {
+    public void deleteReply(@AuthenticationPrincipal FullUserEntity user, @PathVariable @NotNull UUID id) {
         replyService.deleteReply(id);
     }
 
 //    @PreAuthorize("isAuthenticated()")
     @PostMapping("/reply/{id}/reaction/me")
     public ResponseEntity<ReactionResponse> reactToReply(@AuthenticationPrincipal FullUserEntity user,
-                                                           @PathVariable UUID id,
+                                                           @PathVariable @NotNull UUID id,
                                                            @RequestBody ReactionRequest reactionRequest) {
         Long userId = user.getId();
         ReplyReactionEntity replyReactionEntity = replyService.reactToReply(userId, id, reactionRequest.getReaction());
