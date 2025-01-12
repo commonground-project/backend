@@ -9,6 +9,7 @@ import tw.commonground.backend.service.user.entity.UserRole;
 
 @Getter
 @Setter
+@SuppressWarnings("MagicNumber")
 public class UpdateUserRequest {
 
     @Nullable
