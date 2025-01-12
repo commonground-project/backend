@@ -53,9 +53,12 @@ public class ReplyService {
         factService.throwIfFactsNotExist(request.getFacts());
         viewpointService.throwIfViewpointNotExist(viewpointId);
 
+        List<QuoteReply> quotes = request.getQuotes().stream().map(quote -> (QuoteReply) quote).toList();
+        quotes.forEach(quote -> throwIfReplyNotExist(quote.getReplyId()));
+
         String content = ContentParser.convertLinkIntToUuid(request.getContent(),
                 request.getFacts(),
-                request.getQuotes().stream().map(quote -> (QuoteReply) quote).toList());
+                quotes);
 
         ReplyEntity replyEntity = new ReplyEntity();
         replyEntity.setContent(content);
@@ -80,11 +83,15 @@ public class ReplyService {
 
     @Transactional
     public ReplyEntity updateReply(UUID id, ReplyRequest request) {
-        ReplyEntity replyEntity = replyRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Reply", "id", id.toString()));
+        ReplyEntity replyEntity = replyRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Reply", "id", id.toString()));
+
+        List<QuoteReply> quotes = request.getQuotes().stream().map(quote -> (QuoteReply) quote).toList();
+        quotes.forEach(quote -> throwIfReplyNotExist(quote.getReplyId()));
 
         String content = ContentParser.convertLinkIntToUuid(request.getContent(),
                 request.getFacts(),
-                request.getQuotes().stream().map(quote -> (QuoteReply) quote).toList());
+                quotes);
 
         replyEntity.setContent(content);
 
