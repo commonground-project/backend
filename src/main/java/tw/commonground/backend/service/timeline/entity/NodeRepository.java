@@ -6,7 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface NodeRepository extends JpaRepository<NodeEntity, UUID> {
-//    List<NodeEntity> findAllByIssue(IssueEntity issue, Sort sort);
-
     List<NodeEntity> findAllByIssueId(UUID issueId);
 }
