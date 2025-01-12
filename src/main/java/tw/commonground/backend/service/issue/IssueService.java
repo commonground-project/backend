@@ -13,7 +13,7 @@ import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
-import tw.commonground.backend.shared.content.ContentContainFactParser;
+import tw.commonground.backend.shared.content.ContentParser;
 
 import java.util.*;
 
@@ -51,7 +51,7 @@ public class IssueService {
 
         String insight;
         try {
-            insight = ContentContainFactParser.convertLinkIntToUuid(request.getInsight(), request.getFacts());
+            insight = ContentParser.convertLinkIntToUuid(request.getInsight(), request.getFacts());
         } catch (Exception e) {
             throw new ValidationException("Insight is invalid: " + e.getMessage());
         }
@@ -76,7 +76,7 @@ public class IssueService {
         });
 
         try {
-            issueEntity.setInsight(ContentContainFactParser.convertLinkIntToUuid(issueRequest.getInsight(),
+            issueEntity.setInsight(ContentParser.convertLinkIntToUuid(issueRequest.getInsight(),
                     issueRequest.getFacts()));
         } catch (Exception e) {
             throw new ValidationException("Insight is invalid: " + e.getMessage());

@@ -7,7 +7,7 @@ import tw.commonground.backend.service.viewpoint.entity.Reaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
-import tw.commonground.backend.shared.content.ContentContainFactParser;
+import tw.commonground.backend.shared.content.ContentParser;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public final class ViewpointMapper {
     public static ViewpointResponse toResponse(ViewpointEntity viewpointEntity, Reaction reaction,
                                                List<FactEntity> factEntities) {
 
-        ContentContainFact content = ContentContainFactParser.separateContentAndFacts(viewpointEntity.getContent(),
+        ContentContainFact content = ContentParser.separateContentAndFacts(viewpointEntity.getContent(),
                 factEntities.stream().map(FactEntity::getId).toList());
 
         return ViewpointResponse.builder()
