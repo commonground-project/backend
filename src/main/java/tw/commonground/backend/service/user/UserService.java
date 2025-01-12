@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.image.ImageService;
+import tw.commonground.backend.service.user.dto.UpdateUserRequest;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -63,6 +64,22 @@ public class UserService {
 
     public Optional<FullUserEntity> getUserByEmail(String email) {
         return userRepository.findUserEntityByEmail(email);
+    }
+
+    public FullUserEntity updateUser(String username, UpdateUserRequest request) {
+        UserEntity userEntity = userRepository.getUserEntityByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
+
+        userEntity.setUsername(Optional.ofNullable(request.getUsername()).orElse(userEntity.getUsername()));
+        userEntity.setNickname(Optional.ofNullable(request.getNickname()).orElse(userEntity.getNickname()));
+        userEntity.setRole(Optional.ofNullable(request.getRole()).orElse(userEntity.getRole()));
+
+        userRepository.save(userEntity);
+
+        // Use to clear hibernate second level cache before fetching and returning user
+        entityManager.clear();
+        return userRepository.getUserEntityByUsername(Optional.ofNullable(request.getUsername()).orElse(username))
+                .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
     }
 
     public FullUserEntity completeSetup(UserSetupRequest setupRequest, String email) {
