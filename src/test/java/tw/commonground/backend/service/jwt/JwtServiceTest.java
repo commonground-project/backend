@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tw.commonground.backend.service.jwt.dto.RefreshTokenResponse;
 import tw.commonground.backend.service.jwt.entity.RefreshTokenEntity;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,13 +28,16 @@ import java.util.UUID;
 @ExtendWith(MockitoExtension.class)
 class JwtServiceTest {
 
-    private static final Long EXPIRATION_TIME = System.currentTimeMillis() + 1000;
+    private static final Long EXPIRATION_TIME = 1736658684976L;
 
     @Mock
     private JwtAccessUtil jwtAccessUtil;
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Spy
+    private Clock clock = Clock.fixed(Clock.systemDefaultZone().instant(), Clock.systemDefaultZone().getZone());
 
     @InjectMocks
     private JwtService jwtService;
@@ -48,6 +53,9 @@ class JwtServiceTest {
         when(jwtAccessUtil.generateRefreshToken(Mockito.argThat(u -> user.getId().equals(u.getId()))))
                 .thenReturn(refreshTokenEntity);
 
+        when(jwtAccessUtil.getRefreshTokenExpirationMillis())
+                .thenReturn(1000L);
+
         RefreshTokenResponse response = jwtService.generateTokens(user);
 
         verify(jwtAccessUtil, Mockito.times(1))
@@ -57,6 +65,7 @@ class JwtServiceTest {
                 .generateRefreshToken(user);
 
         assertThat(response.getAccessToken()).isEqualTo("accessToken");
+        assertThat(response.getExpirationTime()).isEqualTo(clock.millis() + jwtAccessUtil.getRefreshTokenExpirationMillis());
         assertThat(response.getRefreshToken()).isEqualTo(refreshTokenEntity.getId().toString());
     }
 
@@ -70,10 +79,10 @@ class JwtServiceTest {
         newRefreshTokenEntity.setUser(user);
 
         when(refreshTokenRepository
-                        .findByIdAndIsActiveAndExpirationTimeAfter(
-                                Mockito.eq(refreshTokenEntity.getId()),
-                                Mockito.eq(true),
-                                Mockito.anyLong()))
+                .findByIdAndIsActiveAndExpirationTimeAfter(
+                        Mockito.eq(refreshTokenEntity.getId()),
+                        Mockito.eq(true),
+                        Mockito.anyLong()))
                 .thenReturn(Optional.of(createRefreshTokenProjection(refreshTokenEntity)));
 
         when(jwtAccessUtil.generateAccessToken(Mockito.argThat(u -> user.getId().equals(u.getId()))))
@@ -107,10 +116,10 @@ class JwtServiceTest {
         RefreshTokenEntity refreshTokenEntity = createInactiveRefreshToken();
 
         when(refreshTokenRepository
-                        .findByIdAndIsActiveAndExpirationTimeAfter(
-                                Mockito.eq(refreshTokenEntity.getId()),
-                                Mockito.eq(true),
-                                Mockito.anyLong()))
+                .findByIdAndIsActiveAndExpirationTimeAfter(
+                        Mockito.eq(refreshTokenEntity.getId()),
+                        Mockito.eq(true),
+                        Mockito.anyLong()))
                 .thenReturn(Optional.empty());
 
         UUID refreshToken = refreshTokenEntity.getId();
@@ -138,7 +147,7 @@ class JwtServiceTest {
         RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
         refreshTokenEntity.setId(UUID.randomUUID());
         refreshTokenEntity.setIsActive(true);
-        refreshTokenEntity.setExpirationTime(JwtServiceTest.EXPIRATION_TIME);
+        refreshTokenEntity.setExpirationTime(EXPIRATION_TIME);
         return refreshTokenEntity;
     }
 
@@ -146,7 +155,7 @@ class JwtServiceTest {
         RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
         refreshTokenEntity.setId(UUID.randomUUID());
         refreshTokenEntity.setIsActive(false);
-        refreshTokenEntity.setExpirationTime(JwtServiceTest.EXPIRATION_TIME);
+        refreshTokenEntity.setExpirationTime(EXPIRATION_TIME);
         return refreshTokenEntity;
     }
 
