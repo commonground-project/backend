@@ -67,8 +67,8 @@ class JwtServiceTest {
                 .generateRefreshToken(user);
 
         assertThat(response.getAccessToken()).isEqualTo("accessToken");
-        assertThat(response.getExpirationTime()).isEqualTo(clock.millis() +
-                jwtAccessUtil.getRefreshTokenExpirationMillis());
+        assertThat(response.getExpirationTime()).isEqualTo(clock.millis()
+                + jwtAccessUtil.getRefreshTokenExpirationMillis());
         assertThat(response.getRefreshToken()).isEqualTo(refreshTokenEntity.getId().toString());
     }
 
