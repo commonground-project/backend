@@ -14,6 +14,7 @@ import nl.martijndwars.webpush.PushService;
 import org.jose4j.lang.JoseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,16 +50,19 @@ public class WebPushService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @CrossOrigin(origins = "http://localhost:8082")
     @PostMapping("/subscribe")
     public void subscribe(WebPushSubscription subscription) {
         subscriptions.put(subscription.notificationEndPoint, subscription);
     }
 
+    @CrossOrigin(origins = "http://localhost:8082")
     @PostMapping("/unsubscribe")
     public void unsubscribe(WebPushSubscription subscription) {
         subscriptions.remove(subscription.notificationEndPoint);
     }
 
+    @CrossOrigin(origins = "http://localhost:8082")
     @PostMapping("/notify-all")
     public WebPushMessage notifyAll(@RequestBody WebPushMessage message) throws GeneralSecurityException, IOException, JoseException, ExecutionException, InterruptedException {
         for (WebPushSubscription subscription: subscriptions.values()) {
