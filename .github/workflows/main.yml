@@ -131,7 +131,7 @@ jobs:
         if: ${{ (contains(github.ref, 'ref/tags/')) }}
         run: |
           export MODE='Stage'
-          ssh -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
