@@ -66,8 +66,6 @@ public class ReplyService {
         replyEntity.setAuthor(user);
         replyRepository.save(replyEntity);
 
-        replyRepository.save(replyEntity);
-
         for (UUID factId : request.getFacts()) {
             replyFactRepository.saveByReplyIdAndFactId(replyEntity.getId(), factId);
         }

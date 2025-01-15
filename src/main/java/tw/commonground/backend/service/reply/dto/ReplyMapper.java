@@ -38,10 +38,6 @@ public final class ReplyMapper {
                                                 List<ReplyEntity> replyEntities,
                                                 List<QuoteReply> quoteReplies) {
 
-        //Quotes
-
-
-        //Facts
         List<FactResponse> facts = factEntities.stream().map(FactMapper::toResponse).toList();
 
         ContentReply content = ContentParser.separateContentAndReplies(replyEntity.getContent(),

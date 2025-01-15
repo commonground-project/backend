@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface ReplyRepository extends JpaRepository<ReplyEntity, UUID>, ReplyRepositoryCustom {
 
-    @Query("select r from ReplyEntity r where r.id in :ids")
+    @Query("SELECT r FROM ReplyEntity r WHERE r.id IN :ids")
     List<ReplyEntity> findAllByIds(@Param("ids") List<UUID> ids);
 
     Page<ReplyEntity> findAllByViewpointId(UUID viewpointId, Pageable pageable);

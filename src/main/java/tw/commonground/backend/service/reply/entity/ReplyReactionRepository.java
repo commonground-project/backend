@@ -10,10 +10,10 @@ import java.util.UUID;
 
 public interface ReplyReactionRepository extends JpaRepository<ReplyReactionEntity, ReplyReactionKey> {
 
-    @Query("select r.reaction from ReplyReactionEntity r where r.id = :id")
+    @Query("SELECT r.reaction FROM ReplyReactionEntity r WHERE r.id = :id")
     Optional<Reaction> findReactionById(ReplyReactionKey id);
 
-    @Query("select r from ReplyReactionEntity r where r.user.id = :userId and r.reply.id in :replyIds")
+    @Query("SELECT r FROM ReplyReactionEntity r WHERE r.user.id = :userId AND r.reply.id IN :replyIds")
     List<ReplyReactionEntity> findReactionsByUserIdAndReplyIds(Long userId, List<UUID> replyIds);
 
     @Modifying
@@ -22,7 +22,7 @@ public interface ReplyReactionRepository extends JpaRepository<ReplyReactionEnti
     void insertReaction(ReplyReactionKey id, String reaction);
 
     @Modifying
-    @Query(value = "update reply_reaction_entity set reaction = :reaction "
-            + "where reply_id = :#{#id.replyId} and user_id = :#{#id.userId}", nativeQuery = true)
+    @Query(value = "UPDATE reply_reaction_entity SET reaction = :reaction "
+            + "WHERE reply_id = :#{#id.replyId} AND user_id = :#{#id.userId}", nativeQuery = true)
     void updateReaction(ReplyReactionKey id, String reaction);
 }

@@ -204,23 +204,4 @@ public class ViewpointService {
         ViewpointReactionKey id = new ViewpointReactionKey(userId, viewpointId);
         return viewpointReactionRepository.findReactionById(id).orElse(Reaction.NONE);
     }
-
-//    public ViewpointEntity addFactToViewpoint(UUID id, UUID factId) {
-//        ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(id).orElseThrow(
-//                () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
-//        FactEntity factEntity = factRepository.findById(factId).orElseThrow(
-//                () -> new EntityNotFoundException("Fact", "id", factId.toString()));
-//        viewpointEntity.getFacts().add(factEntity);
-//        viewpointRepository.save(viewpointEntity);
-//        return viewpointEntity;
-//    }
-
-//    public void deleteFactFromViewpoint(UUID id, UUID factId) {
-//        ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(id).orElseThrow(
-//                () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
-//        FactEntity factEntity = factRepository.findById(factId).orElseThrow(
-//                () -> new EntityNotFoundException("Fact", "id", factId.toString()));
-//        viewpointEntity.getFacts().remove(factEntity);
-//        viewpointRepository.save(viewpointEntity);
-//    }
 }
