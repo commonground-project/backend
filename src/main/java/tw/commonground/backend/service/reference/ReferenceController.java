@@ -19,7 +19,7 @@ public class ReferenceController {
         this.factService = factService;
     }
 
-    @PostMapping("/reference")
+    @PostMapping("/references")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReferenceResponse> createReference(@Valid @RequestBody ReferenceRequest referenceRequest) {
         ReferenceEntity referenceEntity = factService.parseReferenceEntity(referenceRequest.getUrl());
