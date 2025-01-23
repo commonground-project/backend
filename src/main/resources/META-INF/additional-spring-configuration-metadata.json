@@ -41,6 +41,12 @@
       "type": "java.lang.String",
       "description": "Description for jwt.state.expiration.",
       "defaultValue": ""
+    },
+    {
+      "name": "application.admin.email",
+      "type": "java.lang.String",
+      "description": "Description for application.admin.email.",
+      "defaultValue": ""
     }
   ]
 }

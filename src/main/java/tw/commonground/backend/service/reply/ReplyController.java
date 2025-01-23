@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
@@ -51,53 +52,42 @@ public class ReplyController {
     }
 
     @PostMapping("/viewpoint/{id}/replies")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReplyResponse> createReplies(@AuthenticationPrincipal FullUserEntity user,
-                                                             @PathVariable @NotNull UUID id,
-                                                             @RequestBody @Valid ReplyRequest replyRequest) {
+                                                       @PathVariable @NotNull UUID id,
+                                                       @RequestBody @Valid ReplyRequest replyRequest) {
         ReplyEntity replyEntity = replyService.createViewpointReply(id, user, replyRequest);
         List<FactEntity> facts = replyService.getFactsOfReply(replyEntity.getId());
-        List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
-        List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
-        Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
-
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
+        return getReplyResponseResponseEntity(user, replyEntity, facts);
     }
 
     @GetMapping("/reply/{id}")
     public ResponseEntity<ReplyResponse> getReply(@AuthenticationPrincipal FullUserEntity user,
                                                   @PathVariable @NotNull UUID id) {
         ReplyEntity replyEntity = replyService.getReply(id);
-        List<FactEntity> facts = replyService.getFactsOfReply(id);
-        List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
-        List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
-        Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
-
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
+        return getReplyResponseResponseEntity(user, id, replyEntity);
     }
 
     @PutMapping("/reply/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReplyResponse> updateReply(@AuthenticationPrincipal FullUserEntity user,
                                                      @PathVariable @NotNull UUID id,
                                                      @RequestBody @Valid ReplyRequest replyRequest) {
         ReplyEntity replyEntity = replyService.updateReply(id, replyRequest);
-        List<FactEntity> facts = replyService.getFactsOfReply(id);
-        List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
-        List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
-        Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
-
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
+        return getReplyResponseResponseEntity(user, id, replyEntity);
     }
 
     @DeleteMapping("/reply/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteReply(@AuthenticationPrincipal FullUserEntity user, @PathVariable @NotNull UUID id) {
         replyService.deleteReply(id);
     }
 
-//    @PreAuthorize("isAuthenticated()")
     @PostMapping("/reply/{id}/reaction/me")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReactionResponse> reactToReply(@AuthenticationPrincipal FullUserEntity user,
-                                                           @PathVariable @NotNull UUID id,
-                                                           @RequestBody ReactionRequest reactionRequest) {
+                                                         @PathVariable @NotNull UUID id,
+                                                         @RequestBody ReactionRequest reactionRequest) {
         Long userId = user.getId();
         ReplyReactionEntity replyReactionEntity = replyService.reactToReply(userId, id, reactionRequest.getReaction());
 
@@ -112,7 +102,7 @@ public class ReplyController {
                 .stream().map(ReplyEntity::getId).toList());
 
         Map<UUID, List<QuoteReply>> quotesMap = replyService.getQuoteByReplies(pageReplies.getContent()
-            .stream().map(ReplyEntity::getId).toList());
+                .stream().map(ReplyEntity::getId).toList());
 
         Map<UUID, Reaction> reactionsMap = replyService.getReactionsForReplies(
                 userId,
@@ -130,5 +120,22 @@ public class ReplyController {
                 .toList();
 
         return new WrappedPaginationResponse<>(replyResponses, PaginationMapper.toResponse(pageReplies));
+    }
+
+    private ResponseEntity<ReplyResponse> getReplyResponseResponseEntity(@AuthenticationPrincipal FullUserEntity user,
+                                                                         @PathVariable @NotNull UUID id,
+                                                                         ReplyEntity replyEntity) {
+        List<FactEntity> facts = replyService.getFactsOfReply(id);
+        return getReplyResponseResponseEntity(user, replyEntity, facts);
+    }
+
+    private ResponseEntity<ReplyResponse> getReplyResponseResponseEntity(@AuthenticationPrincipal FullUserEntity user,
+                                                                         ReplyEntity replyEntity,
+                                                                         List<FactEntity> facts) {
+        List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
+        List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
+        Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
+
+        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
     }
 }
