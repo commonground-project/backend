@@ -51,6 +51,7 @@ public class ViewpointController {
     }
 
     @PostMapping("/issue/{id}/viewpoints")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ViewpointResponse> createViewpointForIssue(@AuthenticationPrincipal FullUserEntity user,
                                                                      @PathVariable UUID id,
                                                                      @RequestBody ViewpointRequest request) {
@@ -73,6 +74,7 @@ public class ViewpointController {
     }
 
     @PostMapping("/viewpoints")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ViewpointResponse> createViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                              @RequestBody ViewpointRequest request) {
         ViewpointEntity viewpointEntity = viewpointService.createViewpoint(request, user);
@@ -94,6 +96,7 @@ public class ViewpointController {
     }
 
     @PutMapping("/viewpoint/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ViewpointResponse> updateViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                              @PathVariable @NotNull UUID id,
                                                              @RequestBody ViewpointRequest updateRequest) {
@@ -106,13 +109,14 @@ public class ViewpointController {
     }
 
     @DeleteMapping("/viewpoint/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteViewPoint(@PathVariable @NotNull UUID id) {
         viewpointService.deleteViewpoint(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/viewpoint/{id}/reaction/me")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ViewpointReactionResponse> reactToViewPoint(
             @AuthenticationPrincipal FullUserEntity user,
             @PathVariable UUID id,
@@ -147,30 +151,4 @@ public class ViewpointController {
 
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));
     }
-
-    // TODO: wait for page and size
-//    @GetMapping("/viewpoint/{id}/facts")
-//    public ResponseEntity<List<FactEntity>> getFactsOfViewPoint(
-//            @PathVariable @NotNull UUID id,
-//            @RequestParam(required = false) Integer page,
-//            @RequestParam(required = false) Integer size) {
-//        // Implement the logic to get facts of a viewpoint
-//        return ResponseEntity.ok(viewpointService.getFactsOfViewpoint(id, page, size));
-//    }
-
-//    @PostMapping("/viewpoint/{id}/facts")
-//    public ResponseEntity<ViewpointResponse> addFactToViewPoint(
-//            @PathVariable @NotNull UUID id,
-//            @RequestBody UUID factId) {
-//        ViewpointResponse response = ViewpointMapper.toResponse(viewpointService.addFactToViewpoint(id, factId));
-//        return ResponseEntity.ok(response);
-//    }
-
-//    @DeleteMapping("/viewpoint/{id}/facts/{factId}")
-//    public ResponseEntity<Void> removeFactFromViewPoint(
-//            @PathVariable @NotNull UUID id,
-//            @PathVariable @NotNull UUID factId) {
-//        viewpointService.deleteFactFromViewpoint(id, factId);
-//        return ResponseEntity.noContent().build();
-//    }
 }
