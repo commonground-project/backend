@@ -87,7 +87,8 @@ public class FactController {
     @PostMapping("/api/fact/{id}/references")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<ReferenceResponse>> updateFactReferences(@PathVariable String id,
-                                                                        @RequestBody List<@Valid ReferenceRequest> referenceRequests) {
+                                                                        @RequestBody List<@Valid ReferenceRequest>
+                                                                                referenceRequests) {
 
         return ResponseEntity.ok(factService.createFactReferences(UUID.fromString(id), referenceRequests)
                 .stream().map(ReferenceMapper::toResponse).toList());

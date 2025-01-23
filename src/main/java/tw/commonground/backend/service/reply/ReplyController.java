@@ -122,12 +122,16 @@ public class ReplyController {
         return new WrappedPaginationResponse<>(replyResponses, PaginationMapper.toResponse(pageReplies));
     }
 
-    private ResponseEntity<ReplyResponse> getReplyResponseResponseEntity(@AuthenticationPrincipal FullUserEntity user, @PathVariable @NotNull UUID id, ReplyEntity replyEntity) {
+    private ResponseEntity<ReplyResponse> getReplyResponseResponseEntity(@AuthenticationPrincipal FullUserEntity user,
+                                                                         @PathVariable @NotNull UUID id,
+                                                                         ReplyEntity replyEntity) {
         List<FactEntity> facts = replyService.getFactsOfReply(id);
         return getReplyResponseResponseEntity(user, replyEntity, facts);
     }
 
-    private ResponseEntity<ReplyResponse> getReplyResponseResponseEntity(@AuthenticationPrincipal FullUserEntity user, ReplyEntity replyEntity, List<FactEntity> facts) {
+    private ResponseEntity<ReplyResponse> getReplyResponseResponseEntity(@AuthenticationPrincipal FullUserEntity user,
+                                                                         ReplyEntity replyEntity,
+                                                                         List<FactEntity> facts) {
         List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
         List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
         Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
