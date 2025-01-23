@@ -54,7 +54,7 @@ public class FactService {
 
         factEntity.setAuthor(user);
 
-        Set<ReferenceEntity> referenceEntities = parseReferenceEntity(factRequest.getUrls());
+        Set<ReferenceEntity> referenceEntities = parseReferenceEntities(factRequest.getUrls());
         factEntity.setReferences(referenceEntities);
 
         return factRepository.save(factEntity);
@@ -68,7 +68,7 @@ public class FactService {
         );
         factEntity.setTitle(factRequest.getTitle());
 
-        Set<ReferenceEntity> referenceEntities = parseReferenceEntity(factRequest.getUrls());
+        Set<ReferenceEntity> referenceEntities = parseReferenceEntities(factRequest.getUrls());
         factEntity.setReferences(referenceEntities);
 
         return factRepository.save(factEntity);
@@ -98,7 +98,7 @@ public class FactService {
 
         List<String> urls = referenceRequests.stream().map(ReferenceRequest::getUrl).toList();
         Set<ReferenceEntity> referenceEntities = factEntity.getReferences();
-        referenceEntities.addAll(parseReferenceEntity(urls));
+        referenceEntities.addAll(parseReferenceEntities(urls));
         factEntity.setReferences(referenceEntities);
 
         factRepository.save(factEntity);
@@ -128,7 +128,11 @@ public class FactService {
         }
     }
 
-    protected Set<ReferenceEntity> parseReferenceEntity(List<String> urls) {
+    public ReferenceEntity parseReferenceEntity(String url) {
+        return parseReferenceEntities(List.of(url)).iterator().next();
+    }
+
+    public Set<ReferenceEntity> parseReferenceEntities(List<String> urls) {
         urls = urlHandling(urls);
 
         Set<ReferenceEntity> referenceEntities = new HashSet<>();
