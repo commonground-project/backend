@@ -36,7 +36,7 @@ class FactServiceTest {
     private ArgumentCaptor<List<ReferenceEntity>> captor;
 
     @Test
-    void testParseReferenceEntity_withExistedUrl() {
+    void testParseReferenceEntities_withExistedUrl() {
 
         List<String> input = List.of("https://www.google.com");
 
@@ -50,7 +50,7 @@ class FactServiceTest {
         Mockito.when(referenceRepository.findByUrl("https://www.google.com"))
                 .thenReturn(Optional.of(referenceEntity));
 
-        Set<ReferenceEntity> result = factService.parseReferenceEntity(input);
+        Set<ReferenceEntity> result = factService.parseReferenceEntities(input);
 
         Set<ReferenceEntity> expected = Set.of(referenceEntity);
 
@@ -59,7 +59,7 @@ class FactServiceTest {
     }
 
     @Test
-    void testParseReferenceEntity_withNotExistedUrl() throws IOException {
+    void testParseReferenceEntities_withNotExistedUrl() throws IOException {
         List<String> input = List.of("https://www.github.com");
 
         ReferenceEntity referenceEntity = new ReferenceEntity();
@@ -82,7 +82,7 @@ class FactServiceTest {
         FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
         when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        Set<ReferenceEntity> result = spyFactService.parseReferenceEntity(input);
+        Set<ReferenceEntity> result = spyFactService.parseReferenceEntities(input);
 
         assertThat(result).hasSize(1);
 
