@@ -35,6 +35,10 @@ public class UserEntity implements SimpleUserEntity, FullUserEntity {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private UserSettingEntity setting;
+
     @PrePersist
     public void prePersist() {
         if (uuid == null) {
