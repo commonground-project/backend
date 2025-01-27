@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import tw.commonground.backend.exception.ProblemTemplate;
 import tw.commonground.backend.service.jwt.security.JwtAuthenticationFilter;
 import tw.commonground.backend.service.jwt.JwtService;
@@ -94,6 +95,13 @@ public class SecurityConfiguration {
                         .deleteCookies("JSESSIONID")
                 )
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(List.of("*"));
+                    configuration.setAllowedMethods(List.of("*"));
+                    configuration.setAllowedHeaders(List.of("*"));
+                    return configuration;
+                }))
 
                 // Only handle exceptions thrown by Spring Security
                 .exceptionHandling(this::exceptionHandling);
