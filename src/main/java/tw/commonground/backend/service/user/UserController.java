@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.service.user.dto.UpdateUserRequest;
 import tw.commonground.backend.service.user.dto.UserMapper;
 import tw.commonground.backend.service.user.dto.UserResponse;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
@@ -44,6 +45,15 @@ public class UserController {
         FullUserEntity userEntity = userService.getUserByUsername(username).orElseThrow(
                 () -> new EntityNotFoundException("User", "username", username));
 
+        UserResponse response = UserMapper.toResponse(userEntity);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/user/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable @NotBlank String username,
+                                                   @Valid @RequestBody UpdateUserRequest updateRequest) {
+        FullUserEntity userEntity = userService.updateUser(username, updateRequest);
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
