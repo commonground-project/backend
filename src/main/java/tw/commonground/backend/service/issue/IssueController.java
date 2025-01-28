@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.FactService;
@@ -59,6 +60,7 @@ public class IssueController {
     }
 
     @PostMapping("/issues")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<IssueResponse> createIssue(@AuthenticationPrincipal FullUserEntity user,
                                                      @Valid @RequestBody IssueRequest issueRequest) {
 
@@ -83,6 +85,7 @@ public class IssueController {
     }
 
     @PutMapping("/issue/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<IssueResponse> updateIssue(@PathVariable UUID id,
                                                      @Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.updateIssue(id, issueRequest);
@@ -95,6 +98,7 @@ public class IssueController {
     }
 
     @DeleteMapping("/issue/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteIssue(@PathVariable String id) {
         issueService.deleteIssue(UUID.fromString(id));
     }
@@ -115,6 +119,7 @@ public class IssueController {
     }
 
     @PostMapping("/issue/{id}/facts")
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, List<FactResponse>> linkFactsToIssue(@PathVariable UUID id,
                                                             @Valid @RequestBody LinkFactsRequest request) {
         List<FactEntity> factEntities = issueService.createManualFact(id, request.getFactIds());

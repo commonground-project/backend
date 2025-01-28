@@ -2,6 +2,7 @@ package tw.commonground.backend.service.timeline;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.timeline.dto.*;
 import tw.commonground.backend.service.timeline.entity.NodeEntity;
@@ -27,6 +28,7 @@ public class TimelineController {
     }
 
     @PostMapping("/issue/{id}/timeline")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NodeResponse> createNode(@PathVariable UUID id, @Valid @RequestBody NodeRequest request) {
         NodeEntity node = timelineService.createNode(id, request);
         NodeResponse response = NodeMapper.toResponse(node);
@@ -41,6 +43,7 @@ public class TimelineController {
     }
 
     @PutMapping("/timeline/node/{nodeId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<NodeResponse> updateNode(@PathVariable UUID nodeId, @Valid @RequestBody NodeRequest request) {
         NodeEntity node = timelineService.updateNode(nodeId, request);
         NodeResponse response = NodeMapper.toResponse(node);
@@ -48,6 +51,7 @@ public class TimelineController {
     }
 
     @DeleteMapping("/timeline/node/{nodeId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteNode(@PathVariable UUID nodeId) {
         timelineService.deleteNode(nodeId);
         return ResponseEntity.noContent().build();
