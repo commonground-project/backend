@@ -1,12 +1,10 @@
 package tw.commonground.backend.service.user;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.user.dto.UserSettingDto;
 import tw.commonground.backend.service.user.dto.UserSettingMapper;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -33,7 +31,7 @@ public class UserSettingController {
     @PutMapping("/user/setting")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserSettingDto> updateUserSetting(@AuthenticationPrincipal FullUserEntity user,
-                                                            UserSettingDto userSettingDto) {
+                                                            @RequestBody @Valid UserSettingDto userSettingDto) {
         UserSettingEntity updatedUserSetting = userSettingService.updateUserSetting(user.getId(), userSettingDto);
         UserSettingDto updatedUserSettingDto = UserSettingMapper.toDto(updatedUserSetting);
         return ResponseEntity.ok(updatedUserSettingDto);
