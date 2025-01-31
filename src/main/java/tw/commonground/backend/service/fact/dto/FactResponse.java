@@ -1,7 +1,7 @@
 package tw.commonground.backend.service.fact.dto;
 
 import lombok.*;
-import tw.commonground.backend.service.reference.ReferenceResponse;
+import tw.commonground.backend.service.reference.dto.ReferenceResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;

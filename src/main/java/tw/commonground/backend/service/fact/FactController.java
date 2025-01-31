@@ -15,8 +15,8 @@ import tw.commonground.backend.service.reference.ReferenceMapper;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.PaginationParser;
-import tw.commonground.backend.service.reference.ReferenceRequest;
-import tw.commonground.backend.service.reference.ReferenceResponse;
+import tw.commonground.backend.service.reference.dto.ReferenceRequest;
+import tw.commonground.backend.service.reference.dto.ReferenceResponse;
 import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 

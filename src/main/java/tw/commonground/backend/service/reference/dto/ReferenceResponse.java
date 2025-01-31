@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.reference;
+package tw.commonground.backend.service.reference.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
