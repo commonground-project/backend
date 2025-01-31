@@ -50,10 +50,11 @@ public class SubscriptionService {
                 .build());
     }
 
-    public void removeSubscription(SubscriptionRequest request) {
-        SubscriptionEntity subscription = subscriptionRepository.findByEndpoint(request.getEndpoint()).orElseThrow(
-                () -> new EntityNotFoundException("Subscription not found")
-        );
+    public void removeSubscription(SubscriptionRequest request, FullUserEntity user) {
+        SubscriptionEntity subscription = subscriptionRepository.findByEndpoint(request.getEndpoint())
+                .filter(sub -> sub.getUser().getId().equals(user.getId()))
+                .orElseThrow(() -> new EntityNotFoundException("Subscription not found or not owned by user"));
+
         subscriptionRepository.delete(subscription);
     }
 

@@ -15,6 +15,7 @@ public class SubscriptionRequest {
 @Getter
 @Setter
 class SubscriptionKey {
+
     private String p256dh;
 
     private String auth;
