@@ -25,7 +25,7 @@ public class SubscriptionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @DeleteMapping("/unsubscribe")
     public void unsubscribeSubscription(@AuthenticationPrincipal FullUserEntity user,
-                                        @RequestBody SubscriptionRequest request) {
+                                        @RequestBody UnsubscriptionRequest request) {
         subscriptionService.removeSubscription(request, user);
     }
 

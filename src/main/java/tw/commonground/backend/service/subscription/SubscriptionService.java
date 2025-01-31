@@ -31,7 +31,7 @@ public class SubscriptionService {
                 .build());
     }
 
-    public void removeSubscription(SubscriptionRequest request, FullUserEntity user) {
+    public void removeSubscription(UnsubscriptionRequest request, FullUserEntity user) {
 
         UserEntity userEntity = userRepository.getUserEntityByUsername(user.getUsername()).orElseThrow(() ->
                 new EntityNotFoundException("User not found")
