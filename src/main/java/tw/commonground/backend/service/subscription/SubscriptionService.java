@@ -57,22 +57,4 @@ public class SubscriptionService {
         subscriptionRepository.delete(subscription);
     }
 
-    public void sendNotification(String message)
-            throws GeneralSecurityException, JoseException, IOException, ExecutionException, InterruptedException {
-        List<SubscriptionEntity> subscriptions = subscriptionRepository.findAll();
-
-        Security.addProvider(new BouncyCastleProvider());
-
-        PushService pushService = new PushService(
-                publicKey,
-                privateKey);
-
-        for (SubscriptionEntity subscription : subscriptions) {
-            Subscription sub = new Subscription();
-            sub.keys = new Subscription.Keys(subscription.getP256dh(), subscription.getAuth());
-            sub.endpoint = subscription.getEndpoint();
-            Notification notification = new Notification(sub, message);
-            pushService.send(notification);
-        }
-    }
 }

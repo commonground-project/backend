@@ -35,12 +35,5 @@ public class SubscriptionController {
         subscriptionService.removeSubscription(request, user);
     }
 
-//    @GetMapping("/sendNotification")
-//    public void sendNotification()
-//            throws JoseException, GeneralSecurityException, IOException, ExecutionException, InterruptedException {
-//        JSONObject json = new JSONObject();
-//        json.put("title", "test");
-//        subscriptionService.sendNotification(json.toString());
-//    }
 
 }
