@@ -32,9 +32,15 @@ public class SubscriptionService {
     }
 
     public void removeSubscription(SubscriptionRequest request, FullUserEntity user) {
-        SubscriptionEntity subscription = subscriptionRepository.findByEndpoint(request.getEndpoint())
-                .filter(sub -> sub.getUser().getId().equals(user.getId()))
-                .orElseThrow(() -> new EntityNotFoundException("Subscription not found or not owned by user"));
+
+        UserEntity userEntity = userRepository.getUserEntityByUsername(user.getUsername()).orElseThrow(() ->
+                new EntityNotFoundException("User not found")
+        );
+
+        SubscriptionEntity subscription = subscriptionRepository.findByEndpointAndAuthAndP256dhAndUser(
+                        request.getEndpoint(), request.getKeys().getAuth(), request.getKeys().getP256dh(), userEntity)
+                .orElseThrow(() -> new EntityNotFoundException("Subscription not found"));
+        // Question: If not found, should I throw Exception? or just ignore it?
 
         subscriptionRepository.delete(subscription);
     }
