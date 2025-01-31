@@ -32,7 +32,7 @@ public class SubscriptionController {
     @DeleteMapping("/unsubscribe")
     public void unsubscribeSubscription(@AuthenticationPrincipal FullUserEntity user,
                                         @RequestBody SubscriptionRequest request) {
-        subscriptionService.removeSubscription(request);
+        subscriptionService.removeSubscription(request, user);
     }
 
 //    @GetMapping("/sendNotification")
