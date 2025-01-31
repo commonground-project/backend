@@ -7,7 +7,6 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
-
 import java.util.UUID;
 
 @Entity
