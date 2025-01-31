@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.fact;
+package tw.commonground.backend.service.reference;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,9 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tw.commonground.backend.service.fact.entity.FactRepository;
-import tw.commonground.backend.service.reference.ReferenceEntity;
-import tw.commonground.backend.service.reference.ReferenceRepository;
+import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
 
 import java.io.IOException;
 import java.util.*;
@@ -21,13 +19,10 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("MethodName")
 @ExtendWith(MockitoExtension.class)
-class FactServiceTest {
+class ReferenceServiceTest {
 
     @InjectMocks
-    private FactService factService;
-
-    @Mock
-    private FactRepository factRepository;
+    private ReferenceService referenceService;
 
     @Mock
     private ReferenceRepository referenceRepository;
@@ -50,7 +45,7 @@ class FactServiceTest {
         Mockito.when(referenceRepository.findByUrl("https://www.google.com"))
                 .thenReturn(Optional.of(referenceEntity));
 
-        Set<ReferenceEntity> result = factService.parseReferenceEntity(input);
+        Set<ReferenceEntity> result = referenceService.createReferencesFromUrls(input);
 
         Set<ReferenceEntity> expected = Set.of(referenceEntity);
 
@@ -79,10 +74,10 @@ class FactServiceTest {
                 .attr("rel", "icon")
                 .attr("href", "https://www.github.com/favicon.ico");
 
-        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
-        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
+        ReferenceService spyReferenceService = Mockito.spy(new ReferenceService(referenceRepository));
+        when(spyReferenceService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        Set<ReferenceEntity> result = spyFactService.parseReferenceEntity(input);
+        Set<ReferenceEntity> result = spyReferenceService.createReferencesFromUrls(input);
 
         assertThat(result).hasSize(1);
 
@@ -100,13 +95,12 @@ class FactServiceTest {
         Document mockDocument = new Document("https://www.github.com");
         mockDocument.title("Github");
 
-        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
-        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
+        ReferenceService spyReferenceService = Mockito.spy(new ReferenceService(referenceRepository));
+        when(spyReferenceService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        ReferenceEntity referenceEntity = spyFactService.getUrlDetails("https://www.github.com");
-        assertThat(referenceEntity.getUrl()).isEqualTo("https://www.github.com");
-        assertThat(referenceEntity.getTitle()).isEqualTo("Github");
-        assertThat(referenceEntity.getFavicon()).isEmpty();
+        WebsiteInfoResponse websiteInfoResponse = spyReferenceService.getWebsiteInfo("https://www.github.com");
+        assertThat(websiteInfoResponse.getTitle()).isEqualTo("Github");
+        assertThat(websiteInfoResponse.getIcon()).isEqualTo("https://www.github.com/favicon.ico");
     }
 
     @Test
@@ -118,13 +112,12 @@ class FactServiceTest {
                 .attr("rel", "icon")
                 .attr("href", "https://www.github.com/favicon.ico");
 
-        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
-        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
+        ReferenceService spyReferenceService = Mockito.spy(new ReferenceService(referenceRepository));
+        when(spyReferenceService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        ReferenceEntity referenceEntity = spyFactService.getUrlDetails("https://www.github.com");
-        assertThat(referenceEntity.getUrl()).isEqualTo("https://www.github.com");
-        assertThat(referenceEntity.getTitle()).isEqualTo("Github");
-        assertThat(referenceEntity.getFavicon()).isEqualTo("https://www.github.com/favicon.ico");
+        WebsiteInfoResponse websiteInfoResponse = spyReferenceService.getWebsiteInfo("https://www.github.com");
+        assertThat(websiteInfoResponse.getTitle()).isEqualTo("Github");
+        assertThat(websiteInfoResponse.getIcon()).isEqualTo("https://www.github.com/favicon.ico");
     }
 
     @Test
@@ -136,13 +129,12 @@ class FactServiceTest {
                 .attr("itemprop", "image")
                 .attr("content", "/favicon.ico");
 
-        FactService spyFactService = Mockito.spy(new FactService(factRepository, referenceRepository));
-        when(spyFactService.getDocument("https://www.github.com")).thenReturn(mockDocument);
+        ReferenceService spyReferenceService = Mockito.spy(new ReferenceService(referenceRepository));
+        when(spyReferenceService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
-        ReferenceEntity referenceEntity = spyFactService.getUrlDetails("https://www.github.com");
-        assertThat(referenceEntity.getUrl()).isEqualTo("https://www.github.com");
-        assertThat(referenceEntity.getTitle()).isEqualTo("Github");
-        assertThat(referenceEntity.getFavicon()).isEqualTo("https://www.github.com/favicon.ico");
+        WebsiteInfoResponse websiteInfoResponse = spyReferenceService.getWebsiteInfo("https://www.github.com");
+        assertThat(websiteInfoResponse.getTitle()).isEqualTo("Github");
+        assertThat(websiteInfoResponse.getIcon()).isEqualTo("https://www.github.com/favicon.ico");
     }
 
     @ParameterizedTest
@@ -152,7 +144,7 @@ class FactServiceTest {
             "www.github.com%2Fcommonground-project%2Fbackend, https://www.github.com/commonground-project/backend"})
     void testUrlHandling(String input, String output) {
         List<String> url = List.of(input);
-        List<String> result = factService.urlHandling(url);
+        List<String> result = referenceService.urlHandling(url);
 
         List<String> expected = List.of(output);
 

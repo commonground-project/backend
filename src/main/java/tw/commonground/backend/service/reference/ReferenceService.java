@@ -67,17 +67,17 @@ public class ReferenceService {
             if (iconTag != null) {
                 String iconUrl = iconTag.attr("href");
                 if (iconUrl.isEmpty()) {
-                    String host = url.getHost();
-                    faviconUrl = url.getProtocol() + "://" + host + iconTag.attr("content");
-                } else if (!iconUrl.startsWith("https://") && !iconUrl.startsWith("http://")) {
-                    faviconUrl = url.getProtocol() + "://" + url.getHost() + iconUrl;
+                    faviconUrl = url.getProtocol() + "://" + url.getHost() + iconTag.attr("content");
                 } else {
-                    faviconUrl = iconUrl;
+                    faviconUrl = appendHostAndProtocol(iconUrl, url);
                 }
             } else {
                 iconTag = document.selectFirst("meta[itemprop~=(?i)^(image)]");
                 if (iconTag != null) {
-                    faviconUrl = iconTag.attr("content");
+                    String iconUrl = iconTag.attr("content");
+                    if (!iconUrl.isEmpty()) {
+                        faviconUrl = appendHostAndProtocol(iconUrl, url);
+                    }
                 }
             }
 
@@ -104,5 +104,13 @@ public class ReferenceService {
             decodedUrls.add(decodedUrl);
         }
         return decodedUrls;
+    }
+
+    private String appendHostAndProtocol(String path, URL url) {
+        if (!path.startsWith("https://") && !path.startsWith("http://")) {
+            return url.getProtocol() + "://" + url.getHost() + path;
+        }
+
+        return path;
     }
 }
