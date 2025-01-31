@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.reference;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -7,15 +8,14 @@ import org.springframework.stereotype.Service;
 import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class ReferenceService {
 
@@ -54,8 +54,15 @@ public class ReferenceService {
     public WebsiteInfoResponse getWebsiteInfo(String urlString) {
         WebsiteInfoResponse websiteInfoResponse = new WebsiteInfoResponse();
 
+        Document document;
         try {
-            Document document = getDocument(urlString);
+            document = getDocument(urlString);
+        } catch (Exception e) {
+            log.error("Error fetching website, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
+            throw new WebsiteFetchException();
+        }
+
+        try {
             websiteInfoResponse.setTitle(document.title());
 
             URL url = new URI(urlString).toURL();
@@ -82,7 +89,7 @@ public class ReferenceService {
             }
 
             websiteInfoResponse.setIcon(faviconUrl);
-        } catch (Exception ignored) {
+        } catch (URISyntaxException | MalformedURLException ignored) {
             websiteInfoResponse.setIcon("");
             websiteInfoResponse.setTitle("");
         }
