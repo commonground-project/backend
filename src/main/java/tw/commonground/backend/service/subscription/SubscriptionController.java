@@ -28,8 +28,4 @@ public class SubscriptionController {
                                         @RequestBody UnsubscriptionRequest request) {
         subscriptionService.removeSubscription(request, user);
     }
-
-
-
-
 }
