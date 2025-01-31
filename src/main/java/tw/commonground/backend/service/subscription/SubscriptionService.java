@@ -12,7 +12,6 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Security;
