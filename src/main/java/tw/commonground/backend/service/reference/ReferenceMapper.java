@@ -1,5 +1,7 @@
 package tw.commonground.backend.service.reference;
 
+import tw.commonground.backend.service.reference.dto.ReferenceResponse;
+
 public final class ReferenceMapper {
 
     private ReferenceMapper() {

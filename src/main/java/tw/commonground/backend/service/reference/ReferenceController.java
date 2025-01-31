@@ -2,21 +2,29 @@ package tw.commonground.backend.service.reference;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import tw.commonground.backend.service.reference.dto.ReferenceRequest;
+import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tw.commonground.backend.service.fact.FactService;
 
 
 @RestController
 @RequestMapping("/api")
 public class ReferenceController {
-    private final FactService factService;
+    private final ReferenceService referenceService;
 
-    public ReferenceController(FactService factService) {
-        this.factService = factService;
+    public ReferenceController(ReferenceService referenceService) {
+        this.referenceService = referenceService;
+    }
+
+    @GetMapping("/website/check")
+    public ResponseEntity<WebsiteInfoResponse> getUrlInfo(ReferenceRequest referenceRequest) {
+        WebsiteInfoResponse websiteInfoResponse = referenceService.getWebsiteInfo(referenceRequest.getUrl());
+        return ResponseEntity.ok(websiteInfoResponse);
     }
 
     @PostMapping("/references")
