@@ -39,8 +39,10 @@ public class UserSettingService {
 
         userSettingRepository.findById(userId)
                 .ifPresentOrElse(userSettingEntity -> {
-                    userSettingEntity.setNewReplyInMyViewpoint(userSettingDto.getNotification().isNewReplyInMyViewpoint());
-                    userSettingEntity.setNewReferenceToMyReply(userSettingDto.getNotification().isNewReferenceToMyReply());
+                    userSettingEntity.setNewReplyInMyViewpoint(userSettingDto.getNotification()
+                            .isNewReplyInMyViewpoint());
+                    userSettingEntity.setNewReferenceToMyReply(userSettingDto.getNotification()
+                            .isNewReferenceToMyReply());
                     userSettingRepository.save(userSettingEntity);
                 }, () -> {
                     UserSettingEntity newSetting = UserSettingEntity.builder()
