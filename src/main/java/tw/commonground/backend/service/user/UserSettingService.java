@@ -3,7 +3,7 @@ package tw.commonground.backend.service.user;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
-import tw.commonground.backend.service.user.dto.UserSettingDto;
+import tw.commonground.backend.service.user.dto.setting.UserSettingDto;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserSettingEntity;
 import tw.commonground.backend.service.user.entity.UserSettingRepository;
@@ -39,13 +39,13 @@ public class UserSettingService {
 
         userSettingRepository.findById(userId)
                 .ifPresentOrElse(userSettingEntity -> {
-                    userSettingEntity.setNewReplyInMyViewpoint(userSettingDto.isNewReplyInMyViewpoint());
-                    userSettingEntity.setNewReferenceToMyReply(userSettingDto.isNewReferenceToMyReply());
+                    userSettingEntity.setNewReplyInMyViewpoint(userSettingDto.getNotification().isNewReplyInMyViewpoint());
+                    userSettingEntity.setNewReferenceToMyReply(userSettingDto.getNotification().isNewReferenceToMyReply());
                     userSettingRepository.save(userSettingEntity);
                 }, () -> {
                     UserSettingEntity newSetting = UserSettingEntity.builder()
-                            .newReplyInMyViewpoint(userSettingDto.isNewReplyInMyViewpoint())
-                            .newReferenceToMyReply(userSettingDto.isNewReferenceToMyReply())
+                            .newReplyInMyViewpoint(userSettingDto.getNotification().isNewReplyInMyViewpoint())
+                            .newReferenceToMyReply(userSettingDto.getNotification().isNewReferenceToMyReply())
                             .user(user)
                             .build();
                     userSettingRepository.save(newSetting);

@@ -1,14 +1,14 @@
-package tw.commonground.backend.service.user.dto;
+package tw.commonground.backend.service.user.dto.setting;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
-public class UserSettingDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserSettingNotificationDto {
 
     @NotNull
     private boolean newReplyInMyViewpoint;

@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import tw.commonground.backend.service.user.dto.UserSettingDto;
-import tw.commonground.backend.service.user.dto.UserSettingMapper;
+import tw.commonground.backend.service.user.dto.setting.UserSettingDto;
+import tw.commonground.backend.service.user.dto.setting.UserSettingMapper;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserSettingEntity;
 
@@ -20,7 +20,7 @@ public class UserSettingController {
         this.userSettingService = userSettingService;
     }
 
-    @GetMapping("/user/setting")
+    @GetMapping("/user/settings")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserSettingDto> getUserSetting(@AuthenticationPrincipal FullUserEntity user) {
         UserSettingEntity userSetting = userSettingService.getUserSetting(user.getId());
@@ -28,7 +28,7 @@ public class UserSettingController {
         return ResponseEntity.ok(userSettingDto);
     }
 
-    @PutMapping("/user/setting")
+    @PutMapping("/user/settings")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserSettingDto> updateUserSetting(@AuthenticationPrincipal FullUserEntity user,
                                                             @RequestBody @Valid UserSettingDto userSettingDto) {
