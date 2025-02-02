@@ -15,10 +15,8 @@ import tw.commonground.backend.service.user.entity.UserRepository;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+
 import java.security.Security;
-import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -64,7 +62,7 @@ public class SubscriptionService {
     }
 
     public void sendNotification(List<FullUserEntity> users, String title, String body)
-            throws GeneralSecurityException {
+            throws GeneralSecurityException, JoseException, IOException, ExecutionException, InterruptedException {
         List<UserEntity> userEntities = userRepository.getUsersByUsername(
                 users.stream().map(FullUserEntity::getUsername).toList());
 
@@ -80,22 +78,12 @@ public class SubscriptionService {
         payload.put("title", title);
         payload.put("body", body);
 
-        subscriptions.forEach(subscription -> {
+        for (SubscriptionEntity subscription : subscriptions) {
             Subscription sub = new Subscription();
             sub.keys = new Subscription.Keys(subscription.getP256dh(), subscription.getAuth());
             sub.endpoint = subscription.getEndpoint();
-            Notification notification = null;
-            try {
-                notification = new Notification(sub, payload.toString());
-            } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                pushService.send(notification);
-            } catch (GeneralSecurityException | IOException | JoseException | ExecutionException
-                     | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        });
+            Notification notification = new Notification(sub, payload.toString());
+            pushService.send(notification);
+        }
     }
 }
