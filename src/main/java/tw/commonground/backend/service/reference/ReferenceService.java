@@ -25,6 +25,11 @@ public class ReferenceService {
         this.referenceRepository = referenceRepository;
     }
 
+    public ReferenceEntity createReferenceFromUrl(String url) {
+        Set<ReferenceEntity> referenceEntities = createReferencesFromUrls(List.of(url));
+        return referenceEntities.stream().findFirst().orElseThrow();
+    }
+
     public Set<ReferenceEntity> createReferencesFromUrls(List<String> urls) {
         urls = urlHandling(urls);
 
