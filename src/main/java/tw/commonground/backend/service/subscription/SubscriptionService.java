@@ -1,6 +1,5 @@
 package tw.commonground.backend.service.subscription;
 
-import jakarta.annotation.PostConstruct;
 import net.minidev.json.JSONObject;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
@@ -29,23 +28,18 @@ public class SubscriptionService {
 
     private final UserRepository userRepository;
 
-    private PushService pushService;
-
     @Value("vapid.public.key")
     private String publicKey;
 
     @Value("vapid.private.key")
     private String privateKey;
 
-    @PostConstruct
-    private void init() throws GeneralSecurityException {
-        pushService = new PushService(publicKey, privateKey);
-    }
-
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
                                UserRepository userRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
+
+
     }
 
     public void saveSubscription(SubscriptionRequest request, FullUserEntity user) {
@@ -75,13 +69,19 @@ public class SubscriptionService {
         List<UserEntity> userEntities = userRepository.getUsersByUsername(
                 users.stream().map(FullUserEntity::getUsername).toList());
 
-        Security.addProvider(new BouncyCastleProvider());
-
         List<SubscriptionEntity> subscriptions = subscriptionRepository.findByUsers(userEntities);
 
         JSONObject payload = new JSONObject();
         payload.put("title", title);
         payload.put("body", body);
+
+        PushService pushService;
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            pushService = new PushService(publicKey, privateKey);
+        } catch (GeneralSecurityException e) {
+            throw new NotificationDeliveryException(e.getMessage());
+        }
 
         StringBuilder stringbuilder = new StringBuilder();
         for (SubscriptionEntity subscription : subscriptions) {
@@ -99,6 +99,7 @@ public class SubscriptionService {
                 stringbuilder.append(e.getMessage());
             }
         }
+
 
         if (stringbuilder.isEmpty()) {
             return subscriptions.size();
