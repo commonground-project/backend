@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.subscription;
 
+import jakarta.annotation.PostConstruct;
 import net.minidev.json.JSONObject;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
@@ -28,17 +29,29 @@ public class SubscriptionService {
 
     private final UserRepository userRepository;
 
-    @Value("vapid.public.key")
+    private PushService pushService;
+
+    @Value("${vapid.public.key}")
     private String publicKey;
 
-    @Value("vapid.private.key")
+    @Value("${vapid.private.key}")
     private String privateKey;
 
     public SubscriptionService(SubscriptionRepository subscriptionRepository,
                                UserRepository userRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
+    }
 
+    @PostConstruct
+    private void init() throws NotificationDeliveryException {
+        Security.addProvider(new BouncyCastleProvider());
+
+        try {
+            pushService = new PushService(publicKey, privateKey);
+        } catch (GeneralSecurityException e) {
+            throw new NotificationDeliveryException(e.getMessage());
+        }
 
     }
 
@@ -74,14 +87,6 @@ public class SubscriptionService {
         JSONObject payload = new JSONObject();
         payload.put("title", title);
         payload.put("body", body);
-
-        PushService pushService;
-        try {
-            Security.addProvider(new BouncyCastleProvider());
-            pushService = new PushService(publicKey, privateKey);
-        } catch (GeneralSecurityException e) {
-            throw new NotificationDeliveryException(e.getMessage());
-        }
 
         StringBuilder stringbuilder = new StringBuilder();
         for (SubscriptionEntity subscription : subscriptions) {
