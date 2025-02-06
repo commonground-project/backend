@@ -119,7 +119,7 @@ public class IssueController {
     }
 
     @PostMapping("/issue/{id}/facts")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     public Map<String, List<FactResponse>> linkFactsToIssue(@PathVariable UUID id,
                                                             @Valid @RequestBody LinkFactsRequest request) {
         List<FactEntity> factEntities = issueService.createManualFact(id, request.getFactIds());
