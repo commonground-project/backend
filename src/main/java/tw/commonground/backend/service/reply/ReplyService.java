@@ -10,7 +10,10 @@ import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.*;
+import tw.commonground.backend.service.subscription.SubscriptionService;
+import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
@@ -32,16 +35,24 @@ public class ReplyService {
 
     private final ViewpointService viewpointService;
 
+    private final SubscriptionService subscriptionService;
+
+    private final UserRepository userRepository;
+
     public ReplyService(ReplyRepository replyRepository,
                         ReplyFactRepository replyFactRepository,
                         ReplyReactionRepository replyReactionRepository,
                         FactService factService,
-                        ViewpointService viewpointService) {
+                        ViewpointService viewpointService,
+                        SubscriptionService subscriptionService,
+                        UserRepository userRepository) {
         this.replyRepository = replyRepository;
         this.replyFactRepository = replyFactRepository;
         this.replyReactionRepository = replyReactionRepository;
         this.factService = factService;
         this.viewpointService = viewpointService;
+        this.subscriptionService = subscriptionService;
+        this.userRepository = userRepository;
     }
 
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
@@ -49,7 +60,8 @@ public class ReplyService {
     }
 
     @Transactional
-    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request) {
+    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request)
+            throws NotificationDeliveryException {
         factService.throwIfFactsNotExist(request.getFacts());
         viewpointService.throwIfViewpointNotExist(viewpointId);
 
@@ -69,6 +81,26 @@ public class ReplyService {
         for (UUID factId : request.getFacts()) {
             replyFactRepository.saveByReplyIdAndFactId(replyEntity.getId(), factId);
         }
+
+        ViewpointEntity viewpointEntity = viewpointService.getViewpoint(viewpointId);
+        List<FullUserEntity> quoteUsers = new ArrayList<>();
+        quotes.forEach(quote -> replyRepository.findById(quote.getReplyId()).ifPresentOrElse(reply -> {
+            Long userId = userRepository.getIdByUid(reply.getAuthorId());
+            quoteUsers.add(userRepository.findUserEntityById(userId).orElseThrow(
+                    () -> new EntityNotFoundException("User", "id", userId.toString())
+            ));
+        }, () -> {
+            throw new EntityNotFoundException("Reply", "id", quote.getReplyId().toString());
+        }));
+
+        subscriptionService.sendNotification(quoteUsers,
+                viewpointEntity.getTitle(),
+                "有人節錄了您的回覆");
+
+        Long userId = userRepository.getIdByUid(viewpointEntity.getAuthorId());
+        subscriptionService.sendNotification(List.of(userRepository.findUserEntityById(userId).orElseThrow(
+                () -> new EntityNotFoundException("User", "id", userId.toString())
+        )), viewpointEntity.getTitle(), viewpointEntity.getTitle() + " 下有一則新的回覆！");
 
         return replyEntity;
     }

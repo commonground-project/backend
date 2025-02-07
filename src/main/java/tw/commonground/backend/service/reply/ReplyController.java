@@ -13,6 +13,7 @@ import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.Reaction;
 import tw.commonground.backend.service.reply.entity.ReplyEntity;
 import tw.commonground.backend.service.reply.entity.ReplyReactionEntity;
+import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.PaginationParser;
@@ -55,7 +56,8 @@ public class ReplyController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReplyResponse> createReplies(@AuthenticationPrincipal FullUserEntity user,
                                                        @PathVariable @NotNull UUID id,
-                                                       @RequestBody @Valid ReplyRequest replyRequest) {
+                                                       @RequestBody @Valid ReplyRequest replyRequest)
+        throws NotificationDeliveryException {
         ReplyEntity replyEntity = replyService.createViewpointReply(id, user, replyRequest);
         List<FactEntity> facts = replyService.getFactsOfReply(replyEntity.getId());
         return getReplyResponseResponseEntity(user, replyEntity, facts);
