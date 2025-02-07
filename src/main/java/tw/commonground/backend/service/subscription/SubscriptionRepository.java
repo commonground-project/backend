@@ -18,5 +18,4 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     @Query("select s from SubscriptionEntity s where s.user in :users")
     List<SubscriptionEntity> findByUsers(@Param("users") List<UserEntity> users);
 
-
 }

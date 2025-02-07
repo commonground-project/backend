@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -50,9 +51,8 @@ public class SubscriptionService {
         try {
             pushService = new PushService(publicKey, privateKey);
         } catch (GeneralSecurityException e) {
-            throw new NotificationDeliveryException(e.getMessage());
+            throw new NotificationDeliveryException("PushService initialization failed", e);
         }
-
     }
 
     public void saveSubscription(SubscriptionRequest request, FullUserEntity user) {
@@ -68,7 +68,6 @@ public class SubscriptionService {
     }
 
     public void removeSubscription(UnsubscriptionRequest request, FullUserEntity user) {
-
         UserEntity userEntity = userRepository.getUserEntityByUsername(user.getUsername()).orElseThrow(() ->
                 new EntityNotFoundException("User not found")
         );
@@ -88,7 +87,8 @@ public class SubscriptionService {
         payload.put("title", title);
         payload.put("body", body);
 
-        StringBuilder stringbuilder = new StringBuilder();
+        List<String> errorEndpoints = new ArrayList<>();
+        List<Exception> errorSubscriptions = new ArrayList<>();
         for (SubscriptionEntity subscription : subscriptions) {
             try {
                 Subscription sub = new Subscription();
@@ -101,15 +101,15 @@ public class SubscriptionService {
                      | IOException
                      | ExecutionException
                      | InterruptedException e) {
-                stringbuilder.append(e.getMessage());
+                errorEndpoints.add(subscription.getEndpoint());
+                errorSubscriptions.add(e);
             }
         }
 
-
-        if (stringbuilder.isEmpty()) {
+        if (errorEndpoints.isEmpty()) {
             return subscriptions.size();
         } else {
-            throw new NotificationDeliveryException(stringbuilder.toString());
+            throw new NotificationDeliveryException(errorSubscriptions, errorEndpoints);
         }
     }
 }

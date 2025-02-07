@@ -15,16 +15,16 @@ public class SubscriptionController {
         this.subscriptionService = subscriptionService;
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping("/subscribe")
     public void saveSubscription(@AuthenticationPrincipal FullUserEntity user,
                                  @RequestBody SubscriptionRequest request) {
         subscriptionService.saveSubscription(request, user);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('USER')")
     @DeleteMapping("/unsubscribe")
-    public void unsubscribeSubscription(@AuthenticationPrincipal FullUserEntity user,
+    public void removeSubscription(@AuthenticationPrincipal FullUserEntity user,
                                         @RequestBody UnsubscriptionRequest request) {
         subscriptionService.removeSubscription(request, user);
     }
