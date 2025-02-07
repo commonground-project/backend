@@ -12,6 +12,7 @@ import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.*;
 import tw.commonground.backend.service.subscription.SubscriptionService;
 import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
+import tw.commonground.backend.service.user.UserSettingService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
@@ -39,13 +40,16 @@ public class ReplyService {
 
     private final UserRepository userRepository;
 
+    private final UserSettingService userSettingService;
+
     public ReplyService(ReplyRepository replyRepository,
                         ReplyFactRepository replyFactRepository,
                         ReplyReactionRepository replyReactionRepository,
                         FactService factService,
                         ViewpointService viewpointService,
                         SubscriptionService subscriptionService,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        UserSettingService userSettingService) {
         this.replyRepository = replyRepository;
         this.replyFactRepository = replyFactRepository;
         this.replyReactionRepository = replyReactionRepository;
@@ -53,6 +57,7 @@ public class ReplyService {
         this.viewpointService = viewpointService;
         this.subscriptionService = subscriptionService;
         this.userRepository = userRepository;
+        this.userSettingService = userSettingService;
     }
 
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
@@ -86,9 +91,12 @@ public class ReplyService {
         List<FullUserEntity> quoteUsers = new ArrayList<>();
         quotes.forEach(quote -> replyRepository.findById(quote.getReplyId()).ifPresentOrElse(reply -> {
             Long userId = userRepository.getIdByUid(reply.getAuthorId());
-            quoteUsers.add(userRepository.findUserEntityById(userId).orElseThrow(
+            FullUserEntity userEntity = userRepository.findUserEntityById(userId).orElseThrow(
                     () -> new EntityNotFoundException("User", "id", userId.toString())
-            ));
+            );
+            if (userSettingService.getUserSetting(userId).getNewReferenceToMyReply()) {
+                quoteUsers.add(userEntity);
+            }
         }, () -> {
             throw new EntityNotFoundException("Reply", "id", quote.getReplyId().toString());
         }));
@@ -98,9 +106,11 @@ public class ReplyService {
                 "有人節錄了您的回覆");
 
         Long userId = userRepository.getIdByUid(viewpointEntity.getAuthorId());
-        subscriptionService.sendNotification(List.of(userRepository.findUserEntityById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User", "id", userId.toString())
-        )), viewpointEntity.getTitle(), viewpointEntity.getTitle() + " 下有一則新的回覆！");
+        if (userSettingService.getUserSetting(userId).getNewReplyInMyViewpoint()) {
+            subscriptionService.sendNotification(List.of(userRepository.findUserEntityById(userId).orElseThrow(
+                    () -> new EntityNotFoundException("User", "id", userId.toString())
+            )), viewpointEntity.getTitle(), viewpointEntity.getTitle() + " 下有一則新的回覆！");
+        }
 
         return replyEntity;
     }
