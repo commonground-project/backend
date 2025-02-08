@@ -47,6 +47,11 @@
       "type": "java.lang.String",
       "description": "Description for application.admin.email.",
       "defaultValue": ""
+    },
+    {
+      "name": "application.service.account.default.token",
+      "type": "java.lang.String",
+      "description": "Description for application.service.account.default.token."
     }
   ]
 }
