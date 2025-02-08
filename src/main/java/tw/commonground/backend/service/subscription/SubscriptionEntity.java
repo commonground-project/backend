@@ -19,6 +19,7 @@ public class SubscriptionEntity {
     private UUID id;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String endpoint;
 
     private String p256dh;
