@@ -59,12 +59,16 @@ public class SubscriptionService {
         UserEntity userEntity = userRepository.getUserEntityByUsername(user.getUsername()).orElseThrow(() ->
                 new EntityNotFoundException("User not found")
         );
-        subscriptionRepository.save(SubscriptionEntity.builder()
-                .endpoint(request.getEndpoint())
-                .p256dh(request.getKeys().getP256dh())
-                .auth(request.getKeys().getAuth())
-                .user(userEntity)
-                .build());
+
+        if (!subscriptionRepository.existsByEndpointAndAuthAndP256dhAndUser(
+                request.getEndpoint(), request.getKeys().getAuth(), request.getKeys().getP256dh(), userEntity)) {
+            subscriptionRepository.save(SubscriptionEntity.builder()
+                    .endpoint(request.getEndpoint())
+                    .p256dh(request.getKeys().getP256dh())
+                    .auth(request.getKeys().getAuth())
+                    .user(userEntity)
+                    .build());
+        }
     }
 
     public void removeSubscription(UnsubscriptionRequest request, FullUserEntity user) {
