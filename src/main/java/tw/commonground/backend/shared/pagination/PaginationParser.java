@@ -20,7 +20,9 @@ public class PaginationParser {
         validatePaginationRequest(paginationRequest);
 
         if (paginationRequest.getSort() == null || paginationRequest.getSort().isBlank()) {
-            return PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize());
+            return PageRequest.of(paginationRequest.getPage(),
+                    paginationRequest.getSize(),
+                    Sort.by(Order.desc("createdAt")));
         }
 
         List<Order> orders = parseSortOrders(paginationRequest.getSort());
