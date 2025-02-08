@@ -23,7 +23,7 @@ public class InternalIssueService {
         this.viewpointService = viewpointService;
     }
 
-    public List<InternalIssueResponse> getAllIssues() {
+    public List<InternalIssueResponse> getIssues() {
         List<IssueEntity> issues = issueRepository.findAll();
 
         return issues.stream()

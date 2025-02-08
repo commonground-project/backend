@@ -18,7 +18,7 @@ public class InternalIssueController {
 
     @GetMapping
     public List<InternalIssueResponse> getIssues() {
-        return internalIssueService.getAllIssues();
+        return internalIssueService.getIssues();
     }
 
     @GetMapping("/{issueId}")
