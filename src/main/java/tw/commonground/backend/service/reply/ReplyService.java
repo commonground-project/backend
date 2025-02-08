@@ -1,6 +1,6 @@
 package tw.commonground.backend.service.reply;
 
-
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,11 +10,8 @@ import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.*;
-import tw.commonground.backend.service.subscription.SubscriptionService;
 import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
-import tw.commonground.backend.service.user.UserSettingService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
-import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
@@ -36,28 +33,20 @@ public class ReplyService {
 
     private final ViewpointService viewpointService;
 
-    private final SubscriptionService subscriptionService;
-
-    private final UserRepository userRepository;
-
-    private final UserSettingService userSettingService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ReplyService(ReplyRepository replyRepository,
                         ReplyFactRepository replyFactRepository,
                         ReplyReactionRepository replyReactionRepository,
                         FactService factService,
                         ViewpointService viewpointService,
-                        SubscriptionService subscriptionService,
-                        UserRepository userRepository,
-                        UserSettingService userSettingService) {
+                        ApplicationEventPublisher applicationEventPublisher) {
         this.replyRepository = replyRepository;
         this.replyFactRepository = replyFactRepository;
         this.replyReactionRepository = replyReactionRepository;
         this.factService = factService;
         this.viewpointService = viewpointService;
-        this.subscriptionService = subscriptionService;
-        this.userRepository = userRepository;
-        this.userSettingService = userSettingService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
@@ -87,30 +76,7 @@ public class ReplyService {
             replyFactRepository.saveByReplyIdAndFactId(replyEntity.getId(), factId);
         }
 
-        ViewpointEntity viewpointEntity = viewpointService.getViewpoint(viewpointId);
-        List<FullUserEntity> quoteUsers = new ArrayList<>();
-        quotes.forEach(quote -> replyRepository.findById(quote.getReplyId()).ifPresentOrElse(reply -> {
-            Long userId = userRepository.getIdByUid(reply.getAuthorId());
-            FullUserEntity userEntity = userRepository.findUserEntityById(userId).orElseThrow(
-                    () -> new EntityNotFoundException("User", "id", userId.toString())
-            );
-            if (userSettingService.getUserSetting(userId).getNewReferenceToMyReply()) {
-                quoteUsers.add(userEntity);
-            }
-        }, () -> {
-            throw new EntityNotFoundException("Reply", "id", quote.getReplyId().toString());
-        }));
-
-        subscriptionService.sendNotification(quoteUsers,
-                viewpointEntity.getTitle(),
-                "有人節錄了您的回覆");
-
-        Long userId = userRepository.getIdByUid(viewpointEntity.getAuthorId());
-        if (userSettingService.getUserSetting(userId).getNewReplyInMyViewpoint()) {
-            subscriptionService.sendNotification(List.of(userRepository.findUserEntityById(userId).orElseThrow(
-                    () -> new EntityNotFoundException("User", "id", userId.toString())
-            )), viewpointEntity.getTitle(), viewpointEntity.getTitle() + " 下有一則新的回覆！");
-        }
+        applicationEventPublisher.publishEvent(new ReplyCreatedEvent(replyEntity, quotes));
 
         return replyEntity;
     }

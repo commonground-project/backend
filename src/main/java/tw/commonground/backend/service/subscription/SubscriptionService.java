@@ -9,6 +9,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jose4j.lang.JoseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -55,6 +56,7 @@ public class SubscriptionService {
         }
     }
 
+    @Transactional
     public void saveSubscription(SubscriptionRequest request, FullUserEntity user) {
         UserEntity userEntity = userRepository.getUserEntityByUsername(user.getUsername()).orElseThrow(() ->
                 new EntityNotFoundException("User not found")
