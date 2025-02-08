@@ -4,7 +4,7 @@ import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 
 import java.util.List;
 
-public class InternalViewpointMapper {
+public final class InternalViewpointMapper {
 
     private InternalViewpointMapper() {
         // hide constructor
