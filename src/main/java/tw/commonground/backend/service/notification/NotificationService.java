@@ -1,6 +1,7 @@
 package tw.commonground.backend.service.notification;
 
 import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.reply.ReplyCreatedEvent;
 import tw.commonground.backend.service.reply.dto.QuoteReply;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class NotificationService implements ApplicationListener<ReplyCreatedEvent> {
 
     private final ViewpointService viewpointService;
