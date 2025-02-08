@@ -18,7 +18,6 @@ public class SubscriptionEntity {
     @GeneratedValue
     private UUID id;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String endpoint;
 
