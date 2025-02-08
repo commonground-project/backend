@@ -67,7 +67,8 @@ public class NotificationService implements ApplicationListener<ReplyCreatedEven
         try {
             subscriptionService.sendNotification(quoteUsers,
                     viewpointEntity.getTitle(),
-                    "有人節錄了您的回覆");
+                    "有人節錄了您的回覆",
+                    "/issues/" + viewpointEntity.getIssue().getId() + "/viewpoints/" + viewpointId);
         } catch (NotificationDeliveryException e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +78,10 @@ public class NotificationService implements ApplicationListener<ReplyCreatedEven
             try {
                 subscriptionService.sendNotification(List.of(userRepository.findUserEntityById(userId).orElseThrow(
                         () -> new EntityNotFoundException("User", "id", userId.toString())
-                )), viewpointEntity.getTitle(), viewpointEntity.getTitle() + " 下有一則新的回覆！");
+                )),
+                        viewpointEntity.getTitle(),
+                        viewpointEntity.getTitle() + " 下有一則新的回覆！",
+                        "/issues/" + viewpointEntity.getIssue().getId() + "/viewpoints/" + viewpointId);
             } catch (NotificationDeliveryException e) {
                 throw new RuntimeException(e);
             }

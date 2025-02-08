@@ -82,7 +82,7 @@ public class SubscriptionService {
                 .ifPresent(subscriptionRepository::delete);
     }
 
-    public int sendNotification(List<FullUserEntity> users, String title, String body)
+    public int sendNotification(List<FullUserEntity> users, String title, String body, String url)
             throws NotificationDeliveryException {
         List<UserEntity> userEntities = userRepository.getUsersByUsername(
                 users.stream().map(FullUserEntity::getUsername).toList());
@@ -92,6 +92,7 @@ public class SubscriptionService {
         JSONObject payload = new JSONObject();
         payload.put("title", title);
         payload.put("body", body);
+        payload.put("url", url);
 
         List<String> errorEndpoints = new ArrayList<>();
         List<Exception> errorSubscriptions = new ArrayList<>();
