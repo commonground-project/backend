@@ -93,6 +93,7 @@ public class NotificationService {
         // 1. iterates over quotes
         // 2. finds the associated ReplyEntity and FullUserEntity
         quotes.forEach(quote -> replyRepository.findById(quote.getReplyId())
+                // flatMap only executes the lambda if the optional is present
                 .flatMap(reply -> userRepository.findUserEntityById(userId)).ifPresent(user -> {
 
                     // 3. checks if the user has enabled notifications for new references
