@@ -7,6 +7,8 @@ import java.net.URL;
 
 public final class NotificationFactory {
 
+    private static final int MAX_CONTENT_LENGTH = 10;
+
     private static final String VIEWPOINT_REPLY_NOTIFICATION_TITLE_TEMPLATE = "%s 下有一則新的回覆！";
 
     private static final String VIEWPOINT_REPLY_NOTIFICATION_BODY_TEMPLATE = "「%s」";
@@ -26,7 +28,8 @@ public final class NotificationFactory {
     public static NotificationDto createViewpointReplyNotification(String viewpointTitle, String replyContent,
                                                                    String issueId, String viewpointId) {
 
-        String content = replyContent.length() > 10 ? replyContent.substring(0, 10) + "..." : replyContent;
+        String content = replyContent.length() > MAX_CONTENT_LENGTH
+                ? replyContent.substring(0, MAX_CONTENT_LENGTH) + "..." : replyContent;
 
         NotificationDto dto = new NotificationDto();
         dto.setTitle(String.format(VIEWPOINT_REPLY_NOTIFICATION_TITLE_TEMPLATE, viewpointTitle));
@@ -38,7 +41,8 @@ public final class NotificationFactory {
     public static NotificationDto createQuoteReplyNotification(String replyContent,
                                                                String issueId, String viewpointId) {
 
-        String content = replyContent.length() > 10 ? replyContent.substring(0, 10) + "..." : replyContent;
+        String content = replyContent.length() > MAX_CONTENT_LENGTH
+                ? replyContent.substring(0, MAX_CONTENT_LENGTH) + "..." : replyContent;
 
         NotificationDto dto = new NotificationDto();
         dto.setTitle(QUOTE_REPLY_NOTIFICATION_TITLE_TEMPLATE);
