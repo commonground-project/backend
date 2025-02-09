@@ -24,7 +24,7 @@ public class InternalViewpointController {
         List<InternalViewpointResponse> viewpoints = internalViewpointService.getViewpoints();
         return ResponseEntity.ok(viewpoints);
     }
-    
+
     @GetMapping("/{viewpointId}")
     public InternalViewpointResponse getViewpointById(@PathVariable UUID viewpointId) {
         return internalViewpointService.getViewpointById(viewpointId);
