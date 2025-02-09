@@ -47,7 +47,7 @@ public class ServiceAccountController {
 
         UUID token = UUID.randomUUID();
 
-        ServiceAccountEntity serviceAccountEntity = serviceAccountService.createServiceAccount(request.getServiceName(),
+        ServiceAccountEntity serviceAccountEntity = serviceAccountService.createServiceAccount(request.getName(),
                 request.getRole(), token.toString());
 
         return ResponseEntity.ok(ServiceAccountMapper.toCreatedResponse(serviceAccountEntity));

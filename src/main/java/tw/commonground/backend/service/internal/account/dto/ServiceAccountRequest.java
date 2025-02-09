@@ -11,7 +11,7 @@ import tw.commonground.backend.security.UserRole;
 public class ServiceAccountRequest {
 
     @NotBlank
-    private String serviceName;
+    private String name;
 
     @NotNull
     private UserRole role;
