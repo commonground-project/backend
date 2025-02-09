@@ -2,9 +2,6 @@ package tw.commonground.backend.service.notification;
 
 import tw.commonground.backend.service.notification.dto.NotificationDto;
 
-import java.net.URI;
-import java.net.URL;
-
 public final class NotificationFactory {
 
     private static final int MAX_CONTENT_LENGTH = 10;
