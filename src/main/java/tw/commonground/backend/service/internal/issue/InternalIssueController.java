@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.internal.issue;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.internal.issue.dto.InternalIssueResponse;
 
@@ -17,12 +18,14 @@ public class InternalIssueController {
     }
 
     @GetMapping
-    public List<InternalIssueResponse> getIssues() {
-        return internalIssueService.getIssues();
+    public ResponseEntity<List<InternalIssueResponse>> getIssues() {
+        List<InternalIssueResponse> issues = internalIssueService.getIssues();
+        return ResponseEntity.ok(issues);
     }
 
     @GetMapping("/{issueId}")
-    public InternalIssueResponse getIssue(@PathVariable UUID issueId) {
-        return internalIssueService.getIssue(issueId);
+    public ResponseEntity<InternalIssueResponse> getIssue(@PathVariable UUID issueId) {
+        InternalIssueResponse issue = internalIssueService.getIssue(issueId);
+        return ResponseEntity.ok(issue);
     }
 }
