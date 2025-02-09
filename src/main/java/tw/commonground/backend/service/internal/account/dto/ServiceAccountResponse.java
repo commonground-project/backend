@@ -17,4 +17,5 @@ public class ServiceAccountResponse {
     private String name;
 
     private UserRole role;
+
 }
