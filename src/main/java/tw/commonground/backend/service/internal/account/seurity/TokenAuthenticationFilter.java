@@ -37,7 +37,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 UserAuthentication authentication = new UserAuthentication(user);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-                logger.debug("Invalid access token trying next filter, error: {}", e.getMessage());
+                // If the token is invalid, still need to continue executing the jwt filter
+                logger.debug("Invalid token({}), trying next filter", e.getMessage());
             }
         }
         filterChain.doFilter(request, response);
