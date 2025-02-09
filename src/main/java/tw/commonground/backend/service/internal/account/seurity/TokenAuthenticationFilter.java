@@ -15,6 +15,7 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 
 import java.io.IOException;
 
+@SuppressWarnings("MagicNumber")
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final Logger logger = LoggerFactory.getLogger(TokenAuthenticationFilter.class);

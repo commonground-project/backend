@@ -35,16 +35,21 @@ public class ServiceAccountController {
     @GetMapping("/service-accounts")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ServiceAccountResponse>> getServiceAccounts() {
-        List<ServiceAccountResponse> response = ServiceAccountMapper.toResponses(serviceAccountService.getServiceAccounts());
+        List<ServiceAccountResponse> response = ServiceAccountMapper
+                .toResponses(serviceAccountService.getServiceAccounts());
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/service-accounts")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CreatedServiceAccountResponse> createServiceAccount(@Valid @RequestBody ServiceAccountRequest request) {
+    public ResponseEntity<CreatedServiceAccountResponse> createServiceAccount(
+            @Valid @RequestBody ServiceAccountRequest request) {
+
         UUID token = UUID.randomUUID();
 
-        ServiceAccountEntity serviceAccountEntity = serviceAccountService.createServiceAccount(request.getServiceName(), request.getRole(), token.toString());
+        ServiceAccountEntity serviceAccountEntity = serviceAccountService.createServiceAccount(request.getServiceName(),
+                request.getRole(), token.toString());
+
         return ResponseEntity.ok(ServiceAccountMapper.toCreatedResponse(serviceAccountEntity));
     }
 

@@ -5,7 +5,7 @@ import tw.commonground.backend.service.internal.account.entity.ServiceAccountEnt
 
 import java.util.List;
 
-public class ServiceAccountMapper {
+public final class ServiceAccountMapper {
     private ServiceAccountMapper() {
         // hide the constructor
     }

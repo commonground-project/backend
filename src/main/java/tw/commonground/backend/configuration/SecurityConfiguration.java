@@ -67,13 +67,18 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, ServiceAccountService serviceAccountService) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ServiceAccountService serviceAccountService)
+            throws Exception {
+
         http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(new TokenAuthenticationFilter(serviceAccountService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new TokenAuthenticationFilter(serviceAccountService),
+                        UsernamePasswordAuthenticationFilter.class)
+
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/internal/**").hasAnyRole("ADMIN", "SERVICE_ACCOUNT_READ")
                         .requestMatchers("/api/user/avatar/**").permitAll()
