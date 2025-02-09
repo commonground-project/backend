@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import tw.commonground.backend.security.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class ServiceAccountTokenEntity {
+public class ServiceAccountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -36,6 +37,5 @@ public class ServiceAccountTokenEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ServiceAccountRole role;
-
+    private UserRole role;
 }
