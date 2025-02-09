@@ -101,7 +101,8 @@ class PaginationParserTest {
         PaginationRequest request = new PaginationRequest(0, 10, null);
         Pageable pageable = parser.parsePageable(request);
 
-        assertThat(pageable.getSort().isUnsorted()).isTrue();
+        assertThat(Objects.requireNonNull(pageable.getSort().getOrderFor("createdAt"))
+                .getDirection()).isEqualTo(Sort.Direction.DESC);
     }
 
     @Test
@@ -109,7 +110,8 @@ class PaginationParserTest {
         PaginationRequest request = new PaginationRequest(0, 10, " ");
         Pageable pageable = parser.parsePageable(request);
 
-        assertThat(pageable.getSort().isUnsorted()).isTrue();
+        assertThat(Objects.requireNonNull(pageable.getSort().getOrderFor("createdAt"))
+                .getDirection()).isEqualTo(Sort.Direction.DESC);
     }
 
     @Test

@@ -4,10 +4,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.*;
 import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ReplyService {
 
+    private static final String REPLY_REACTION_LOCK_FORMAT = "reply.reaction.%s.%d";
+
     private final ReplyRepository replyRepository;
 
     private final ReplyFactRepository replyFactRepository;
@@ -32,21 +36,25 @@ public class ReplyService {
     private final FactService factService;
 
     private final ViewpointService viewpointService;
-
+  
     private final ApplicationEventPublisher applicationEventPublisher;
+  
+    private final LockService lockService;
 
     public ReplyService(ReplyRepository replyRepository,
                         ReplyFactRepository replyFactRepository,
                         ReplyReactionRepository replyReactionRepository,
                         FactService factService,
                         ViewpointService viewpointService,
-                        ApplicationEventPublisher applicationEventPublisher) {
+                        ApplicationEventPublisher applicationEventPublisher,
+                        LockService lockService) {
         this.replyRepository = replyRepository;
         this.replyFactRepository = replyFactRepository;
         this.replyReactionRepository = replyReactionRepository;
         this.factService = factService;
         this.viewpointService = viewpointService;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.lockService = lockService;
     }
 
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
@@ -144,16 +152,21 @@ public class ReplyService {
         return replyReactionRepository.findReactionById(id).orElse(Reaction.NONE);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ReplyReactionEntity reactToReply(Long userId, UUID replyId, Reaction reaction) {
         throwIfReplyNotExist(replyId);
 
-        ReplyReactionKey replyReactionKey = new ReplyReactionKey(userId, replyId);
+        String lockKey = String.format(REPLY_REACTION_LOCK_FORMAT, replyId, userId);
 
-        Optional<ReplyReactionEntity> reactionOptional = replyReactionRepository.findById(replyReactionKey);
-        return reactionOptional
-                .map(replyReactionEntity -> handleExistingReaction(replyReactionEntity, replyId, reaction))
-                .orElseGet(() -> handleNewReaction(replyReactionKey, replyId, reaction));
+        return lockService.executeWithLock(lockKey, () -> {
+            ReplyReactionKey replyReactionKey = new ReplyReactionKey(userId, replyId);
+
+            Optional<ReplyReactionEntity> reactionOptional = replyReactionRepository.findById(replyReactionKey);
+
+            return reactionOptional
+                    .map(replyReactionEntity -> handleExistingReaction(replyReactionEntity, replyId, reaction))
+                    .orElseGet(() -> handleNewReaction(replyReactionKey, replyId, reaction));
+        });
     }
 
     private ReplyReactionEntity handleNewReaction(ReplyReactionKey reactionKey, UUID replyId, Reaction reaction) {
