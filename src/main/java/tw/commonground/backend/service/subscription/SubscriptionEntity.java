@@ -1,9 +1,6 @@
 package tw.commonground.backend.service.subscription;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
@@ -21,6 +18,7 @@ public class SubscriptionEntity {
     @GeneratedValue
     private UUID id;
 
+    @Column(columnDefinition = "TEXT")
     private String endpoint;
 
     private String p256dh;

@@ -1,6 +1,6 @@
 package tw.commonground.backend.service.reply;
 
-
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,6 +12,7 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.*;
+import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
@@ -36,18 +37,23 @@ public class ReplyService {
 
     private final ViewpointService viewpointService;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     private final LockService lockService;
 
     public ReplyService(ReplyRepository replyRepository,
                         ReplyFactRepository replyFactRepository,
                         ReplyReactionRepository replyReactionRepository,
                         FactService factService,
-                        ViewpointService viewpointService, LockService lockService) {
+                        ViewpointService viewpointService,
+                        ApplicationEventPublisher applicationEventPublisher,
+                        LockService lockService) {
         this.replyRepository = replyRepository;
         this.replyFactRepository = replyFactRepository;
         this.replyReactionRepository = replyReactionRepository;
         this.factService = factService;
         this.viewpointService = viewpointService;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.lockService = lockService;
     }
 
@@ -56,7 +62,8 @@ public class ReplyService {
     }
 
     @Transactional
-    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request) {
+    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request)
+            throws NotificationDeliveryException {
         factService.throwIfFactsNotExist(request.getFacts());
         viewpointService.throwIfViewpointNotExist(viewpointId);
 
@@ -76,6 +83,8 @@ public class ReplyService {
         for (UUID factId : request.getFacts()) {
             replyFactRepository.saveByReplyIdAndFactId(replyEntity.getId(), factId);
         }
+
+        applicationEventPublisher.publishEvent(new ReplyCreatedEvent(user, replyEntity, quotes));
 
         return replyEntity;
     }

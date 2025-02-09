@@ -121,4 +121,10 @@ public class UserService {
                 () -> new EntityNotFoundException("User", "email", username)
         ).getProfileImage();
     }
+
+    public void throwIfUserNotExist(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User", "id", userId.toString());
+        }
+    }
 }

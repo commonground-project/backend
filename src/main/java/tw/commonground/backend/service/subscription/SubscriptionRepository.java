@@ -15,6 +15,11 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
                                                                        String p256dh,
                                                                        UserEntity user);
 
+    boolean existsByEndpointAndAuthAndP256dhAndUser(String endpoint,
+                                                    String auth,
+                                                    String p256dh,
+                                                    UserEntity user);
+
     @Query("select s from SubscriptionEntity s where s.user in :users")
     List<SubscriptionEntity> findByUsers(@Param("users") List<UserEntity> users);
 
