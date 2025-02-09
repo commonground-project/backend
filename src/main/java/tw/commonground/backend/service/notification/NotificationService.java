@@ -118,7 +118,7 @@ public class NotificationService {
         return subscriptionService.sendNotification(user,
                 notificationDto.getTitle(),
                 notificationDto.getBody(),
-                notificationDto.getUrl().toString());
+                notificationDto.getUrl());
     }
 
     public int sendNotification(List<FullUserEntity> users, NotificationDto notificationDto) throws
@@ -126,6 +126,6 @@ public class NotificationService {
         return subscriptionService.sendNotification(users,
                 notificationDto.getTitle(),
                 notificationDto.getBody(),
-                notificationDto.getUrl().toString());
+                notificationDto.getUrl());
     }
 }

@@ -34,7 +34,7 @@ public final class NotificationFactory {
         NotificationDto dto = new NotificationDto();
         dto.setTitle(String.format(VIEWPOINT_REPLY_NOTIFICATION_TITLE_TEMPLATE, viewpointTitle));
         dto.setBody(String.format(VIEWPOINT_REPLY_NOTIFICATION_BODY_TEMPLATE, content));
-        dto.setUrl(createUrl(String.format(VIEWPOINT_REPLY_NOTIFICATION_URL_TEMPLATE, issueId, viewpointId)));
+        dto.setUrl(String.format(VIEWPOINT_REPLY_NOTIFICATION_URL_TEMPLATE, issueId, viewpointId));
         return dto;
     }
 
@@ -47,16 +47,7 @@ public final class NotificationFactory {
         NotificationDto dto = new NotificationDto();
         dto.setTitle(QUOTE_REPLY_NOTIFICATION_TITLE_TEMPLATE);
         dto.setBody(String.format(QUOTE_REPLY_NOTIFICATION_BODY_TEMPLATE, content));
-        dto.setUrl(createUrl(String.format(QUOTE_REPLY_NOTIFICATION_URL_TEMPLATE, issueId, viewpointId)));
+        dto.setUrl(String.format(QUOTE_REPLY_NOTIFICATION_URL_TEMPLATE, issueId, viewpointId));
         return dto;
-    }
-
-    private static URL createUrl(String url) {
-        try {
-            URI uri = new URI(url);
-            return uri.toURL();
-        } catch (Exception e) {
-            return null;
-        }
     }
 }
