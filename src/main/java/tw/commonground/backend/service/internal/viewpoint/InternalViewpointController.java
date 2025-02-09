@@ -1,5 +1,6 @@
 package  tw.commonground.backend.service.internal.viewpoint;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +20,11 @@ public class InternalViewpointController {
     }
 
     @GetMapping
-    public List<InternalViewpointResponse> getViewpoints() {
-        return internalViewpointService.getViewpoints();
+    public ResponseEntity<List<InternalViewpointResponse>> getViewpoints() {
+        List<InternalViewpointResponse> viewpoints = internalViewpointService.getViewpoints();
+        return ResponseEntity.ok(viewpoints);
     }
-
+    
     @GetMapping("/{viewpointId}")
     public InternalViewpointResponse getViewpointById(@PathVariable UUID viewpointId) {
         return internalViewpointService.getViewpointById(viewpointId);
