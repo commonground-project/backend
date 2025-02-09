@@ -36,9 +36,9 @@ public class ReplyService {
     private final FactService factService;
 
     private final ViewpointService viewpointService;
-  
+
     private final ApplicationEventPublisher applicationEventPublisher;
-  
+
     private final LockService lockService;
 
     public ReplyService(ReplyRepository replyRepository,
