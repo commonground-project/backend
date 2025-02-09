@@ -82,6 +82,11 @@ public class SubscriptionService {
                 .ifPresent(subscriptionRepository::delete);
     }
 
+    public int sendNotification(FullUserEntity user, String title, String body, String url)
+            throws NotificationDeliveryException {
+       return sendNotification(List.of(user), title, body, url);
+    }
+
     public int sendNotification(List<FullUserEntity> users, String title, String body, String url)
             throws NotificationDeliveryException {
         List<UserEntity> userEntities = userRepository.getUsersByUsername(

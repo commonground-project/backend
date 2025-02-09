@@ -76,7 +76,7 @@ public class ReplyService {
             replyFactRepository.saveByReplyIdAndFactId(replyEntity.getId(), factId);
         }
 
-        applicationEventPublisher.publishEvent(new ReplyCreatedEvent(replyEntity, quotes));
+        applicationEventPublisher.publishEvent(new ReplyCreatedEvent(user, replyEntity, quotes));
 
         return replyEntity;
     }
