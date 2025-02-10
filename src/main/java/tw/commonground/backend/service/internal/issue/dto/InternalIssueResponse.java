@@ -11,22 +11,22 @@ import lombok.*;
 @Builder
 public class InternalIssueResponse {
     @JsonProperty("issue_id")
-    UUID issueId;
+    private UUID issueId;
 
     @JsonProperty("created_at")
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @JsonProperty("updated_at")
-    LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
-    String title;
+    private String title;
 
     @JsonProperty("publisher_id")
-    UUID authorId;
+    private UUID authorId;
 
     @JsonProperty("view_count")
-    int viewCount;
+    private int viewCount;
 
     @JsonProperty("viewpoint_count")
-    int viewpointCount;
+    private int viewpointCount;
 }
