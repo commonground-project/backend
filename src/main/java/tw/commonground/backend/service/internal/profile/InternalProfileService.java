@@ -25,7 +25,7 @@ public class InternalProfileService {
     }
 
     public InternalProfileResponse getProfile(UUID userId) {
-        UserEntity user = (UserEntity) userRepository.findUserEntityByUuid(userId)
+        UserEntity user = userRepository.findUserEntityByUuid(userId)
                 .orElseThrow(() -> new EntityNotFoundException("InternalProfile", "user id", userId.toString()));
 
         return InternalProfileMapper.toResponse(user);
