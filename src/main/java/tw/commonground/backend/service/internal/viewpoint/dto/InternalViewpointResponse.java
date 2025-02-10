@@ -1,46 +1,54 @@
 package tw.commonground.backend.service.internal.viewpoint.dto;
 
-import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public record InternalViewpointResponse(
-        UUID viewpointId,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        String content,
-        UUID authorId,
-        int likeCount,
-        int dislikeCount,
-        int reasonableCount,
-        int viewCount,
-        UUID issueId,
-        List<String> factTags,
-        int replyCount,
-        Object replyContent,
-        float sentimentScore
-) {
+@Getter
+@Setter
+@Builder
+public class InternalViewpointResponse {
+    @JsonProperty("viewpoint_id")
+    UUID viewpointId;
 
-    public static InternalViewpointResponse fromEntity(ViewpointEntity viewpoint, int replyCount, Object replyContent) {
-        UUID issueId = (viewpoint.getIssue() != null) ? viewpoint.getIssue().getId() : null;
+    @JsonProperty("created_at")
+    LocalDateTime createdAt;
 
-        return new InternalViewpointResponse(
-                viewpoint.getId(),
-                viewpoint.getCreatedAt(),
-                viewpoint.getUpdatedAt(),
-                viewpoint.getContent(),
-                viewpoint.getAuthorId(),
-                viewpoint.getLikeCount(),
-                viewpoint.getDislikeCount(),
-                viewpoint.getReasonableCount(),
-                0, // TODO: Replace hardcoded viewCount with actual value
-                issueId,
-                List.of(), // TODO: Replace hardcoded factTags with actual value
-                replyCount,
-                replyContent,
-                0.0f // TODO: Replace hardcoded sentimentScore with actual value
-        );
-    }
+    @JsonProperty("updated_at")
+    LocalDateTime updatedAt;
+
+    String content;
+
+    @JsonProperty("author_id")
+    UUID authorId;
+
+    @JsonProperty("like_count")
+    int likeCount;
+
+    @JsonProperty("dislike_count")
+    int dislikeCount;
+
+    @JsonProperty("reasonable_count")
+    int reasonableCount;
+
+    @JsonProperty("view_count")
+    int viewCount;
+
+    @JsonProperty("issue_id")
+    UUID issueId;
+
+    @JsonProperty("fact_tags")
+    List<String> factTags;
+
+    @JsonProperty("reply_count")
+    int replyCount;
+
+    @JsonProperty("reply_content")
+    Object replyContent;
+
+    @JsonProperty("sentiment_score")
+    float sentimentScore;
 }

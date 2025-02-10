@@ -3,6 +3,7 @@ package tw.commonground.backend.service.internal.viewpoint;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.service.internal.viewpoint.dto.InternalReplyMapper;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalReplyResponse;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointMapper;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointResponse;
@@ -61,8 +62,7 @@ public class InternalViewpointService {
         return replyRepository.findAllByViewpointId(viewpointId, Pageable.unpaged())
                 .getContent()
                 .stream()
-                .map(InternalReplyResponse::fromEntity)
+                .map(InternalReplyMapper::toResponse)
                 .toList();
     }
-
 }
