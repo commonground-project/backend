@@ -9,4 +9,4 @@ DISABLE_LINTERS:
   - REPOSITORY_TRIVY
   - COPYPASTE_JSCPD
 
-FILTER_REGEX_EXCLUDE: "src/main/resources/static"
+FILTER_REGEX_EXCLUDE: "(src/main/resources/static|script)"
