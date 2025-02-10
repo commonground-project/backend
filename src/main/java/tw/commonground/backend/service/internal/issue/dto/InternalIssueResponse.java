@@ -4,29 +4,29 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import tw.commonground.backend.service.issue.entity.IssueEntity;
+import lombok.*;
 
-public record InternalIssueResponse(
-        UUID issueId,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        String title,
+@Getter
+@Setter
+@Builder
+public class InternalIssueResponse {
+    @JsonProperty("issue_id")
+    UUID issueId;
 
-        @JsonProperty("publisherId")
-        UUID authorId,
+    @JsonProperty("created_at")
+    LocalDateTime createdAt;
 
-        int viewCount,
-        int viewpointCount
-) {
-    public static InternalIssueResponse fromEntity(IssueEntity issue, int viewpointCount) {
-        return new InternalIssueResponse(
-                issue.getId(),
-                issue.getCreatedAt(),
-                issue.getUpdatedAt(),
-                issue.getTitle(),
-                issue.getAuthorId(),
-                0, // TODO: Replace hardcoded viewCount with actual value
-                viewpointCount
-        );
-    }
+    @JsonProperty("updated_at")
+    LocalDateTime updatedAt;
+
+    String title;
+
+    @JsonProperty("publisher_id")
+    UUID authorId;
+
+    @JsonProperty("view_count")
+    int viewCount;
+
+    @JsonProperty("viewpoint_count")
+    int viewpointCount;
 }

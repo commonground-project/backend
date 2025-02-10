@@ -3,6 +3,7 @@ package  tw.commonground.backend.service.internal.issue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.service.internal.issue.dto.InternalIssueMapper;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.internal.issue.dto.InternalIssueResponse;
 import tw.commonground.backend.service.issue.entity.IssueRepository;
@@ -30,7 +31,7 @@ public class InternalIssueService {
                 .map(issue -> {
                     int viewpointCount = viewpointService.getIssueViewpoints(issue.getId(), Pageable.unpaged())
                             .getContent().size();
-                    return InternalIssueResponse.fromEntity(issue, viewpointCount);
+                    return InternalIssueMapper.toResponse(issue, viewpointCount);
                 })
                 .collect(Collectors.toList());
     }
@@ -41,6 +42,6 @@ public class InternalIssueService {
         );
 
         int viewpointCount = viewpointService.getIssueViewpoints(issueId, Pageable.unpaged()).getContent().size();
-        return InternalIssueResponse.fromEntity(issue, viewpointCount);
+        return InternalIssueMapper.toResponse(issue, viewpointCount);
     }
 }
