@@ -10,7 +10,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 
 import java.util.UUID;
 

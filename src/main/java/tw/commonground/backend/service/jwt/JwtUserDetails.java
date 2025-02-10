@@ -3,7 +3,7 @@ package tw.commonground.backend.service.jwt;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.Getter;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 
 import java.util.UUID;
 import java.util.function.Supplier;

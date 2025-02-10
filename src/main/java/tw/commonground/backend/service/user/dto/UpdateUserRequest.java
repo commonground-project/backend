@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.lang.Nullable;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 
 @Getter
 @Setter

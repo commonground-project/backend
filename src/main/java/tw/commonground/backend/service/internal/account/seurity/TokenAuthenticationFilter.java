@@ -1,56 +1,47 @@
-package tw.commonground.backend.service.jwt.security;
+package tw.commonground.backend.service.internal.account.seurity;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tw.commonground.backend.service.internal.account.ServiceAccountService;
 import tw.commonground.backend.security.UserAuthentication;
-import tw.commonground.backend.service.jwt.JwtService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 
 import java.io.IOException;
 
-import static tw.commonground.backend.exception.ProblemTemplate.INVALID_ACCESS_TOKEN;
+@SuppressWarnings("MagicNumber")
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-@Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final Logger logger = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
 
-    private final JwtService jwtService;
+    private final ServiceAccountService serviceAccountService;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
+    public TokenAuthenticationFilter(ServiceAccountService serviceAccountService) {
+        this.serviceAccountService = serviceAccountService;
     }
 
     @Override
-    @SuppressWarnings("MagicNumber")
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
-
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
-                FullUserEntity user = jwtService.authenticate(token);
+                FullUserEntity user = serviceAccountService.authenticate(token);
                 UserAuthentication authentication = new UserAuthentication(user);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-                SecurityContextHolder.clearContext();
-
-                response.setStatus(HttpStatus.FORBIDDEN.value());
-                response.setContentType("application/problem+json");
-                response.getWriter().write(INVALID_ACCESS_TOKEN);
-                return;
+                // If the token is invalid, still need to continue executing the jwt filter
+                logger.debug("Invalid token({}), trying next filter", e.getMessage());
             }
         }
-
         filterChain.doFilter(request, response);
     }
 }

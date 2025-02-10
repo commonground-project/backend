@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.jwt;
+package tw.commonground.backend.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,7 +8,7 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import java.util.Collection;
 import java.util.List;
 
-public record JwtAuthentication(FullUserEntity user) implements Authentication {
+public record UserAuthentication(FullUserEntity user) implements Authentication {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

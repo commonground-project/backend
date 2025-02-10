@@ -16,7 +16,7 @@ import tw.commonground.backend.service.user.dto.UserSetupRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 import tw.commonground.backend.service.user.exception.UserAlreadySetupException;
 
 import java.util.List;
