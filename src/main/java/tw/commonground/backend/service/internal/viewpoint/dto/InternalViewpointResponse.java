@@ -12,43 +12,43 @@ import java.util.UUID;
 @Builder
 public class InternalViewpointResponse {
     @JsonProperty("viewpoint_id")
-    UUID viewpointId;
+    private UUID viewpointId;
 
     @JsonProperty("created_at")
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @JsonProperty("updated_at")
-    LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
-    String content;
+    private String content;
 
     @JsonProperty("author_id")
-    UUID authorId;
+    private UUID authorId;
 
     @JsonProperty("like_count")
-    int likeCount;
+    private int likeCount;
 
     @JsonProperty("dislike_count")
-    int dislikeCount;
+    private int dislikeCount;
 
     @JsonProperty("reasonable_count")
-    int reasonableCount;
+    private int reasonableCount;
 
     @JsonProperty("view_count")
-    int viewCount;
+    private int viewCount;
 
     @JsonProperty("issue_id")
-    UUID issueId;
+    private UUID issueId;
 
     @JsonProperty("fact_tags")
-    List<String> factTags;
+    private List<String> factTags;
 
     @JsonProperty("reply_count")
-    int replyCount;
+    private int replyCount;
 
     @JsonProperty("reply_content")
-    Object replyContent;
+    private Object replyContent;
 
     @JsonProperty("sentiment_score")
-    float sentimentScore;
+    private float sentimentScore;
 }
