@@ -22,15 +22,21 @@ public class IssueService {
 
     private final IssueRepository issueRepository;
 
+    private final IssueFollowRepository issueFollowRepository;
+
     private final ManualFactRepository manualFactRepository;
 
     private final FactRepository factRepository;
 
     private final FactService factService;
 
-    public IssueService(IssueRepository issueRepository, ManualFactRepository manualFactRepository,
-                        FactRepository factRepository, FactService factService) {
+    public IssueService(IssueRepository issueRepository,
+                        IssueFollowRepository issueFollowRepository,
+                        ManualFactRepository manualFactRepository,
+                        FactRepository factRepository,
+                        FactService factService) {
         this.issueRepository = issueRepository;
+        this.issueFollowRepository = issueFollowRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
@@ -123,6 +129,19 @@ public class IssueService {
         }
 
         return factEntities;
+    }
+
+    public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
+        IssueFollowKey id = new IssueFollowKey(userId, issueId);
+        IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
+        issueFollowEntity.setId(id);
+        issueFollowEntity.setFollow(follow);
+        return issueFollowRepository.save(issueFollowEntity);
+    }
+
+    public Boolean getFollowForIssue(Long userId, UUID issueId) {
+        IssueFollowKey id = new IssueFollowKey(userId, issueId);
+        return issueFollowRepository.findFollowById(id).orElse(false);
     }
 
     public void throwIfIssueNotExist(UUID id) {

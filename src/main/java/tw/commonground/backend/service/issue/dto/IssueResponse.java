@@ -32,5 +32,7 @@ public class IssueResponse {
 
     private String authorAvatar;
 
+    private IssueFollowResponse userFollow;
+
     private List<FactResponse> facts;
 }

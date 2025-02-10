@@ -12,11 +12,9 @@ import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.dto.LinkFactsRequest;
 import tw.commonground.backend.service.fact.entity.FactEntity;
-import tw.commonground.backend.service.issue.dto.IssueMapper;
-import tw.commonground.backend.service.issue.dto.IssueRequest;
-import tw.commonground.backend.service.issue.dto.IssueResponse;
-import tw.commonground.backend.service.issue.dto.SimpleIssueResponse;
+import tw.commonground.backend.service.issue.dto.*;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.issue.entity.IssueFollowEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.PaginationRequest;
@@ -69,31 +67,39 @@ public class IssueController {
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, factResponses);
+        Boolean follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/issue/{id}")
-    public ResponseEntity<IssueResponse> getIssue(@PathVariable UUID id) {
+    public ResponseEntity<IssueResponse> getIssue(@AuthenticationPrincipal FullUserEntity user,
+                                                  @PathVariable UUID id) {
         IssueEntity issueEntity = issueService.getIssue(id);
         ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, factResponses);
+        Boolean follow = false;
+        if (user != null) {
+            follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
+        }
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/issue/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<IssueResponse> updateIssue(@PathVariable UUID id,
+    public ResponseEntity<IssueResponse> updateIssue(@AuthenticationPrincipal FullUserEntity user,
+                                                     @PathVariable UUID id,
                                                      @Valid @RequestBody IssueRequest issueRequest) {
         IssueEntity issueEntity = issueService.updateIssue(id, issueRequest);
         ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, factResponses);
+        Boolean follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
         return ResponseEntity.ok(response);
     }
 
@@ -101,6 +107,15 @@ public class IssueController {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteIssue(@PathVariable String id) {
         issueService.deleteIssue(UUID.fromString(id));
+    }
+
+    @PostMapping("/issue/{id}/follow/me")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<FollowResponse> followIssue(@AuthenticationPrincipal FullUserEntity user,
+                                                           @PathVariable UUID id,
+                                                           @RequestBody IssueFollowRequest request) {
+        IssueFollowEntity entity = issueService.followIssue(user.getId(), id, request.getFollow());
+        return ResponseEntity.ok(IssueMapper.toFollowResponse(entity));
     }
 
     @GetMapping("/issue/{id}/facts")
