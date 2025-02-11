@@ -3,6 +3,8 @@ package tw.commonground.backend.service.notification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import tw.commonground.backend.service.issue.IssueService;
+import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.notification.dto.NotificationDto;
 import tw.commonground.backend.service.reply.ReplyCreatedEvent;
 import tw.commonground.backend.service.reply.dto.QuoteReply;
@@ -10,6 +12,7 @@ import tw.commonground.backend.service.reply.entity.ReplyEntity;
 import tw.commonground.backend.service.reply.entity.ReplyRepository;
 import tw.commonground.backend.service.subscription.SubscriptionService;
 import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
+import tw.commonground.backend.service.timeline.NodeCreatedEvent;
 import tw.commonground.backend.service.user.UserSettingService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
@@ -24,6 +27,8 @@ public class NotificationService {
 
     private final ViewpointService viewpointService;
 
+    private final IssueService issueService;
+
     private final ReplyRepository replyRepository;
 
     private final UserRepository userRepository;
@@ -33,11 +38,13 @@ public class NotificationService {
     private final SubscriptionService subscriptionService;
 
     public NotificationService(ViewpointService viewpointService,
+                               IssueService issueService,
                                ReplyRepository replyRepository,
                                UserRepository userRepository,
                                UserSettingService userSettingService,
                                SubscriptionService subscriptionService) {
         this.viewpointService = viewpointService;
+        this.issueService = issueService;
         this.replyRepository = replyRepository;
         this.userRepository = userRepository;
         this.userSettingService = userSettingService;
@@ -112,6 +119,38 @@ public class NotificationService {
         } catch (NotificationDeliveryException e) {
             log.error("Failed to send notification to users: {}", needNotificationUser, e);
         }
+    }
+
+    @EventListener
+    public void onNodeCreatedEventCheckIssueSubscription(NodeCreatedEvent nodeCreatedEvent) {
+        // Collect notification data
+        IssueEntity issueEntity = nodeCreatedEvent.getIssueEntity();
+
+        // Collect issue data
+        String title = issueEntity.getTitle();
+        String body = nodeCreatedEvent.getNodeEntity().getDescription();
+        String issueId = issueEntity.getId().toString();
+
+        // Collect users that need to be notified
+        List<Long> userIds = issueService.getIssueFollowersById(issueEntity.getId());
+        List<FullUserEntity> needNotificationUser = new ArrayList<>();
+
+        userIds.forEach(userId -> userRepository.findUserEntityById(userId).ifPresent(user -> {
+            if (userSettingService.getUserSetting(userId).getNewTimelineToFollowedIssue()) {
+                needNotificationUser.add(user);
+            }
+        }));
+
+        try {
+            NotificationDto dto = NotificationFactory.createNodeOfFollowedIssueNotification(
+                    title, body, issueId);
+            int sent = sendNotification(needNotificationUser, dto);
+            log.info("Sent node of followed issue notification to {} users", sent);
+        } catch (NotificationDeliveryException e) {
+            log.error("Failed to send notification to users: {}", needNotificationUser, e);
+        }
+
+
     }
 
     public int sendNotification(FullUserEntity user, NotificationDto notificationDto) throws

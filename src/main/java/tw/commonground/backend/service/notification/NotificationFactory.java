@@ -18,6 +18,12 @@ public final class NotificationFactory {
 
     private static final String QUOTE_REPLY_NOTIFICATION_URL_TEMPLATE = "/issues/%s/viewpoints/%s";
 
+    private static final String NODE_OF_FOLLOWED_ISSUE_TITLE_TEMPLATE = "您追蹤的議題 %s 有新的動態！";
+
+    private static final String NODE_OF_FOLLOWED_ISSUE_BODY_TEMPLATE = "「%s」";
+
+    private static final String NODE_OF_FOLLOWED_ISSUE_URL_TEMPLATE = "/issues/%s";
+
     private NotificationFactory() {
         // hide the constructor
     }
@@ -45,6 +51,20 @@ public final class NotificationFactory {
         dto.setTitle(QUOTE_REPLY_NOTIFICATION_TITLE_TEMPLATE);
         dto.setBody(String.format(QUOTE_REPLY_NOTIFICATION_BODY_TEMPLATE, content));
         dto.setUrl(String.format(QUOTE_REPLY_NOTIFICATION_URL_TEMPLATE, issueId, viewpointId));
+        return dto;
+    }
+
+    public static NotificationDto createNodeOfFollowedIssueNotification(String issueTitle,
+                                                                        String nodeContent,
+                                                                        String issueId) {
+
+        String content = nodeContent.length() > MAX_CONTENT_LENGTH
+                ? nodeContent.substring(0, MAX_CONTENT_LENGTH) + "..." : nodeContent;
+
+        NotificationDto dto = new NotificationDto();
+        dto.setTitle(String.format(NODE_OF_FOLLOWED_ISSUE_TITLE_TEMPLATE, issueTitle));
+        dto.setBody(String.format(NODE_OF_FOLLOWED_ISSUE_BODY_TEMPLATE, content));
+        dto.setUrl(String.format(NODE_OF_FOLLOWED_ISSUE_URL_TEMPLATE, issueId));
         return dto;
     }
 }

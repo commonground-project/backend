@@ -144,6 +144,10 @@ public class IssueService {
         return issueFollowRepository.findFollowById(id).orElse(false);
     }
 
+    public List<Long> getIssueFollowersById(UUID issueId) {
+        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
+    }
+
     public void throwIfIssueNotExist(UUID id) {
         if (!issueRepository.existsById(id)) {
             throw new EntityNotFoundException("Issue", "id", id.toString());
