@@ -20,8 +20,6 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     Optional<FullUserEntity> findIdByEmail(String email);
 
-    Optional<UserEntity> findUserEntityByUuid(UUID uuid);
-
     Optional<UserEntity> getUserEntityByUsername(String username);
 
     SimpleUserEntity findByEmail(String email);
