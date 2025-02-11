@@ -136,7 +136,7 @@ public class NotificationService {
         List<FullUserEntity> needNotificationUser = new ArrayList<>();
 
         userIds.forEach(userId -> userRepository.findUserEntityById(userId).ifPresent(user -> {
-            if (userSettingService.getUserSetting(userId).getNewTimelineToFollowedIssue()) {
+            if (userSettingService.getUserSetting(userId).getNewNodeOfTimelineToFollowedIssue()) {
                 needNotificationUser.add(user);
             }
         }));

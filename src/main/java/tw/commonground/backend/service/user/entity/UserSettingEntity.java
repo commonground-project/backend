@@ -27,6 +27,6 @@ public class UserSettingEntity {
     private Boolean newReferenceToMyReply;
 
     @ColumnDefault("true")
-    private Boolean newTimelineToFollowedIssue;
+    private Boolean newNodeOfTimelineToFollowedIssue;
 
 }

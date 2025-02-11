@@ -17,5 +17,5 @@ public class UserSettingNotificationDto {
     private boolean newReferenceToMyReply;
 
     @NotNull
-    private boolean newTimelineToFollowedIssue;
+    private boolean newNodeOfTimelineToFollowedIssue;
 }
