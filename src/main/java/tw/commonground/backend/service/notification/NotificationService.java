@@ -48,11 +48,12 @@ public class NotificationService {
     public void onReplyCreatedEventCheckViewpointSubscription(ReplyCreatedEvent notificationEvent) {
         // Collect notification data
         ReplyEntity replyEntity = notificationEvent.getReplyEntity();
-        Long userId = notificationEvent.getUser().getId();
 
         // Collect viewpoint data
         UUID viewpointId = replyEntity.getViewpoint().getId();
         ViewpointEntity viewpointEntity = viewpointService.getViewpoint(viewpointId);
+        UUID authorId = viewpointEntity.getAuthorId();
+        Long userId = userRepository.getIdByUid(authorId);
         String title = viewpointEntity.getTitle();
         String body = replyEntity.getContent();
         String issueId = viewpointEntity.getIssue().getId().toString();
