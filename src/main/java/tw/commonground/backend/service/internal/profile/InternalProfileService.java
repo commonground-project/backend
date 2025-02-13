@@ -62,6 +62,7 @@ public class InternalProfileService {
         UserEntity user = entityManager.getReference(UserEntity.class, userId);
 
         InternalProfileEntity newProfile = InternalProfileEntity.builder()
+                .uuid(user.getUuid())
                 .user(user)
                 .gender("")
                 .occupation("")
