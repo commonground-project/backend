@@ -7,6 +7,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.service.internal.account.TokenUserDetails;
+import tw.commonground.backend.service.internal.account.exception.ServiceAccountUnsupportedOperationException;
 import tw.commonground.backend.service.user.dto.UpdateUserRequest;
 import tw.commonground.backend.service.user.dto.UserMapper;
 import tw.commonground.backend.service.user.dto.UserResponse;
@@ -61,6 +63,10 @@ public class UserController {
     @GetMapping("/user/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal FullUserEntity user) {
+        if (user instanceof TokenUserDetails) {
+            throw new ServiceAccountUnsupportedOperationException("/user/me");
+        }
+
         UserResponse response = UserMapper.toResponse(user);
         return ResponseEntity.ok(response);
     }

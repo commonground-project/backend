@@ -9,6 +9,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jose4j.lang.JoseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -55,16 +56,21 @@ public class SubscriptionService {
         }
     }
 
+    @Transactional
     public void saveSubscription(SubscriptionRequest request, FullUserEntity user) {
         UserEntity userEntity = userRepository.getUserEntityByUsername(user.getUsername()).orElseThrow(() ->
                 new EntityNotFoundException("User not found")
         );
-        subscriptionRepository.save(SubscriptionEntity.builder()
-                .endpoint(request.getEndpoint())
-                .p256dh(request.getKeys().getP256dh())
-                .auth(request.getKeys().getAuth())
-                .user(userEntity)
-                .build());
+
+        if (!subscriptionRepository.existsByEndpointAndAuthAndP256dhAndUser(
+                request.getEndpoint(), request.getKeys().getAuth(), request.getKeys().getP256dh(), userEntity)) {
+            subscriptionRepository.save(SubscriptionEntity.builder()
+                    .endpoint(request.getEndpoint())
+                    .p256dh(request.getKeys().getP256dh())
+                    .auth(request.getKeys().getAuth())
+                    .user(userEntity)
+                    .build());
+        }
     }
 
     public void removeSubscription(UnsubscriptionRequest request, FullUserEntity user) {
@@ -76,7 +82,12 @@ public class SubscriptionService {
                 .ifPresent(subscriptionRepository::delete);
     }
 
-    public int sendNotification(List<FullUserEntity> users, String title, String body)
+    public int sendNotification(FullUserEntity user, String title, String body, String url)
+            throws NotificationDeliveryException {
+       return sendNotification(List.of(user), title, body, url);
+    }
+
+    public int sendNotification(List<FullUserEntity> users, String title, String body, String url)
             throws NotificationDeliveryException {
         List<UserEntity> userEntities = userRepository.getUsersByUsername(
                 users.stream().map(FullUserEntity::getUsername).toList());
@@ -86,6 +97,7 @@ public class SubscriptionService {
         JSONObject payload = new JSONObject();
         payload.put("title", title);
         payload.put("body", body);
+        payload.put("url", url);
 
         List<String> errorEndpoints = new ArrayList<>();
         List<Exception> errorSubscriptions = new ArrayList<>();

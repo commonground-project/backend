@@ -3,6 +3,7 @@ package tw.commonground.backend.service.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import tw.commonground.backend.security.UserRole;
 
 import java.util.UUID;
 

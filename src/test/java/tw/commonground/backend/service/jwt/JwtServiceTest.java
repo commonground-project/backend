@@ -13,7 +13,7 @@ import tw.commonground.backend.service.jwt.entity.RefreshTokenProjectionImpl;
 import tw.commonground.backend.service.jwt.entity.RefreshTokenRepository;
 import tw.commonground.backend.service.jwt.exception.RefreshTokenInvalidException;
 import tw.commonground.backend.service.user.entity.UserEntity;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;

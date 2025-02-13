@@ -12,15 +12,18 @@ import tw.commonground.backend.service.user.entity.UserSettingRepository;
 public class UserSettingService {
 
     private final UserSettingRepository userSettingRepository;
+    private final UserService userService;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public UserSettingService(UserSettingRepository userSettingRepository) {
+    public UserSettingService(UserSettingRepository userSettingRepository, UserService userService) {
         this.userSettingRepository = userSettingRepository;
+        this.userService = userService;
     }
 
     public UserSettingEntity getUserSetting(Long userId) {
+        userService.throwIfUserNotExist(userId);
         UserEntity user = entityManager.getReference(UserEntity.class, userId);
 
         return userSettingRepository.findById(userId)
@@ -35,6 +38,7 @@ public class UserSettingService {
     }
 
     public UserSettingEntity updateUserSetting(Long userId, UserSettingDto userSettingDto) {
+        userService.throwIfUserNotExist(userId);
         UserEntity user = entityManager.getReference(UserEntity.class, userId);
 
         userSettingRepository.findById(userId)

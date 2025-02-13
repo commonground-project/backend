@@ -26,6 +26,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import tw.commonground.backend.exception.ProblemTemplate;
+import tw.commonground.backend.service.internal.account.ServiceAccountService;
+import tw.commonground.backend.service.internal.account.seurity.TokenAuthenticationFilter;
 import tw.commonground.backend.service.jwt.security.JwtAuthenticationFilter;
 import tw.commonground.backend.service.jwt.JwtService;
 import tw.commonground.backend.service.jwt.security.OAuthRequestResolver;
@@ -33,7 +35,7 @@ import tw.commonground.backend.service.jwt.security.OAuthSuccessHandler;
 import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -65,13 +67,20 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ServiceAccountService serviceAccountService)
+            throws Exception {
+
         http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .addFilterBefore(new TokenAuthenticationFilter(serviceAccountService),
+                        UsernamePasswordAuthenticationFilter.class)
+
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/internal/**").hasAnyRole("ADMIN", "SERVICE_ACCOUNT_READ")
                         .requestMatchers("/api/user/avatar/**").permitAll()
                         .requestMatchers("/api/jwt/refresh/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()

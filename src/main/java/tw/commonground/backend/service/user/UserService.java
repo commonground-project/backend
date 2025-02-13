@@ -16,7 +16,7 @@ import tw.commonground.backend.service.user.dto.UserSetupRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 import tw.commonground.backend.service.user.exception.UserAlreadySetupException;
 
 import java.util.List;
@@ -120,5 +120,11 @@ public class UserService {
         return userRepository.getUserEntityByUsername(username).orElseThrow(
                 () -> new EntityNotFoundException("User", "email", username)
         ).getProfileImage();
+    }
+
+    public void throwIfUserNotExist(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User", "id", userId.toString());
+        }
     }
 }
