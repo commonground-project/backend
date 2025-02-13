@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -29,6 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final ImageService imageService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -36,9 +38,10 @@ public class UserService {
     @Value("${application.admin.email:}")
     private String adminEmail;
 
-    public UserService(UserRepository userRepository, ImageService imageService) {
+    public UserService(UserRepository userRepository, ImageService imageService, ApplicationEventPublisher applicationEventPublisher) {
         this.userRepository = userRepository;
         this.imageService = imageService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public UserEntity createUser(UserInitRequest userInitRequest, UserRole role) {
@@ -54,6 +57,9 @@ public class UserService {
         }, () -> logger.info("No profile image url provided for user {}", userInitRequest.getEmail()));
 
         userRepository.save(userEntity);
+
+        applicationEventPublisher.publishEvent(new UserCreatedEvent(userEntity));
+
         return userEntity;
     }
 

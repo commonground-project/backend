@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class InternalProfileResponse {
     @JsonProperty("user_id")
-    private UUID userId;
+    private UUID userUuid;
 
     @Builder.Default
     private String gender = "";

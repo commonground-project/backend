@@ -16,20 +16,33 @@ import tw.commonground.backend.service.user.entity.UserEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InternalProfileEntity {
-    @Id
-    @Column(name = "user_id")
-    private UUID userId;
 
-    @OneToOne
+    @Id
+    private Long id;
+
+    private UUID uuid;
+
     @MapsId
-    @JoinColumn(name = "user_id", referencedColumnName = "uuid", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id")
     private UserEntity user;
 
     private String gender;
     private String occupation;
     private String location;
 
+//    @Column(columnDefinition = "text[]")
+//    @Type(value = tw.commonground.backend.service.internal.profile.entity.CustomStringArrayType.class)
+//    private String[] browsingTags;
+    @Column(name = "browsingTags")
+    @Convert(converter = ListToStringConverter.class)
     private List<String> browsingTags;
+
+//    @Column(columnDefinition = "text[]")
+//    @Type(value = tw.commonground.backend.service.internal.profile.entity.CustomStringArrayType.class)
+//    private String[] searchKeywords;
+    @Column(name = "searchKeywords")
+    @Convert(converter = ListToStringConverter.class)
     private List<String> searchKeywords;
 
     private LocalDateTime createdAt;

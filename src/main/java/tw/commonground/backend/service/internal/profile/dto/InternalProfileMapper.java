@@ -1,9 +1,8 @@
 package tw.commonground.backend.service.internal.profile.dto;
 
-import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.service.internal.profile.entity.InternalProfileEntity;
 
 import java.util.List;
-import java.util.UUID;
 
 public final class InternalProfileMapper {
 
@@ -11,20 +10,23 @@ public final class InternalProfileMapper {
         // hide constructor
     }
 
-    public static InternalProfileResponse toResponseFromId(UUID userId) {
+    public static InternalProfileResponse toResponse(InternalProfileEntity internalProfileEntity) {
         return InternalProfileResponse.builder()
-                .userId(userId)
+                .userUuid(internalProfileEntity.getUuid())
+                .gender(internalProfileEntity.getGender())
+                .occupation(internalProfileEntity.getOccupation())
+                .location(internalProfileEntity.getLocation())
+                .browsingTags(internalProfileEntity.getBrowsingTags())
+                .searchKeywords(internalProfileEntity.getSearchKeywords())
+                .createdAt(internalProfileEntity.getCreatedAt())
+                .lastActiveAt(internalProfileEntity.getLastActiveAt())
+                .activityFrequency(internalProfileEntity.getActivityFrequency())
+                .userTopIp(internalProfileEntity.getUserTopIp())
                 .build();
     }
 
-    public static InternalProfileResponse toResponse(UserEntity user) {
-        return InternalProfileResponse.builder()
-                .userId(user.getUuid())
-                .build();
-    }
-
-    public static List<InternalProfileResponse> toResponses(List<UserEntity> users) {
-        return users.stream()
+    public static List<InternalProfileResponse> toResponses(List<InternalProfileEntity> internalProfileEntities) {
+        return internalProfileEntities.stream()
                 .map(InternalProfileMapper::toResponse)
                 .toList();
     }
