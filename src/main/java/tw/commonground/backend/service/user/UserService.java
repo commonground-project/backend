@@ -38,7 +38,10 @@ public class UserService {
     @Value("${application.admin.email:}")
     private String adminEmail;
 
-    public UserService(UserRepository userRepository, ImageService imageService, ApplicationEventPublisher applicationEventPublisher) {
+    public UserService(
+            UserRepository userRepository,
+            ImageService imageService,
+            ApplicationEventPublisher applicationEventPublisher) {
         this.userRepository = userRepository;
         this.imageService = imageService;
         this.applicationEventPublisher = applicationEventPublisher;
