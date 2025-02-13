@@ -91,7 +91,9 @@ public class InternalProfileService {
         long userCount = userRepository.count();
         long profileCount = internalProfileRepository.count();
 
-        if (userCount == profileCount) { return; }
+        if (userCount == profileCount) {
+            return;
+        }
 
         List<UserEntity> users = (List<UserEntity>) userRepository.findAll();
         for (UserEntity user : users) {
