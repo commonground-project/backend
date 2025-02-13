@@ -1,5 +1,8 @@
 package tw.commonground.backend.service.internal.profile;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,9 @@ import java.util.UUID;
 public class InternalProfileService {
     private final UserRepository userRepository;
     private final InternalProfileRepository internalProfileRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public InternalProfileService(UserRepository userRepository, InternalProfileRepository internalProfileRepository) {
         this.userRepository = userRepository;
@@ -52,22 +58,16 @@ public class InternalProfileService {
         return InternalProfileMapper.toResponse(internalProfileEntity);
     }
 
-    public void createProfile(UserEntity userEntity) {
-        if (userEntity == null || userEntity.getId() == null) {
-            throw new IllegalArgumentException("UserEntity cannot be null and must have an ID before creating a profile.");
-        }
+    public void createProfile(Long userId) {
+        UserEntity user = entityManager.getReference(UserEntity.class, userId);
 
         InternalProfileEntity newProfile = InternalProfileEntity.builder()
-                .id(userEntity.getId())
-                .uuid(userEntity.getUuid())
-                .user(userEntity)
+                .user(user)
                 .gender("")
                 .occupation("")
                 .location("")
                 .browsingTags(List.of())
                 .searchKeywords(List.of())
-                .createdAt(LocalDateTime.now())
-                .lastActiveAt(LocalDateTime.now())
                 .activityFrequency(List.of())
                 .userTopIp(List.of())
                 .build();
@@ -76,26 +76,28 @@ public class InternalProfileService {
     }
 
     @EventListener
+    @Transactional
     public void onUserCreatedEvent(UserCreatedEvent userEvent) {
         UserEntity userEntity = userEvent.getUserEntity();
 
-        if (userEntity == null || userEntity.getId() == null) {
-            throw new IllegalStateException("UserEntity is null or does not have an ID when creating profile.");
-        }
-
         internalProfileRepository.findById(userEntity.getId()).ifPresentOrElse(
                 profile -> {},
-                () -> createProfile(userEntity)
+                () -> createProfile(userEntity.getId())
         );
     }
 
     @EventListener
     public void onApplicationStart(ContextRefreshedEvent event) {
+        long userCount = userRepository.count();
+        long profileCount = internalProfileRepository.count();
+
+        if (userCount == profileCount) return;
+
         List<UserEntity> users = (List<UserEntity>) userRepository.findAll();
         for (UserEntity user : users) {
             internalProfileRepository.findById(user.getId()).ifPresentOrElse(
                     profile -> {},
-                    () -> createProfile(user)
+                    () -> createProfile(user.getId())
             );
         }
     }
