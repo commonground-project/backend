@@ -12,6 +12,7 @@ public final class UserSettingMapper {
                 .notification(UserSettingNotificationDto.builder()
                         .newReplyInMyViewpoint(entity.getNewReplyInMyViewpoint())
                         .newReferenceToMyReply(entity.getNewReferenceToMyReply())
+                        .newNodeOfTimelineToFollowedIssue(entity.getNewNodeOfTimelineToFollowedIssue())
                         .build())
                 .build();
     }

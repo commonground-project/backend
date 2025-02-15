@@ -2,6 +2,7 @@ package tw.commonground.backend.service.timeline;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.exception.ValidationException;
@@ -23,12 +24,17 @@ public class TimelineService {
 
     private final NodeRepository nodeRepository;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     @PersistenceContext
     private EntityManager entityManager;
 
-    public TimelineService(IssueService issueService, NodeRepository nodeRepository) {
+    public TimelineService(IssueService issueService,
+                           NodeRepository nodeRepository,
+                           ApplicationEventPublisher applicationEventPublisher) {
         this.issueService = issueService;
         this.nodeRepository = nodeRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public List<NodeEntity> getNodes(UUID issueId) {
@@ -56,6 +62,8 @@ public class TimelineService {
 
         IssueEntity issue = entityManager.getReference(IssueEntity.class, issueId);
         node.setIssue(issue);
+
+        applicationEventPublisher.publishEvent(new NodeCreatedEvent(issue, node));
 
         return nodeRepository.save(node);
     }

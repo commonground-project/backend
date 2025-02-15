@@ -31,6 +31,7 @@ public class UserSettingService {
                     UserSettingEntity newSetting = UserSettingEntity.builder()
                             .newReplyInMyViewpoint(true)
                             .newReferenceToMyReply(true)
+                            .newNodeOfTimelineToFollowedIssue(true)
                             .user(user)
                             .build();
                     return userSettingRepository.save(newSetting);
@@ -47,11 +48,15 @@ public class UserSettingService {
                             .isNewReplyInMyViewpoint());
                     userSettingEntity.setNewReferenceToMyReply(userSettingDto.getNotification()
                             .isNewReferenceToMyReply());
+                    userSettingEntity.setNewNodeOfTimelineToFollowedIssue(userSettingDto.getNotification()
+                            .isNewNodeOfTimelineToFollowedIssue());
                     userSettingRepository.save(userSettingEntity);
                 }, () -> {
                     UserSettingEntity newSetting = UserSettingEntity.builder()
                             .newReplyInMyViewpoint(userSettingDto.getNotification().isNewReplyInMyViewpoint())
                             .newReferenceToMyReply(userSettingDto.getNotification().isNewReferenceToMyReply())
+                            .newNodeOfTimelineToFollowedIssue(userSettingDto
+                                    .getNotification().isNewNodeOfTimelineToFollowedIssue())
                             .user(user)
                             .build();
                     userSettingRepository.save(newSetting);
