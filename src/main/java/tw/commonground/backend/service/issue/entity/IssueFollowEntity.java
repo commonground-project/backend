@@ -15,6 +15,7 @@ import java.util.UUID;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class IssueFollowEntity {
+
     @EmbeddedId
     private IssueFollowKey id;
 

@@ -149,8 +149,6 @@ public class NotificationService {
         } catch (NotificationDeliveryException e) {
             log.error("Failed to send notification to users: {}", needNotificationUser, e);
         }
-
-
     }
 
     public int sendNotification(FullUserEntity user, NotificationDto notificationDto) throws

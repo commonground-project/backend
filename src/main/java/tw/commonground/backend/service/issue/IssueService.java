@@ -15,6 +15,7 @@ import tw.commonground.backend.service.issue.entity.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -131,12 +132,19 @@ public class IssueService {
         return factEntities;
     }
 
+    @Transactional
     public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
         IssueFollowKey id = new IssueFollowKey(userId, issueId);
+        if (issueFollowRepository.findById(id).isPresent()) {
+            issueFollowRepository.updateFollowById(id, follow);
+        } else {
+            issueFollowRepository.insertFollowById(id, follow);
+        }
         IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
         issueFollowEntity.setId(id);
         issueFollowEntity.setFollow(follow);
-        return issueFollowRepository.save(issueFollowEntity);
+        issueFollowEntity.setUpdatedAt(LocalDateTime.now());
+        return issueFollowEntity;
     }
 
     public Boolean getFollowForIssue(Long userId, UUID issueId) {
