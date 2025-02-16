@@ -55,7 +55,6 @@ public class InternalProfileService {
 
     @Transactional
     public void createProfile(Long userId) {
-//        UserEntity user = entityManager.getReference(UserEntity.class, userId);
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
