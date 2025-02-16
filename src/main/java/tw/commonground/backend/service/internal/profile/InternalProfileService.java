@@ -1,7 +1,5 @@
 package tw.commonground.backend.service.internal.profile;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -23,9 +21,6 @@ import java.util.UUID;
 public class InternalProfileService {
     private final UserRepository userRepository;
     private final InternalProfileRepository internalProfileRepository;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     public InternalProfileService(UserRepository userRepository, InternalProfileRepository internalProfileRepository) {
         this.userRepository = userRepository;
@@ -58,8 +53,11 @@ public class InternalProfileService {
         return InternalProfileMapper.toResponse(internalProfileEntity);
     }
 
+    @Transactional
     public void createProfile(Long userId) {
-        UserEntity user = entityManager.getReference(UserEntity.class, userId);
+//        UserEntity user = entityManager.getReference(UserEntity.class, userId);
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         InternalProfileEntity newProfile = InternalProfileEntity.builder()
                 .uuid(user.getUuid())
@@ -88,6 +86,7 @@ public class InternalProfileService {
     }
 
     @EventListener
+    @Transactional
     public void onApplicationStart(ContextRefreshedEvent event) {
         long userCount = userRepository.count();
         long profileCount = internalProfileRepository.count();
