@@ -8,6 +8,7 @@ import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.List;
 
@@ -33,8 +34,8 @@ public final class ViewpointMapper {
 
         return ViewpointResponse.builder()
                 .id(viewpointEntity.getId())
-                .createdAt(viewpointEntity.getCreatedAt())
-                .updatedAt(viewpointEntity.getUpdatedAt())
+                .createdAt(DateTimeUtils.toIso8601String(viewpointEntity.getCreatedAt()))
+                .updatedAt(DateTimeUtils.toIso8601String(viewpointEntity.getUpdatedAt()))
                 .title(viewpointEntity.getTitle())
                 .content(content.getText())
                 .authorId(viewpointEntity.getAuthorId())

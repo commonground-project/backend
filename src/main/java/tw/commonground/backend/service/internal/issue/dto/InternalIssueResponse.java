@@ -1,6 +1,5 @@
 package  tw.commonground.backend.service.internal.issue.dto;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,10 +13,10 @@ public class InternalIssueResponse {
     private UUID issueId;
 
     @JsonProperty("created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     @JsonProperty("updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     private String title;
 

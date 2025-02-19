@@ -1,6 +1,7 @@
 package tw.commonground.backend.service.internal.profile.dto;
 
 import tw.commonground.backend.service.internal.profile.entity.InternalProfileEntity;
+import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.List;
 
@@ -18,8 +19,8 @@ public final class InternalProfileMapper {
                 .location(internalProfileEntity.getLocation())
                 .browsingTags(internalProfileEntity.getBrowsingTags())
                 .searchKeywords(internalProfileEntity.getSearchKeywords())
-                .createdAt(internalProfileEntity.getCreatedAt())
-                .lastActiveAt(internalProfileEntity.getLastActiveAt())
+                .createdAt(DateTimeUtils.toIso8601String(internalProfileEntity.getCreatedAt()))
+                .lastActiveAt(DateTimeUtils.toIso8601String(internalProfileEntity.getLastActiveAt()))
                 .activityFrequency(internalProfileEntity.getActivityFrequency())
                 .userTopIp(internalProfileEntity.getUserTopIp())
                 .build();

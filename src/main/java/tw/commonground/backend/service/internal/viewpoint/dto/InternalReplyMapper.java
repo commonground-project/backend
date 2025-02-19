@@ -1,6 +1,7 @@
 package tw.commonground.backend.service.internal.viewpoint.dto;
 
 import tw.commonground.backend.service.reply.entity.ReplyEntity;
+import tw.commonground.backend.shared.util.DateTimeUtils;
 
 public final class InternalReplyMapper {
     private InternalReplyMapper() {
@@ -15,7 +16,7 @@ public final class InternalReplyMapper {
                 .likeCount(reply.getLikeCount())
                 .dislikeCount(reply.getDislikeCount())
                 .reasonableCount(reply.getReasonableCount())
-                .createdAt(reply.getCreatedAt())
+                .createdAt(DateTimeUtils.toIso8601String(reply.getCreatedAt()))
                 .build();
     }
 }
