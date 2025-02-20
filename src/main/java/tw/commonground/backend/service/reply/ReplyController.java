@@ -49,7 +49,11 @@ public class ReplyController {
         Pageable pageable = paginationParser.parsePageable(paginationRequest);
         Page<ReplyEntity> pageReplies = replyService.getViewpointReplies(id, pageable);
 
-        return ResponseEntity.ok(getPaginationResponse(user.getId(), pageReplies));
+        if (user == null) {
+            return ResponseEntity.ok(getPaginationResponse(null, pageReplies));
+        } else {
+            return ResponseEntity.ok(getPaginationResponse(user.getId(), pageReplies));
+        }
     }
 
     @PostMapping("/viewpoint/{id}/replies")
