@@ -10,6 +10,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.image.ImageService;
 import tw.commonground.backend.service.user.dto.UpdateUserRequest;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
@@ -36,7 +37,7 @@ public class UserService {
     private EntityManager entityManager;
 
     @Value("${application.admin.email:}")
-    private String adminEmail;
+    private String[] adminEmail;
 
     public UserService(
             UserRepository userRepository,
@@ -105,8 +106,17 @@ public class UserService {
             throw new UserAlreadySetupException(email);
         } else {
             UserRole defaultRole = UserRole.ROLE_USER;
-            if (adminEmail.equals(email)) {
-                defaultRole = UserRole.ROLE_ADMIN;
+            if (adminEmail != null) {
+                for (String admin : adminEmail) {
+                    if (admin.equals(email)) {
+                        defaultRole = UserRole.ROLE_ADMIN;
+                        break;
+                    }
+                }
+            }
+
+            if (userRepository.existsByUsername(setupRequest.getUsername())) {
+                throw new ValidationException("Username already exists");
             }
 
             userRepository.setupUserById(fullUser.getId(),
