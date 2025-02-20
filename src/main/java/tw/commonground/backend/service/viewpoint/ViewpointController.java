@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.*;
-import tw.commonground.backend.service.viewpoint.entity.Reaction;
+import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;

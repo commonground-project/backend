@@ -6,6 +6,7 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reply.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
+import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.ArrayList;

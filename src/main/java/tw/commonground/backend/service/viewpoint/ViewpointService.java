@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.viewpoint;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.event.react.UserReactedEvent;
+import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,17 +41,20 @@ public class ViewpointService {
 
     private final ViewpointFactRepository viewpointFactRepository;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     public ViewpointService(ViewpointRepository viewpointRepository,
                             ViewpointReactionRepository viewpointReactionRepository,
                             FactService factService,
                             ViewpointFactRepository viewpointFactRepository,
-                            IssueService issueService, LockService lockService) {
+                            IssueService issueService, LockService lockService, ApplicationEventPublisher applicationEventPublisher) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
         this.issueService = issueService;
         this.lockService = lockService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
@@ -136,9 +143,14 @@ public class ViewpointService {
             Optional<ViewpointReactionEntity> reactionOptional =
                     viewpointReactionRepository.findById(viewpointReactionKey);
 
-            return reactionOptional
+            ViewpointReactionEntity viewpointReactionEntity = reactionOptional
                     .map(reactionEntity -> handleExistingReaction(reactionEntity, viewpointId, reaction))
                     .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
+
+            applicationEventPublisher.publishEvent(new UserViewpointReactedEvent(this,
+                    userId, viewpointId, reaction));
+
+            return viewpointReactionEntity;
         });
     }
 

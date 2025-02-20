@@ -3,7 +3,7 @@ package tw.commonground.backend.service.viewpoint.dto;
 
 import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.entity.FactEntity;
-import tw.commonground.backend.service.viewpoint.entity.Reaction;
+import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;

@@ -18,6 +18,8 @@ import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
+import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.event.react.UserReplyReactedEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -163,9 +165,13 @@ public class ReplyService {
 
             Optional<ReplyReactionEntity> reactionOptional = replyReactionRepository.findById(replyReactionKey);
 
-            return reactionOptional
-                    .map(replyReactionEntity -> handleExistingReaction(replyReactionEntity, replyId, reaction))
+            ReplyReactionEntity replyReactionEntity = reactionOptional
+                    .map(replyReaction -> handleExistingReaction(replyReaction, replyId, reaction))
                     .orElseGet(() -> handleNewReaction(replyReactionKey, replyId, reaction));
+
+            applicationEventPublisher.publishEvent(new UserReplyReactedEvent(this, userId, replyId, reaction));
+
+            return replyReactionEntity;
         });
     }
 
