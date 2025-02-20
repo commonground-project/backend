@@ -7,6 +7,7 @@ import tw.commonground.backend.service.issue.entity.IssueFollowEntity;
 import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public final class IssueMapper {
     public static FollowResponse toFollowResponse(IssueFollowEntity entity) {
         return FollowResponse.builder()
                 .follow(entity.getFollow())
-                .updatedAt(entity.getUpdatedAt())
+                .updatedAt(DateTimeUtils.toIso8601String(entity.getUpdatedAt()))
                 .build();
     }
 
@@ -29,8 +30,8 @@ public final class IssueMapper {
 
         return IssueResponse.builder()
                 .id(entity.getId().toString())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .createdAt(DateTimeUtils.toIso8601String(entity.getCreatedAt()))
+                .updatedAt(DateTimeUtils.toIso8601String(entity.getUpdatedAt()))
                 .title(entity.getTitle())
                 .description(entity.getDescription())
                 .insight(insight.getText())
@@ -45,8 +46,8 @@ public final class IssueMapper {
     public static SimpleIssueResponse toResponse(SimpleIssueEntity entity) {
         return SimpleIssueResponse.builder()
                 .id(entity.getId().toString())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .createdAt(DateTimeUtils.toIso8601String(entity.getCreatedAt()))
+                .updatedAt(DateTimeUtils.toIso8601String(entity.getUpdatedAt()))
                 .title(entity.getTitle())
                 .description(entity.getDescription())
                 .build();

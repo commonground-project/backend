@@ -1,6 +1,7 @@
 package tw.commonground.backend.service.timeline.dto;
 
 import tw.commonground.backend.service.timeline.entity.NodeEntity;
+import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.time.format.DateTimeFormatter;
 
@@ -15,8 +16,8 @@ public final class NodeMapper {
     public static NodeResponse toResponse(NodeEntity entity) {
         return NodeResponse.builder()
                 .id(entity.getId().toString())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
+                .createdAt(DateTimeUtils.toIso8601String(entity.getCreatedAt()))
+                .updatedAt(DateTimeUtils.toIso8601String(entity.getUpdatedAt()))
                 .title(entity.getTitle())
                 .description(entity.getDescription())
                 .date(entity.getDate().format(FORMATTER))
