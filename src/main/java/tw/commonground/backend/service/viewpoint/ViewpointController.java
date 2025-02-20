@@ -99,7 +99,11 @@ public class ViewpointController {
                                                           @PathVariable @NotNull UUID id) {
         ViewpointEntity viewpointEntity = viewpointService.getViewpoint(id);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
-        Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+
+        Reaction reaction = Reaction.NONE;
+        if (user != null) {
+            reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+        }
 
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
         return ResponseEntity.ok(response);
