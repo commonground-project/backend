@@ -25,6 +25,8 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     SimpleUserEntity findByEmail(String email);
 
+    boolean existsByUsername(String username);
+
     @Query("SELECT u.id FROM UserEntity u WHERE u.uuid = ?1")
     Long getIdByUid(UUID uid);
 
@@ -35,7 +37,6 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     @Transactional
     @Query("UPDATE UserEntity u SET u.username = ?2, u.nickname = ?3, u.role = ?4 WHERE u.id = ?1")
     void setupUserById(Long id, String username, String nickname, UserRole role);
-
 
 }
 
