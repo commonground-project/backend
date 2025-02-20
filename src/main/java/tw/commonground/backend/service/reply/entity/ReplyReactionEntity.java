@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.shared.entity.Reaction;
 
 import java.util.UUID;
 
