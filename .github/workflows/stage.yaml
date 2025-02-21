@@ -1,15 +1,13 @@
 ---
-name: Deploy Main Branch
+name: Deploy to Stage
 
 on:
   push:
-    branches:
-      - main
     tags:
       - v*
 
 concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
+  group: stage-${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
@@ -37,7 +35,7 @@ jobs:
         env:
           # All available variables are described in documentation
           # https://megalinter.io/latest/configuration/
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }} # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # ADD YOUR CUSTOM ENV VARIABLES HERE OR DEFINE THEM IN A FILE .mega-linter.yml AT THE ROOT OF YOUR REPOSITORY
           # DISABLE: COPYPASTE,SPELL # Uncomment to disable copy-paste and spell checks
@@ -81,7 +79,6 @@ jobs:
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v6
-        if: ${{ contains(github.ref, 'ref/tags/') }}
         with:
           build-args: |
             JAR_FILE=build/libs/*.jar
@@ -90,20 +87,6 @@ jobs:
           push: true
           tags: |
             commongroundproject/backend:stage
-            commongroundproject/backend:${{ github.sha }}
-          context: .
-
-      - name: Build and Push Docker image
-        uses: docker/build-push-action@v6
-        if: ${{ !(contains(github.ref, 'ref/tags/')) }}
-        with:
-          build-args: |
-            JAR_FILE=build/libs/*.jar
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: true
-          tags: |
-            commongroundproject/backend:dev
             commongroundproject/backend:${{ github.sha }}
           context: .
 
@@ -121,10 +104,9 @@ jobs:
           echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Deploy Dev
-        if: ${{ !(contains(github.ref, 'ref/tags/')) }}
+      - name: Deploy to Stage
         run: |
-          export MODE='Dev'
+          export MODE='Stage'
           ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
       - name: Clear up
