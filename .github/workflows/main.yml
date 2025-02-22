@@ -81,21 +81,6 @@ jobs:
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v6
-        if: ${{ contains(github.ref, 'ref/tags/') }}
-        with:
-          build-args: |
-            JAR_FILE=build/libs/*.jar
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: true
-          tags: |
-            commongroundproject/backend:stage
-            commongroundproject/backend:${{ github.sha }}
-          context: .
-
-      - name: Build and Push Docker image
-        uses: docker/build-push-action@v6
-        if: ${{ !(contains(github.ref, 'ref/tags/')) }}
         with:
           build-args: |
             JAR_FILE=build/libs/*.jar
@@ -122,7 +107,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy Dev
-        if: ${{ !(contains(github.ref, 'ref/tags/')) }}
         run: |
           export MODE='Dev'
           ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
