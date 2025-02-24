@@ -7,6 +7,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -15,13 +16,16 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class TracingConfig {
 
+    @Value("${jaeger.export.endpoint}")
+    private String endpoint;
+
     @Bean
     public OpenTelemetry openTelemetry() {
         String serviceName = System.getenv()
                 .getOrDefault("TW_COMMONGROUND_BACKEND_SERVICE_VERSION", "local");
 
         OtlpGrpcSpanExporter exporter = OtlpGrpcSpanExporter.builder()
-                .setEndpoint("http://localhost:4317")
+                .setEndpoint(endpoint)
                 .build();
 
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
