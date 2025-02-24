@@ -3,10 +3,12 @@ package tw.commonground.backend.service.internal.profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.internal.profile.dto.InternalProfileResponse;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.UUID;
 
+@Traced
 @RestController
 @RequestMapping("/api/internal/users/profile")
 public class InternalProfileController {

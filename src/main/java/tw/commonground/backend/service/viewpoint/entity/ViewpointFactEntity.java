@@ -1,15 +1,13 @@
 package tw.commonground.backend.service.viewpoint.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 
 @Getter
 @Setter
 @Entity
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class ViewpointFactEntity {

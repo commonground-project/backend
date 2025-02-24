@@ -1,10 +1,12 @@
 package tw.commonground.backend.service.lock;
 
 import org.springframework.stereotype.Service;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+@Traced
 @Service
 public class LockService {
 

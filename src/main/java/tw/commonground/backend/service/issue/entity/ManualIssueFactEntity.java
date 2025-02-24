@@ -1,10 +1,7 @@
 package tw.commonground.backend.service.issue.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,6 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "issue_fact_entity")

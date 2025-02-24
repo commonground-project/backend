@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import tw.commonground.backend.service.internal.account.entity.ServiceAccountEntity;
 import tw.commonground.backend.service.internal.account.entity.ServiceAccountTokenRepository;
 import tw.commonground.backend.security.UserRole;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.UUID;
 
+@Traced
 @Service
 public class ServiceAccountService {
 

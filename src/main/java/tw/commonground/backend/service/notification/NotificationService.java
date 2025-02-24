@@ -18,10 +18,12 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 
 @Slf4j
+@Traced
 @Service
 public class NotificationService {
 

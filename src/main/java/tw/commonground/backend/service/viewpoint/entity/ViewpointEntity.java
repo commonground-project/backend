@@ -17,6 +17,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)

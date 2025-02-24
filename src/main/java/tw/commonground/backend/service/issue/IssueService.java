@@ -14,10 +14,12 @@ import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Traced
 @Service
 public class IssueService {
 

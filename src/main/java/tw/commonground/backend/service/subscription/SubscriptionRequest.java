@@ -2,9 +2,11 @@ package tw.commonground.backend.service.subscription;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class SubscriptionRequest {
 
     private String endpoint;
@@ -14,6 +16,7 @@ public class SubscriptionRequest {
 
 @Getter
 @Setter
+@ToString
 class SubscriptionKey {
 
     private String p256dh;

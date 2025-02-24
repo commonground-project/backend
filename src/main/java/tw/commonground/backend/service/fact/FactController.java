@@ -20,9 +20,11 @@ import tw.commonground.backend.service.reference.dto.ReferenceRequest;
 import tw.commonground.backend.service.reference.dto.ReferenceResponse;
 import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 
+@Traced
 @RestController
 public class FactController {
     private static final int MAX_SIZE = 200;

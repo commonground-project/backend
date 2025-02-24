@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@ToString
 @Builder
 public class InternalReplyResponse {
     @JsonProperty("user_id")

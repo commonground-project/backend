@@ -12,11 +12,13 @@ import tw.commonground.backend.service.internal.profile.entity.InternalProfileRe
 import tw.commonground.backend.service.user.UserCreatedEvent;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Traced
 @Service
 public class InternalProfileService {
     private final UserRepository userRepository;

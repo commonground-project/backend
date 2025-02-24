@@ -18,10 +18,12 @@ import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Traced
 @Service
 public class ReplyService {
 

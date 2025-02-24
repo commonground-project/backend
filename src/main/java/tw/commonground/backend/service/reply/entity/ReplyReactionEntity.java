@@ -4,6 +4,7 @@ package tw.commonground.backend.service.reply.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@ToString
 public class ReplyReactionEntity {
 
     @EmbeddedId

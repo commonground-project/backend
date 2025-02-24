@@ -8,6 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSettingEntity {
