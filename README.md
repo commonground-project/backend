@@ -1,4 +1,4 @@
-# Backend
+# Backend 
 
 ## Development
 
@@ -49,3 +49,6 @@ Alternatively, you can use the following command:
 ```
 
 This will configure your Spring Boot application to use Google OAuth2 for login during development.
+
+---
+Supported by [<img src="https://github.com/user-attachments/assets/0d4f4ade-a805-4f91-b86a-de29fb0617b1" alt="SDC Icon" width="20">](https://www.instagram.com/nycu_sdc/) NYCU Software Development Club
