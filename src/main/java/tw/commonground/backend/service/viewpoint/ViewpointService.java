@@ -17,7 +17,6 @@ import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.entity.Reaction;
-import tw.commonground.backend.shared.event.react.UserReactedEvent;
 import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 
 import java.util.*;
@@ -47,7 +46,8 @@ public class ViewpointService {
                             ViewpointReactionRepository viewpointReactionRepository,
                             FactService factService,
                             ViewpointFactRepository viewpointFactRepository,
-                            IssueService issueService, LockService lockService, ApplicationEventPublisher applicationEventPublisher) {
+                            IssueService issueService, LockService lockService,
+                            ApplicationEventPublisher applicationEventPublisher) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
         this.factService = factService;
