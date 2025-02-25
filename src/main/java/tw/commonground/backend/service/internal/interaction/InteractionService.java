@@ -9,6 +9,8 @@ import tw.commonground.backend.service.internal.interaction.entity.InteractionTy
 import tw.commonground.backend.service.internal.interaction.entity.RelatedObjectType;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.event.comment.UserReplyCommentedEvent;
+import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.event.react.UserReplyReactedEvent;
 import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 import tw.commonground.backend.service.internal.interaction.dto.InteractionMapper;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class InteractionService {
 
     private final UserRepository userRepository;
+
     private final InteractionRepository interactionRepository;
 
     public InteractionService(UserRepository userRepository, InteractionRepository interactionRepository) {
@@ -52,6 +55,39 @@ public class InteractionService {
                 event.getEntityId(), RelatedObjectType.REPLY, event.getReaction());
 
         interactionRepository.save(interactionEntity);
+    }
+
+    @EventListener
+    @Transactional
+    public void onUserViewpointCommentedEvent(UserViewpointCommentedEvent event) {
+        InteractionEntity interactionEntity = createReplyInteractionEntityBuilder(event.getDateTime(),
+                event.getUserId(), event.getEntityId(), RelatedObjectType.VIEWPOINT,
+                event.getContent());
+
+        interactionRepository.save(interactionEntity);
+    }
+
+    @EventListener
+    @Transactional
+    public void onUserReplyCommentedEvent(UserReplyCommentedEvent event) {
+        InteractionEntity interactionEntity = createReplyInteractionEntityBuilder(event.getDateTime(),
+                event.getUserId(), event.getEntityId(), RelatedObjectType.REPLY,
+                event.getContent());
+
+        interactionRepository.save(interactionEntity);
+    }
+
+    private InteractionEntity createReplyInteractionEntityBuilder(LocalDateTime dateTime, Long userId, UUID entityId,
+                                                                  RelatedObjectType objectType, String content) {
+        UUID userUid = userRepository.getUidById(userId);
+
+        return InteractionEntity.builder()
+                .userId(userUid)
+                .objectId(entityId)
+                .timestamp(dateTime)
+                .type(InteractionType.COMMENT)
+                .objectType(objectType)
+                .content(content).build();
     }
 
     private InteractionEntity createInteractionEntityBuilder(LocalDateTime dateTime, Long userId, UUID entityId,

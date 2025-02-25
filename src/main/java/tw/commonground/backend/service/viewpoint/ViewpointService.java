@@ -17,6 +17,8 @@ import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.event.comment.UserReplyCommentedEvent;
+import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 
 import java.util.*;
@@ -82,6 +84,9 @@ public class ViewpointService {
         for (UUID factId : request.getFacts()) {
             viewpointFactRepository.saveByViewpointIdAndFactId(viewpointEntity.getId(), factId);
         }
+
+        applicationEventPublisher.publishEvent(new UserViewpointCommentedEvent(this,
+                user.getId(), viewpointEntity.getId(), request.getContent()));
 
         return viewpointEntity;
     }

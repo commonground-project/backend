@@ -22,7 +22,7 @@ public final class InteractionMapper {
     public static InteractionResponse toInteractionResponse(InteractionEntity entity) {
         return InteractionResponse.builder()
                 .id(entity.getId().toString())
-                .type(entity.getType().name().toLowerCase())
+                .type(entity.getType().name())
                 .userId(entity.getUserId().toString())
                 .relatedObject(toRelatedObject(entity))
                 .timestamp(DateTimeUtils.toIso8601String(entity.getTimestamp()))

@@ -19,6 +19,7 @@ import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
 import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.event.comment.UserReplyCommentedEvent;
 import tw.commonground.backend.shared.event.react.UserReplyReactedEvent;
 
 import java.util.*;
@@ -64,8 +65,7 @@ public class ReplyService {
     }
 
     @Transactional
-    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request)
-            throws NotificationDeliveryException {
+    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
         viewpointService.throwIfViewpointNotExist(viewpointId);
 
@@ -87,6 +87,7 @@ public class ReplyService {
         }
 
         applicationEventPublisher.publishEvent(new ReplyCreatedEvent(user, replyEntity, quotes));
+        applicationEventPublisher.publishEvent(new UserReplyCommentedEvent(this, user.getId(), replyEntity.getId(), content));
 
         return replyEntity;
     }
