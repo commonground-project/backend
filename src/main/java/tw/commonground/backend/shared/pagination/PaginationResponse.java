@@ -5,6 +5,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
+@ToString
 public class PaginationResponse {
     private int size;
     private long totalElement;

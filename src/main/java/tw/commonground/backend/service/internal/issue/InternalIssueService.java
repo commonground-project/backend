@@ -8,11 +8,13 @@ import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.internal.issue.dto.InternalIssueResponse;
 import tw.commonground.backend.service.issue.entity.IssueRepository;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Traced
 @Service
 public class InternalIssueService {
 

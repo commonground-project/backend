@@ -3,9 +3,11 @@ package tw.commonground.backend.service.user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class UserResponse {
     private String username;
     private String nickname;

@@ -9,7 +9,9 @@ import tw.commonground.backend.service.user.dto.setting.UserSettingDto;
 import tw.commonground.backend.service.user.dto.setting.UserSettingMapper;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserSettingEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
+@Traced
 @RestController
 @RequestMapping("/api")
 public class UserSettingController {

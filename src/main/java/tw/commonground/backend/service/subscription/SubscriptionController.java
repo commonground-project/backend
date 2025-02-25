@@ -4,7 +4,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
+@Traced
 @RequestMapping("/api/subscription")
 @RestController
 public class SubscriptionController {

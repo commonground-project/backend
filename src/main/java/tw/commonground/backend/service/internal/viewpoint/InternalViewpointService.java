@@ -10,10 +10,12 @@ import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointR
 import tw.commonground.backend.service.reply.entity.ReplyRepository;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.UUID;
 
+@Traced
 @Service
 public class InternalViewpointService {
     private final ViewpointRepository viewpointRepository;

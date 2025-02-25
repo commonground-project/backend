@@ -1,15 +1,13 @@
 package tw.commonground.backend.service.issue.entity;
 
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Getter
 @Setter
+@ToString
 @Embeddable
 @NoArgsConstructor
 @AllArgsConstructor

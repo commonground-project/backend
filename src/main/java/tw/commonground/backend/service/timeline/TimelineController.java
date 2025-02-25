@@ -6,10 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.timeline.dto.*;
 import tw.commonground.backend.service.timeline.entity.NodeEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.UUID;
 
+@Traced
 @RestController
 @RequestMapping("/api")
 public class TimelineController {

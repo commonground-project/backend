@@ -3,6 +3,7 @@ package tw.commonground.backend.service.issue.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.commonground.backend.service.user.entity.UserEntity;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@ToString
 @EntityListeners(AuditingEntityListener.class)
 public class IssueFollowEntity {
 

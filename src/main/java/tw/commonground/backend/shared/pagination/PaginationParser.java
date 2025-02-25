@@ -6,9 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.domain.Sort;
 import tw.commonground.backend.exception.ValidationException;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 
+@Traced
 @AllArgsConstructor
 public class PaginationParser {
 

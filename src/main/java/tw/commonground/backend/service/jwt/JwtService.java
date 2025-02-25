@@ -8,10 +8,12 @@ import tw.commonground.backend.service.jwt.entity.RefreshTokenProjection;
 import tw.commonground.backend.service.jwt.entity.RefreshTokenRepository;
 import tw.commonground.backend.service.jwt.exception.RefreshTokenInvalidException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.time.Clock;
 import java.util.UUID;
 
+@Traced
 @Service
 public class JwtService {
 

@@ -9,6 +9,7 @@ import java.util.*;
 
 @Getter
 @Setter
+@ToString
 public class FactRequest {
 
     @NotBlank(message = "Title is required")

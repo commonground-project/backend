@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.internal.account.dto.*;
 import tw.commonground.backend.service.internal.account.entity.ServiceAccountEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.UUID;
 
+@Traced
 @RestController
 @RequestMapping("/api/internal")
 public class ServiceAccountController {

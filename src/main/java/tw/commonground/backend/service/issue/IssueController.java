@@ -23,9 +23,11 @@ import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 
+@Traced
 @RestController
 @RequestMapping("/api")
 public class IssueController {

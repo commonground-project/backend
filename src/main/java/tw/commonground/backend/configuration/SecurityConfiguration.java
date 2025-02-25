@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
@@ -58,7 +59,7 @@ public class SecurityConfiguration {
 
     private final OAuthRequestResolver requestResolver;
 
-    public SecurityConfiguration(UserService userService, JwtService jwtService,
+    public SecurityConfiguration(@Lazy UserService userService, JwtService jwtService,
                                  OAuthSuccessHandler successHandler, OAuthRequestResolver requestResolver) {
         this.userService = userService;
         this.jwtService = jwtService;

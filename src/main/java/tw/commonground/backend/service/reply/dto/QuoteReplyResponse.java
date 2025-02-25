@@ -7,6 +7,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@ToString
 public class QuoteReplyResponse {
 
     private UUID replyId;

@@ -18,12 +18,14 @@ import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.PaginationParser;
 import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+@Traced
 @RestController
 @RequestMapping("/api")
 public class ViewpointController {

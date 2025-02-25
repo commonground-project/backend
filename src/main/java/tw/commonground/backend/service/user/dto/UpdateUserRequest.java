@@ -4,11 +4,13 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.lang.Nullable;
 import tw.commonground.backend.security.UserRole;
 
 @Getter
 @Setter
+@ToString
 @SuppressWarnings("MagicNumber")
 public class UpdateUserRequest {
 

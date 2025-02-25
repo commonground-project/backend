@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.io.IOException;
 import java.net.*;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
+@Traced
 @Service
 public class ReferenceService {
 
