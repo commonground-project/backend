@@ -11,6 +11,11 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.stereotype.Component;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.exception.ValidationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +37,7 @@ public class TracingAspect {
     public void tracedClass() { }
 
     @Around("tracedClass() || execution(* org.springframework.data.jpa.repository.JpaRepository+.*(..))))")
-    public Object traceMethod(ProceedingJoinPoint joinPoint) {
+    public Object traceMethod(ProceedingJoinPoint joinPoint) throws Exception {
 
         String spanName = joinPoint.getSignature().getName();
         Span newSpan = tracer.spanBuilder(spanName)
@@ -67,8 +72,22 @@ public class TracingAspect {
             }
             return result;
         } catch (Throwable e) {
-            newSpan.recordException(e);
-            throw new RuntimeException(e);
+            if (e instanceof EntityNotFoundException) {
+                newSpan.recordException(new EntityNotFoundException(e.getMessage()));
+                throw new EntityNotFoundException(e.getMessage());
+            } else if (e instanceof ValidationException) {
+                newSpan.recordException(new ValidationException(e.getMessage()));
+                throw new ValidationException(e.getMessage());
+            } else if (e instanceof IllegalArgumentException) {
+                newSpan.recordException(new IllegalArgumentException(e.getMessage()));
+                throw new IllegalArgumentException(e.getMessage());
+            } else if (e instanceof HttpRequestMethodNotSupportedException) {
+                newSpan.recordException(new HttpRequestMethodNotSupportedException(e.getMessage()));
+                throw new HttpRequestMethodNotSupportedException(e.getMessage());
+            } else {
+                throw new RuntimeException(e);
+            }
+
         } finally {
             newSpan.end();
         }
