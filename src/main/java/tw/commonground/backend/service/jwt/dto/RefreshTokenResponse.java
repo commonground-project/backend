@@ -9,9 +9,11 @@ import lombok.ToString;
 @AllArgsConstructor
 public class RefreshTokenResponse {
 
+    @ToString.Exclude
     private String refreshToken;
 
     private Long expirationTime;
 
+    @ToString.Exclude
     private String accessToken;
 }

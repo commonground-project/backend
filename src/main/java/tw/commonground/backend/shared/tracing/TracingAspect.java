@@ -12,8 +12,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.exception.ValidationException;
 
@@ -60,7 +58,14 @@ public class TracingAspect {
 
         String formattedArgs = attributes.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    if (key.contains("token")) {
+                        value = "********";
+                    }
+                    return String.format("%s: %s", key, value);
+                })
                 .collect(Collectors.joining("\n"));
 
         newSpan.setAttribute("args", formattedArgs);
@@ -72,20 +77,27 @@ public class TracingAspect {
             }
             return result;
         } catch (Throwable e) {
-            if (e instanceof EntityNotFoundException) {
-                newSpan.recordException(new EntityNotFoundException(e.getMessage()));
-                throw new EntityNotFoundException(e.getMessage());
-            } else if (e instanceof ValidationException) {
-                newSpan.recordException(new ValidationException(e.getMessage()));
-                throw new ValidationException(e.getMessage());
-            } else if (e instanceof IllegalArgumentException) {
-                newSpan.recordException(new IllegalArgumentException(e.getMessage()));
-                throw new IllegalArgumentException(e.getMessage());
-            } else if (e instanceof HttpRequestMethodNotSupportedException) {
-                newSpan.recordException(new HttpRequestMethodNotSupportedException(e.getMessage()));
-                throw new HttpRequestMethodNotSupportedException(e.getMessage());
-            } else {
-                throw new RuntimeException(e);
+            if (!(e instanceof IllegalArgumentException && e.getMessage().contains("Invalid token"))) {
+                newSpan.setAttribute("error", true);
+            }
+            switch (e) {
+                case EntityNotFoundException entityNotFoundException -> {
+                    newSpan.recordException(new EntityNotFoundException(e.getMessage()));
+                    throw new EntityNotFoundException(e.getMessage());
+                }
+                case ValidationException validationException -> {
+                    newSpan.recordException(new ValidationException(e.getMessage()));
+                    throw new ValidationException(e.getMessage());
+                }
+                case IllegalArgumentException illegalArgumentException -> {
+                    newSpan.recordException(new IllegalArgumentException(e.getMessage()));
+                    throw new IllegalArgumentException(e.getMessage());
+                }
+                case HttpRequestMethodNotSupportedException httpRequestMethodNotSupportedException -> {
+                    newSpan.recordException(new HttpRequestMethodNotSupportedException(e.getMessage()));
+                    throw new HttpRequestMethodNotSupportedException(e.getMessage());
+                }
+                default -> throw new RuntimeException(e);
             }
 
         } finally {
