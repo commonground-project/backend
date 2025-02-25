@@ -19,6 +19,7 @@ public class UserSettingEntity {
     @MapsId
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
+    @ToString.Exclude
     private UserEntity user;
 
     @ColumnDefault("true")

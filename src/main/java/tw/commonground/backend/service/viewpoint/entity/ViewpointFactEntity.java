@@ -16,9 +16,11 @@ public class ViewpointFactEntity {
 
     @ManyToOne
     @MapsId("viewpointId")
+    @ToString.Exclude
     private ViewpointEntity viewpoint;
 
     @ManyToOne
     @MapsId("factId")
+    @ToString.Exclude
     private FactEntity fact;
 }

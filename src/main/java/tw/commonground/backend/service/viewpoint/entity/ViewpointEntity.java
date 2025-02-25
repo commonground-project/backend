@@ -53,6 +53,7 @@ public class ViewpointEntity extends BaseEntityWithAuthor {
     private Integer dislikeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private IssueEntity issue;
 
     @OneToMany(mappedBy = "viewpoint")
