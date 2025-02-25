@@ -2,7 +2,6 @@ package tw.commonground.backend.shared.event.comment;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
-import tw.commonground.backend.shared.entity.Reaction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

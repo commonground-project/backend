@@ -17,7 +17,6 @@ import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.entity.Reaction;
-import tw.commonground.backend.shared.event.comment.UserReplyCommentedEvent;
 import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 

@@ -12,7 +12,6 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.*;
-import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
@@ -87,7 +86,8 @@ public class ReplyService {
         }
 
         applicationEventPublisher.publishEvent(new ReplyCreatedEvent(user, replyEntity, quotes));
-        applicationEventPublisher.publishEvent(new UserReplyCommentedEvent(this, user.getId(), replyEntity.getId(), content));
+        applicationEventPublisher.publishEvent(new UserReplyCommentedEvent(this, user.getId(),
+                replyEntity.getId(), content));
 
         return replyEntity;
     }
