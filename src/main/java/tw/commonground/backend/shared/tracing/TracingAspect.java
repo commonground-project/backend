@@ -4,6 +4,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.internal.AttributeUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -69,6 +70,10 @@ public class TracingAspect {
                 .collect(Collectors.joining("\n"));
 
         newSpan.setAttribute("args", formattedArgs);
+
+        if (attributes.containsKey("id")) {
+            newSpan.setAttribute("id", attributes.get("id").toString());
+        }
 
         try (Scope scope = newSpan.makeCurrent()) {
             Object result = joinPoint.proceed();
