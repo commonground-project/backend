@@ -29,7 +29,7 @@ public class TracingConfig {
                 .build();
 
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                .setResource(Resource.builder().put("service.name", "tw.commonground.backend:" + serviceName).build())
+                .setResource(Resource.builder().put("service.name", "backend:" + serviceName).build())
                 .addSpanProcessor(BatchSpanProcessor.builder(exporter).build())
                 .build();
 
@@ -40,7 +40,7 @@ public class TracingConfig {
 
     @Bean
     public Tracer tracer() {
-        return openTelemetry().getTracer("tw.commonground.backend");
+        return openTelemetry().getTracer("backend");
     }
 
 }
