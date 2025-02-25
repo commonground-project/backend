@@ -30,6 +30,9 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     @Query("SELECT u.id FROM UserEntity u WHERE u.uuid = ?1")
     Long getIdByUid(UUID uid);
 
+    @Query("SELECT u.uuid FROM UserEntity u WHERE u.id = ?1")
+    UUID getUidById(Long id);
+
     @Query("Select u from UserEntity u where u.username in :usernames")
     List<UserEntity> getUsersByUsername(@Param("usernames") List<String> usernames);
 
