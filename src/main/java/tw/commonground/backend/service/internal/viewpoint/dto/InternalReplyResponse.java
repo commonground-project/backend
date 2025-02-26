@@ -3,7 +3,6 @@ package tw.commonground.backend.service.internal.viewpoint.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -29,5 +28,5 @@ public class InternalReplyResponse {
     private Integer reasonableCount;
 
     @JsonProperty("timestamp")
-    private LocalDateTime createdAt;
+    private String createdAt;
 }

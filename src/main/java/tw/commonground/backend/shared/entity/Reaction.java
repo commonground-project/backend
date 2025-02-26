@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.viewpoint.entity;
+package tw.commonground.backend.shared.entity;
 
 public enum Reaction {
     NONE,

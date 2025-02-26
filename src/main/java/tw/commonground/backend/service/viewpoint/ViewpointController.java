@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.*;
-import tw.commonground.backend.service.viewpoint.entity.Reaction;
+import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
@@ -101,7 +101,11 @@ public class ViewpointController {
                                                           @PathVariable @NotNull UUID id) {
         ViewpointEntity viewpointEntity = viewpointService.getViewpoint(id);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
-        Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+
+        Reaction reaction = Reaction.NONE;
+        if (user != null) {
+            reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+        }
 
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
         return ResponseEntity.ok(response);

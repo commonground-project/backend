@@ -1,13 +1,10 @@
 package tw.commonground.backend.service.reply.dto;
 
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import tw.commonground.backend.service.reply.entity.Reaction;
-
-import java.time.LocalDateTime;
+import tw.commonground.backend.shared.entity.Reaction;
 
 @Getter
 @Setter
@@ -23,5 +20,5 @@ public class ReactionResponse {
 
     private Integer dislikeCount;
 
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 }

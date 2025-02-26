@@ -7,6 +7,8 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reply.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
+import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +57,8 @@ public final class ReplyMapper {
         return ReplyResponse.builder()
                 .id(replyEntity.getId())
                 .userReaction(ReplyReactionResponse.builder().reaction(reaction).build())
-                .createdAt(replyEntity.getCreatedAt())
-                .updatedAt(replyEntity.getUpdatedAt())
+                .createdAt(DateTimeUtils.toIso8601String(replyEntity.getCreatedAt()))
+                .updatedAt(DateTimeUtils.toIso8601String(replyEntity.getUpdatedAt()))
                 .authorId(replyEntity.getAuthorId())
                 .authorName(replyEntity.getAuthorName())
                 .authorAvatar(replyEntity.getAuthorAvatar())
@@ -75,7 +77,7 @@ public final class ReplyMapper {
                 .likeCount(reactionEntity.getReply().getLikeCount())
                 .dislikeCount(reactionEntity.getReply().getDislikeCount())
                 .reasonableCount(reactionEntity.getReply().getReasonableCount())
-                .updatedAt(reactionEntity.getReply().getUpdatedAt())
+                .updatedAt(DateTimeUtils.toIso8601String(reactionEntity.getReply().getUpdatedAt()))
                 .build();
 
     }

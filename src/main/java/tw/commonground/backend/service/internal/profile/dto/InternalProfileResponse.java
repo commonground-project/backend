@@ -3,7 +3,6 @@ package tw.commonground.backend.service.internal.profile.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -36,11 +35,11 @@ public class InternalProfileResponse {
 
     @Builder.Default
     @JsonProperty("created_at")
-    private LocalDateTime createdAt = null;
+    private String createdAt = null;
 
     @Builder.Default
     @JsonProperty("last_active_at")
-    private LocalDateTime lastActiveAt = null;
+    private String lastActiveAt = null;
 
     @Builder.Default
     @JsonProperty("activity_frequency")
