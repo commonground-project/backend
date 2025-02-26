@@ -4,6 +4,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
+import lombok.SneakyThrows;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,9 +12,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.stereotype.Component;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import tw.commonground.backend.exception.EntityNotFoundException;
-import tw.commonground.backend.exception.ValidationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +32,9 @@ public class TracingAspect {
     @Pointcut("within(@Traced *)")
     public void tracedClass() { }
 
+    @SneakyThrows
     @Around("tracedClass() || execution(* org.springframework.data.jpa.repository.JpaRepository+.*(..))))")
-    public Object traceMethod(ProceedingJoinPoint joinPoint) throws Exception {
+    public Object traceMethod(ProceedingJoinPoint joinPoint) {
 
         String spanName = joinPoint.getSignature().getName();
         Span newSpan = tracer.spanBuilder(spanName)
@@ -61,7 +60,7 @@ public class TracingAspect {
                 .map(entry -> {
                     String key = entry.getKey();
                     Object value = entry.getValue();
-                    if (key.contains("token")) {
+                    if (key.toLowerCase().contains("token")) {
                         value = "********";
                     }
                     return String.format("%s: %s", key, value);
@@ -84,26 +83,7 @@ public class TracingAspect {
             if (!(e instanceof IllegalArgumentException && e.getMessage().contains("Invalid token"))) {
                 newSpan.setAttribute("error", true);
             }
-            switch (e) {
-                case EntityNotFoundException entityNotFoundException -> {
-                    newSpan.recordException(new EntityNotFoundException(e.getMessage()));
-                    throw new EntityNotFoundException(e.getMessage());
-                }
-                case ValidationException validationException -> {
-                    newSpan.recordException(new ValidationException(e.getMessage()));
-                    throw new ValidationException(e.getMessage());
-                }
-                case IllegalArgumentException illegalArgumentException -> {
-                    newSpan.recordException(new IllegalArgumentException(e.getMessage()));
-                    throw new IllegalArgumentException(e.getMessage());
-                }
-                case HttpRequestMethodNotSupportedException httpRequestMethodNotSupportedException -> {
-                    newSpan.recordException(new HttpRequestMethodNotSupportedException(e.getMessage()));
-                    throw new HttpRequestMethodNotSupportedException(e.getMessage());
-                }
-                default -> throw new RuntimeException(e);
-            }
-
+            throw e;
         } finally {
             newSpan.end();
         }
