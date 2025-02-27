@@ -83,6 +83,7 @@ public class TracingAspect {
             if (!(e instanceof IllegalArgumentException && e.getMessage().contains("Invalid token"))) {
                 newSpan.setAttribute("error", true);
             }
+            newSpan.recordException(e);
             throw e;
         } finally {
             newSpan.end();
