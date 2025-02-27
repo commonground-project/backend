@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointResponse;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 import java.util.UUID;
 
+@Traced
 @RestController
 @RequestMapping("/api/internal/viewpoints")
 public class InternalViewpointController {

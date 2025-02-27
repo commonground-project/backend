@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import tw.commonground.backend.service.jwt.dto.RefreshTokenResponse;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.shared.tracing.Traced;
 
+@Traced
 @RestController
 @RequestMapping("/api")
 @ConditionalOnProperty(value = "feature.debug.jwt.enabled", havingValue = "true")

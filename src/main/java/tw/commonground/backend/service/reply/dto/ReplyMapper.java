@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.reply.dto;
 
+import lombok.ToString;
 import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.entity.FactEntity;
@@ -12,6 +13,7 @@ import tw.commonground.backend.shared.util.DateTimeUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+@ToString
 public final class ReplyMapper {
 
     private ReplyMapper() {

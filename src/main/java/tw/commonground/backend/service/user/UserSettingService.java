@@ -7,7 +7,9 @@ import tw.commonground.backend.service.user.dto.setting.UserSettingDto;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserSettingEntity;
 import tw.commonground.backend.service.user.entity.UserSettingRepository;
+import tw.commonground.backend.shared.tracing.Traced;
 
+@Traced
 @Service
 public class UserSettingService {
 

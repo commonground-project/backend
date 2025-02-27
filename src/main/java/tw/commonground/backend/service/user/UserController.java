@@ -15,9 +15,11 @@ import tw.commonground.backend.service.user.dto.UserResponse;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
 
+@Traced
 @RestController
 @RequestMapping("/api")
 public class UserController {

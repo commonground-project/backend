@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tw.commonground.backend.service.jwt.dto.RefreshTokenResponse;
 import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.UUID;
 
+@Traced
 @RestController
 @RequestMapping("/api")
 public class JwtController {

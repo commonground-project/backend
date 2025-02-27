@@ -16,6 +16,7 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.tracing.Traced;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
@@ -23,6 +24,7 @@ import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Traced
 @Service
 public class ViewpointService {
     private static final String VIEWPOINT_KEY = "Viewpoint";

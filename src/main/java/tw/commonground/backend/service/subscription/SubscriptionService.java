@@ -15,6 +15,7 @@ import tw.commonground.backend.service.subscription.exception.NotificationDelive
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+@Traced
 @Service
 public class SubscriptionService {
 

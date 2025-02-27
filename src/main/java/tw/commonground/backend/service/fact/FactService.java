@@ -10,9 +10,11 @@ import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.reference.*;
 import tw.commonground.backend.service.reference.dto.ReferenceRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 
+@Traced
 @Service
 public class FactService {
 
