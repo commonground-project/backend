@@ -35,9 +35,11 @@ public class ManualIssueFactEntity {
 
     @ManyToOne
     @MapsId("issueId")
+    @ToString.Exclude
     private IssueEntity issue;
 
     @ManyToOne
     @MapsId("factId")
+    @ToString.Exclude
     private FactEntity fact;
 }
