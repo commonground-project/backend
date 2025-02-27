@@ -3,7 +3,6 @@ package tw.commonground.backend.service.internal.viewpoint.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,10 +15,10 @@ public class InternalViewpointResponse {
     private UUID viewpointId;
 
     @JsonProperty("created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     @JsonProperty("updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     private String content;
 

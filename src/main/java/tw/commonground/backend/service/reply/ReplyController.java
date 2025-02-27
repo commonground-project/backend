@@ -10,7 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reply.dto.*;
-import tw.commonground.backend.service.reply.entity.Reaction;
+import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.service.reply.entity.ReplyEntity;
 import tw.commonground.backend.service.reply.entity.ReplyReactionEntity;
 import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
@@ -51,7 +51,11 @@ public class ReplyController {
         Pageable pageable = paginationParser.parsePageable(paginationRequest);
         Page<ReplyEntity> pageReplies = replyService.getViewpointReplies(id, pageable);
 
-        return ResponseEntity.ok(getPaginationResponse(user.getId(), pageReplies));
+        if (user == null) {
+            return ResponseEntity.ok(getPaginationResponse(null, pageReplies));
+        } else {
+            return ResponseEntity.ok(getPaginationResponse(user.getId(), pageReplies));
+        }
     }
 
     @PostMapping("/viewpoint/{id}/replies")

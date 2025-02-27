@@ -1,0 +1,113 @@
+---
+name: Deploy to Stage
+
+on:
+  push:
+    tags:
+      - v*
+
+concurrency:
+  group: stage-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  MagaLinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      # Git Checkout
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # If you use VALIDATE_ALL_CODEBASE = true, you can remove this line to improve performances
+
+      # MegaLinter
+      - name: MegaLinter
+        id: ml
+        # You can override MegaLinter flavor used to have faster performances
+        # More info at https://megalinter.io/latest/flavors/
+        uses: oxsecurity/megalinter@latest
+        env:
+          # All available variables are described in documentation
+          # https://megalinter.io/latest/configuration/
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }} # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # ADD YOUR CUSTOM ENV VARIABLES HERE OR DEFINE THEM IN A FILE .mega-linter.yml AT THE ROOT OF YOUR REPOSITORY
+          # DISABLE: COPYPASTE,SPELL # Uncomment to disable copy-paste and spell checks
+
+      # Upload MegaLinter artifacts
+      - name: Archive production artifacts
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MegaLinter reports
+          path: |
+            megalinter-reports
+            mega-linter.log
+
+  Project-Build:
+    needs: MagaLinter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: gradle
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon --build-cache
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          build-args: |
+            JAR_FILE=build/libs/*.jar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: true
+          tags: |
+            commongroundproject/backend:stage
+            commongroundproject/backend:${{ github.sha }}
+          context: .
+
+  Deploy:
+    needs: [Project-Build, MagaLinter]
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy to Stage
+        run: |
+          export MODE='Stage'
+          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+
+      - name: Clear up
+        run: rm ~/.ssh/id_rsa

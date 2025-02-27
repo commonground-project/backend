@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.shared.entity.Reaction;
 
 import java.util.UUID;
 

@@ -12,13 +12,15 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.service.reply.entity.*;
-import tw.commonground.backend.service.subscription.exception.NotificationDeliveryException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
 import tw.commonground.backend.shared.tracing.Traced;
+import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.event.comment.UserReplyCommentedEvent;
+import tw.commonground.backend.shared.event.react.UserReplyReactedEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,8 +66,7 @@ public class ReplyService {
     }
 
     @Transactional
-    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request)
-            throws NotificationDeliveryException {
+    public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
         viewpointService.throwIfViewpointNotExist(viewpointId);
 
@@ -87,6 +88,8 @@ public class ReplyService {
         }
 
         applicationEventPublisher.publishEvent(new ReplyCreatedEvent(user, replyEntity, quotes));
+        applicationEventPublisher.publishEvent(new UserReplyCommentedEvent(this, user.getId(),
+                replyEntity.getId(), content));
 
         return replyEntity;
     }
@@ -165,9 +168,13 @@ public class ReplyService {
 
             Optional<ReplyReactionEntity> reactionOptional = replyReactionRepository.findById(replyReactionKey);
 
-            return reactionOptional
-                    .map(replyReactionEntity -> handleExistingReaction(replyReactionEntity, replyId, reaction))
+            ReplyReactionEntity replyReactionEntity = reactionOptional
+                    .map(replyReaction -> handleExistingReaction(replyReaction, replyId, reaction))
                     .orElseGet(() -> handleNewReaction(replyReactionKey, replyId, reaction));
+
+            applicationEventPublisher.publishEvent(new UserReplyReactedEvent(this, userId, replyId, reaction));
+
+            return replyReactionEntity;
         });
     }
 
