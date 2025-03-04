@@ -31,7 +31,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator:3.3.4'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation "org.springframework.boot:spring-boot-starter-aop"
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'com.auth0:java-jwt:4.4.0'
 	implementation 'org.jsoup:jsoup:1.16.1'
 	implementation 'nl.martijndwars:web-push:5.1.1'
