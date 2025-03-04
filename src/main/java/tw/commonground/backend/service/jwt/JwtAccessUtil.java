@@ -28,6 +28,12 @@ public class JwtAccessUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtAccessUtil.class);
 
+    private static final int MILLISECONDS = 1000;
+
+    private static final int CACHE_EXPIRATION = 15;
+
+    private static final int MAXIMUM_SIZE = 10000;
+
     private final RefreshTokenRepository refreshTokenRepository;
 
     private final UserRepository userRepository;
@@ -53,8 +59,8 @@ public class JwtAccessUtil {
     private JWTVerifier accessTokenVerifier;
 
     private final Cache<String, JwtUserDetails> jwtCache = Caffeine.newBuilder()
-            .expireAfterWrite(15, TimeUnit.MINUTES)
-            .maximumSize(10000)
+            .expireAfterWrite(CACHE_EXPIRATION, TimeUnit.MINUTES)
+            .maximumSize(MAXIMUM_SIZE)
             .build();
 
     public JwtAccessUtil(RefreshTokenRepository refreshTokenRepository, UserRepository userRepository) {
@@ -110,7 +116,7 @@ public class JwtAccessUtil {
     private JwtUserDetails verifyAndCacheToken(String token) {
         DecodedJWT jwt = accessTokenVerifier.verify(token);
         long ttl = jwt.getExpiresAt().getTime() - System.currentTimeMillis();
-        ttl = Math.max(ttl / 1000, 1);
+        ttl = Math.max(ttl / MILLISECONDS, 1);
         long finalTtl = ttl;
         jwtCache.policy().expireAfterWrite().ifPresent(expiry -> expiry.setExpiresAfter(finalTtl, TimeUnit.SECONDS));
 
