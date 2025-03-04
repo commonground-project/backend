@@ -2,6 +2,7 @@ package tw.commonground.backend.service.viewpoint;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,7 @@ public class ViewpointController {
         this.viewpointService = viewpointService;
     }
 
+    @Cacheable({"viewpoint", "issue"})
     @GetMapping("/issue/{id}/viewpoints")
     public WrappedPaginationResponse<List<ViewpointResponse>> getViewpointsForIssue(
             @AuthenticationPrincipal FullUserEntity user,
