@@ -2,16 +2,32 @@ package tw.commonground.backend.service.viewpoint.entity;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import tw.commonground.backend.shared.entity.Reaction;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID>, ViewpointRepositoryCustom {
 
+    @Cacheable("viewpoint")
     Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
+
+    @Cacheable("viewpoint")
+    Page<ViewpointEntity> findAll(Pageable pageable);
+
+    @Cacheable("viewpoint")
+    Optional<ViewpointEntity> findById(UUID id);
+
+    @CacheEvict(value = "viewpoint", allEntries = true)
+    ViewpointEntity save(ViewpointEntity viewpointEntity);
+
+    @CacheEvict(value = "viewpoint", allEntries = true)
+    void deleteById(UUID id);
 
 }
 
