@@ -66,7 +66,6 @@ public class ServiceAccountService {
         serviceAccountTokenRepository.deleteById(serviceId);
     }
 
-    @Cacheable
     public TokenUserDetails authenticate(String token) {
         return serviceAccountTokenRepository.findByToken(token)
                 .map(TokenUserDetails::new)
