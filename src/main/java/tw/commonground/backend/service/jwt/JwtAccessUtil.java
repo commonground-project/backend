@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import tw.commonground.backend.service.user.entity.UserRepository;
 import java.time.Duration;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtAccessUtil {
@@ -48,6 +51,11 @@ public class JwtAccessUtil {
     private Long refreshTokenExpirationMillis;
 
     private JWTVerifier accessTokenVerifier;
+
+    private final Cache<String, JwtUserDetails> jwtCache = Caffeine.newBuilder()
+            .expireAfterWrite(15, TimeUnit.MINUTES)
+            .maximumSize(10000)
+            .build();
 
     public JwtAccessUtil(RefreshTokenRepository refreshTokenRepository, UserRepository userRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
@@ -96,7 +104,16 @@ public class JwtAccessUtil {
     }
 
     public JwtUserDetails verifyAccessToken(String token) {
+        return jwtCache.get(token, this::verifyAndCacheToken);
+    }
+
+    private JwtUserDetails verifyAndCacheToken(String token) {
         DecodedJWT jwt = accessTokenVerifier.verify(token);
+        long ttl = jwt.getExpiresAt().getTime() - System.currentTimeMillis();
+        ttl = Math.max(ttl / 1000, 1);
+        long finalTtl = ttl;
+        jwtCache.policy().expireAfterWrite().ifPresent(expiry -> expiry.setExpiresAfter(finalTtl, TimeUnit.SECONDS));
+
         return new JwtUserDetails(jwt, () -> userRepository.getIdByUid(UUID.fromString(jwt.getSubject())));
     }
 
