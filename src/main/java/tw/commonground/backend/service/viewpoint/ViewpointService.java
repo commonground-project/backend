@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Traced
 @Service
-@CacheConfig(cacheNames = "viewpoints")
+@CacheConfig(cacheNames = "viewpoint")
 public class ViewpointService {
     private static final String VIEWPOINT_KEY = "Viewpoint";
 

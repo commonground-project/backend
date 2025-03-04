@@ -148,7 +148,8 @@ public class ViewpointController {
         return ResponseEntity.ok(response);
     }
 
-    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
+    @Cacheable({"viewpoint", "issue"})
+    public WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
             Long userId,
             Page<ViewpointEntity> pageViewpoints) {
 
@@ -170,7 +171,8 @@ public class ViewpointController {
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));
     }
 
-    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
+    @Cacheable({"viewpoint", "issue"})
+    public WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
             Page<ViewpointEntity> pageViewpoints) {
 
         Map<UUID, List<FactEntity>> factsMap = viewpointService.getFactsForViewpoints(pageViewpoints.getContent()
