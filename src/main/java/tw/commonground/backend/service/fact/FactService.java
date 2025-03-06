@@ -3,6 +3,7 @@ package tw.commonground.backend.service.fact;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,18 +32,18 @@ public class FactService {
         this.referenceService = referenceService;
     }
 
-    @Cacheable
+    @Cacheable(key = "'allFacts'")
     public Page<FactEntity> getFacts(Pageable pageable) {
         return factRepository.findAll(pageable);
     }
 
-    @Cacheable
+    @Cacheable(key = "'allFacts'")
     public List<FactEntity> getFacts(List<UUID> ids) {
         return factRepository.findAllById(ids);
     }
 
 
-    @Cacheable
+    @Cacheable(key = "#id")
     public FactEntity getFact(UUID id) {
 
         return factRepository.findById(id).orElseThrow(
@@ -50,7 +51,7 @@ public class FactService {
         );
     }
 
-    @CacheEvict(allEntries = true)
+    @CacheEvict(key = "'allFacts'")
     public FactEntity createFact(FactRequest factRequest, FullUserEntity user) {
         FactEntity factEntity = FactEntity.builder()
                 .title(factRequest.getTitle())
@@ -66,7 +67,10 @@ public class FactService {
     }
 
     // sameUrls represent the urls which already save in ReferenceEntity
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "fact", key = "#id"),
+            @CacheEvict(value = "fact", key = "'allFacts'")
+    })
     public FactEntity updateFact(UUID id, FactRequest factRequest) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
@@ -80,12 +84,15 @@ public class FactService {
         return factRepository.save(factEntity);
     }
 
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "fact", key = "#id"),
+            @CacheEvict(value = "fact", key = "'allFacts'")
+    })
     public void deleteFact(UUID id) {
         factRepository.findById(id).ifPresent(factRepository::delete);
     }
 
-    @Cacheable({"references"})
+    @Cacheable({"reference", "fact"})
     public Set<ReferenceEntity> getFactReferences(UUID id) {
 
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
@@ -94,7 +101,11 @@ public class FactService {
         return factEntity.getReferences();
     }
 
-    @CacheEvict(value = {"references"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "fact", key = "#id"),
+            @CacheEvict(value = "fact", key = "'allFacts'"),
+            @CacheEvict(value = "reference", allEntries = true)
+    })
     public Set<ReferenceEntity> createFactReferences(UUID id,
                                                      List<ReferenceRequest> referenceRequests) {
 
@@ -115,7 +126,11 @@ public class FactService {
         return factEntity.getReferences();
     }
 
-    @CacheEvict(value = {"references"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "fact", key = "#id"),
+            @CacheEvict(value = "fact", key = "'allFacts'"),
+            @CacheEvict(value = "reference", allEntries = true)
+    })
     public void deleteFactReferences(UUID id, UUID referenceId) {
         FactEntity factEntity = factRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Fact", "id", id.toString())

@@ -65,17 +65,20 @@ public class ViewpointService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Cacheable
+    @Cacheable(key = "'allViewpoints'")
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
         return viewpointRepository.findAll(pageable);
     }
 
-    @Cacheable
+    @Cacheable(key = "'allViewpoints'")
     public Page<ViewpointEntity> getIssueViewpoints(UUID issueId, Pageable pageable) {
         return viewpointRepository.findAllByIssueId(issueId, pageable);
     }
 
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "viewpoint", allEntries = true),
+            @CacheEvict(value = "issue", key = "{#issueId, 'allIssues'}")
+    })
     @Transactional
     public ViewpointEntity createIssueViewpoint(UUID issueId, ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -100,13 +103,13 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
-    @Cacheable
+    @Cacheable(key = "#id")
     public ViewpointEntity getViewpoint(UUID id) {
         return viewpointRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
     }
 
-    @CacheEvict(allEntries = true)
+    @CacheEvict(key = "'allViewpoints'")
     @Transactional
     public ViewpointEntity createViewpoint(ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -126,7 +129,10 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "viewpoint", key = "#id"),
+            @CacheEvict(value = "viewpoint", key = "'allViewpoints'")
+    })
     @Transactional
     public ViewpointEntity updateViewpoint(UUID id, ViewpointRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -146,14 +152,15 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
-    @CacheEvict(allEntries = true)
+    @CacheEvict(key = "{#id, 'allViewpoints'}")
     public void deleteViewpoint(UUID id) {
         viewpointRepository.deleteById(id);
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "viewpoint", allEntries = true),
-            @CacheEvict(value = "reaction", allEntries = true)
+            @CacheEvict(value = "viewpoint", key = "#viewpointId"),
+            @CacheEvict(value = "viewpoint", key = "'allViewpoints'"),
+            @CacheEvict(value = "reactionViewpoint", allEntries = true)
     })
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
@@ -238,7 +245,7 @@ public class ViewpointService {
                 ));
     }
 
-    @Cacheable({"reaction"})
+    @Cacheable({"reactionViewpoint"})
     public Map<UUID, Reaction> getReactionsForViewpoints(Long userId, List<UUID> viewpointIds) {
         List<ViewpointReactionEntity> reactions = viewpointReactionRepository
                 .findReactionsByUserIdAndViewpointIds(userId, viewpointIds);
@@ -250,7 +257,7 @@ public class ViewpointService {
                 ));
     }
 
-    @Cacheable({"reaction"})
+    @Cacheable({"reactionViewpoint"})
     public Reaction getReactionForViewpoint(Long userId, UUID viewpointId) {
         ViewpointReactionKey id = new ViewpointReactionKey(userId, viewpointId);
         return viewpointReactionRepository.findReactionById(id).orElse(Reaction.NONE);
