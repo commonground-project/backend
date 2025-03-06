@@ -45,8 +45,10 @@ public class ReplyEntity extends BaseEntityWithAuthor {
     private Integer dislikeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private ViewpointEntity viewpoint;
 
     @OneToMany(mappedBy = "reply")
+    @ToString.Exclude
     private List<ReplyFactEntity> facts;
 }
