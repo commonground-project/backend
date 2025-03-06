@@ -5,6 +5,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import tw.commonground.backend.service.reference.dto.FallbackResponse;
 import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
 import tw.commonground.backend.shared.tracing.Traced;
 
@@ -22,6 +24,8 @@ import java.util.Set;
 public class ReferenceService {
 
     private final ReferenceRepository referenceRepository;
+
+    private static final String FALLBACK_CRAWLER_API = "http://127.0.0.1:8000/title/";
 
     public ReferenceService(ReferenceRepository referenceRepository) {
         this.referenceRepository = referenceRepository;
@@ -60,13 +64,23 @@ public class ReferenceService {
 
     public WebsiteInfoResponse getWebsiteInfo(String urlString) {
         WebsiteInfoResponse websiteInfoResponse = new WebsiteInfoResponse();
-
         Document document;
         try {
             document = getDocument(urlString);
         } catch (Exception e) {
-            log.error("Error fetching website, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
-            throw new WebsiteFetchException();
+            log.error("Jsoup failed to fetch website, trying fallback API. Type: {}, Message: {}",
+                    e.getClass().getSimpleName(), e.getMessage());
+
+            // Use fallback API to fetch title
+            String title = fetchTitleFromFallback(urlString);
+            if (title != null) {
+                websiteInfoResponse.setTitle(title);
+            } else {
+                throw new WebsiteFetchException();
+            }
+
+            websiteInfoResponse.setIcon("");
+            return websiteInfoResponse;
         }
 
         try {
@@ -103,6 +117,19 @@ public class ReferenceService {
 
         return websiteInfoResponse;
     }
+
+    private String fetchTitleFromFallback(String urlString) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String apiUrl = FALLBACK_CRAWLER_API + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            FallbackResponse response = restTemplate.getForObject(apiUrl, FallbackResponse.class);
+            return response != null ? response.getTitle() : null;
+        } catch (Exception e) {
+            log.error("Fallback API failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
+            return null;
+        }
+    }
+
 
     protected Document getDocument(String url) throws IOException {
         return Jsoup.connect(url).get();
