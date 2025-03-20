@@ -31,6 +31,23 @@ class ReferenceServiceTest {
     private ArgumentCaptor<List<ReferenceEntity>> captor;
 
     @Test
+    void testGetWebsiteInfo() {
+        String url = "https://www.ctee.com.tw/news/20221226700018-430705";
+
+        WebsiteInfoResponse websiteInfoResponse = referenceService.getWebsiteInfo(url);
+        System.out.println("title: " + websiteInfoResponse.getTitle());
+
+        String expectedTitle = "XXX";
+        if(websiteInfoResponse.getIcon() != null) {
+            System.out.println("The title is fetched using the fallback API");
+        } else {
+            System.out.println("The title is fetched using the document");
+            System.out.println(websiteInfoResponse.getIcon());
+        }
+        assertThat(websiteInfoResponse.getTitle()).isEqualTo(expectedTitle);
+    }
+
+    @Test
     void testParseReferenceEntity_withExistedUrl() {
 
         List<String> input = List.of("https://www.google.com");
@@ -133,6 +150,7 @@ class ReferenceServiceTest {
         when(spyReferenceService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
         WebsiteInfoResponse websiteInfoResponse = spyReferenceService.getWebsiteInfo("https://www.github.com");
+
         assertThat(websiteInfoResponse.getTitle()).isEqualTo("Github");
         assertThat(websiteInfoResponse.getIcon()).isEqualTo("https://www.github.com/favicon.ico");
     }
