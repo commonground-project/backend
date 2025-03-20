@@ -4,11 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import tw.commonground.backend.service.reference.dto.FallbackResponse;
 import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
 import tw.commonground.backend.shared.tracing.Traced;
+import org.springframework.http.HttpHeaders;
+
 
 import java.io.IOException;
 import java.net.*;
@@ -121,13 +127,22 @@ public class ReferenceService {
     private String fetchTitleFromFallback(String urlString) {
         try {
             RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
             String apiUrl = FALLBACK_CRAWLER_API + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
-            FallbackResponse response = restTemplate.getForObject(apiUrl, FallbackResponse.class);
-            return response != null ? response.getTitle() : null;
+            ResponseEntity<FallbackResponse> response = restTemplate.exchange(
+                    apiUrl, HttpMethod.GET, entity, FallbackResponse.class
+            );
+            if (response.getBody() != null) {
+                return response.getBody().getTitle();
+            }
         } catch (Exception e) {
             log.error("Fallback API failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
-            return null;
         }
+        return null;
     }
 
 
