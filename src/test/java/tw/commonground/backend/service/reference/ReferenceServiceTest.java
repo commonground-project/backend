@@ -37,8 +37,8 @@ class ReferenceServiceTest {
         WebsiteInfoResponse websiteInfoResponse = referenceService.getWebsiteInfo(url);
         System.out.println("title: " + websiteInfoResponse.getTitle());
 
-        String expectedTitle = "XXX";
-        if(websiteInfoResponse.getIcon() != null) {
+        String expectedTitle = "歐洲｜移民難解德國缺工 - 國際 - 工商時報";
+        if (websiteInfoResponse.getIcon() != null) {
             System.out.println("The title is fetched using the fallback API");
         } else {
             System.out.println("The title is fetched using the document");
