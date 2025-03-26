@@ -19,7 +19,7 @@ jobs:
 
       - name: Clone FastAPI Server Repo (Repo B)
         run: |
-          git clone https://github.com/YOUR_USERNAME/YOUR_FASTAPI_REPO.git fastapi_server
+          git clone https://github.com/commonground-project/url-crawler.git fastapi_server
 
       - name: Set up Python
         uses: actions/setup-python@v4
