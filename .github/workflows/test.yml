@@ -57,8 +57,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Debug repo root
+        run: ls -la
+
       - name: Run Gradle Tests
         run: ./gradlew test
 
-      - name: Debug repo root
-        run: ls -la
