@@ -1,4 +1,4 @@
-name: Run Tests with FastAPI Server
+name: Run Tests with FastAPI + crawl4ai
 
 on:
   push:
@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Test Repo (Repo A)
+      - name: Checkout Test Repo
         uses: actions/checkout@v3
 
-      - name: Clone FastAPI Server Repo (Repo B)
+      - name: Clone FastAPI Repo
         run: |
           git clone https://github.com/commonground-project/url-crawler.git fastapi_server
 
@@ -26,30 +26,37 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install FastAPI CLI & dependencies
+      - name: Install Python dependencies (crawl4ai, FastAPI, etc.)
         working-directory: fastapi_server
         run: |
-          pip install "fastapi[all]"
+          pip install -U crawl4ai
+          pip install fastapi uvicorn httpx requests beautifulsoup4 nest_asyncio
 
-      - name: Start FastAPI Server (with CLI)
+      - name: Run crawl4ai post-install setup
         working-directory: fastapi_server
         run: |
-          fastapi dev &
-          sleep 5
+          crawl4ai-setup
+#          crawl4ai-doctor || echo "Doctor check failed but continuing..."
 
-      - name: Wait for FastAPI Server to be ready
+      - name: Start FastAPI Server
+        working-directory: fastapi_server
         run: |
-          echo "Waiting for FastAPI to start..."
+          fastapi dev
+
+      - name: Wait for FastAPI to be ready
+        run: |
           for i in {1..10}; do
             if curl -s http://127.0.0.1:8000/ > /dev/null; then
               echo "FastAPI is ready!"
               break
             fi
-            echo "Still waiting..."
+            echo "Waiting for server..."
             sleep 2
           done
+          echo "FastAPI startup log:"
+          cat fastapi_server/fastapi.log
 
-      - name: Set up Java and Gradle
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -57,3 +64,10 @@ jobs:
 
       - name: Run Gradle Tests
         run: ./gradlew test
+
+      - name: Upload test report if fail
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: build/reports/tests/test
