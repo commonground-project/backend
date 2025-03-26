@@ -34,7 +34,7 @@ jobs:
       - name: Start FastAPI Server (with CLI)
         working-directory: fastapi_server
         run: |
-          uvicorn main:app --host 127.0.0.1 --port 8000 &
+          fastapi dev &
           sleep 5
 
       - name: Wait for FastAPI Server to be ready
