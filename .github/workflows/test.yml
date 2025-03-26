@@ -1,5 +1,4 @@
-name: Run Tests with FastAPI + crawl4ai
-
+name: Run Tests with FastAPI Server
 on:
   push:
     branches:
@@ -8,55 +7,49 @@ on:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Test Repo
         uses: actions/checkout@v3
-
-      - name: Clone FastAPI Repo
+        with:
+          ref: test-report
+          repository: build/reports/tests/test
+      - name: Clone FastAPI Server Repo
         run: |
           git clone https://github.com/commonground-project/url-crawler.git fastapi_server
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
       - name: Install Python dependencies (crawl4ai, FastAPI, etc.)
         working-directory: fastapi_server
         run: |
           pip install -U crawl4ai
           pip install fastapi uvicorn httpx requests beautifulsoup4 nest_asyncio
-
       - name: Run crawl4ai post-install setup
         working-directory: fastapi_server
         run: |
           crawl4ai-setup
-#          crawl4ai-doctor || echo "Doctor check failed but continuing..."
-
-      - name: Start FastAPI Server
+          crawl4ai-doctor || echo "Doctor check failed but continuing..."
+      - name: Start FastAPI Server (with CLI)
         working-directory: fastapi_server
         run: |
-          fastapi dev
-
-      - name: Wait for FastAPI to be ready
+          fastapi dev &
+          sleep 5
+      - name: Wait for FastAPI Server to be ready
         run: |
+          echo "Waiting for FastAPI to start..."
           for i in {1..10}; do
             if curl -s http://127.0.0.1:8000/ > /dev/null; then
               echo "FastAPI is ready!"
               break
             fi
-            echo "Waiting for server..."
+            echo "Still waiting..."
             sleep 2
           done
-          echo "FastAPI startup log:"
-          cat fastapi_server/fastapi.log
-
-      - name: Set up Java
+      - name: Set up Java and Gradle
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -64,10 +57,3 @@ jobs:
 
       - name: Run Gradle Tests
         run: ./gradlew test
-
-      - name: Upload test report if fail
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-report
-          path: build/reports/tests/test
