@@ -1,0 +1,47 @@
+name: Run Tests with FastAPI Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Test Repo (Repo A)
+        uses: actions/checkout@v3
+
+      - name: Clone FastAPI Server Repo (Repo B)
+        run: |
+          git clone https://github.com/YOUR_USERNAME/YOUR_FASTAPI_REPO.git fastapi_server
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install FastAPI CLI & dependencies
+        working-directory: fastapi_server
+        run: |
+          pip install "fastapi[all]"
+
+      - name: Start FastAPI Server (with CLI)
+        working-directory: fastapi_server
+        run: |
+          fastapi dev main & 
+          sleep 5
+
+      - name: Set up Java and Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run Gradle Tests
+        run: ./gradlew test
