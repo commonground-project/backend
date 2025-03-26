@@ -57,4 +57,5 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Run Gradle Tests
+        working-directory: ./backend
         run: ./gradlew test
