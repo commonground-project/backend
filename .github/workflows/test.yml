@@ -14,18 +14,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Wait for FastAPI Server to be ready
-        run: |
-          echo "Waiting for FastAPI to start..."
-          for i in {1..10}; do
-            if curl -s http://127.0.0.1:8000/ > /dev/null; then
-              echo "FastAPI is ready!"
-              break
-            fi
-            echo "Still waiting..."
-            sleep 2
-          done
-
       - name: Checkout Test Repo (Repo A)
         uses: actions/checkout@v3
 
@@ -46,8 +34,20 @@ jobs:
       - name: Start FastAPI Server (with CLI)
         working-directory: fastapi_server
         run: |
-          fastapi dev main & 
+          uvicorn main:app --host 127.0.0.1 --port 8000 &
           sleep 5
+
+      - name: Wait for FastAPI Server to be ready
+        run: |
+          echo "Waiting for FastAPI to start..."
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8000/ > /dev/null; then
+              echo "FastAPI is ready!"
+              break
+            fi
+            echo "Still waiting..."
+            sleep 2
+          done
 
       - name: Set up Java and Gradle
         uses: actions/setup-java@v4
