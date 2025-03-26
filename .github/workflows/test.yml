@@ -56,5 +56,16 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Debug current files
+        run: |
+          echo "pwd = $(pwd)"
+          echo "--- list root ---"
+          ls -la
+          echo "--- list backend ---"
+          ls -la backend
+
       - name: Run Gradle Tests
-        run: ./backend/gradlew test
+        run:
+          cd backend
+          gradle test
