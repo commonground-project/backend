@@ -15,7 +15,7 @@ import java.util.List;
 public class SuggestionService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String MOCK_API_URL = "http://localhost:5001";
+    private final String mockApiUrl = "http://localhost:5001";
 
     private final TextSuggestionRepository textSuggestionRepository;
     private final TextSuggestionDetailRepository textSuggestionDetailRepository;
@@ -34,7 +34,7 @@ public class SuggestionService {
 
 
     public TextSuggestionResponse getTextSuggestions(TextSuggestionRequest request) {
-        String url = MOCK_API_URL + "/api/mock-text-suggestion";
+        String url = mockApiUrl + "/api/mock-text-suggestion";
         TextSuggestionResponse response = makePostRequest(url, request, TextSuggestionResponse.class);
 
         TextSuggestionEntity textSuggestionEntity = textSuggestionRepository.save(
@@ -64,7 +64,7 @@ public class SuggestionService {
 
 
     public EditedTextSuggestionResponse getEditedTextSuggestions(EditedTextSuggestionRequest request) {
-        String url = MOCK_API_URL + "/api/mock-edited-text-suggestion";
+        String url = mockApiUrl + "/api/mock-edited-text-suggestion";
         EditedTextSuggestionResponse response = makePostRequest(url, request, EditedTextSuggestionResponse.class);
 
         EditedTextSuggestionEntity editedTextSuggestionEntity = editedTextSuggestionRepository.save(
