@@ -38,4 +38,6 @@ public class ReferenceEntity {
 
     private String title;
 
+    private String description;
+
 }
