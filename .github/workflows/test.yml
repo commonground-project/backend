@@ -47,6 +47,10 @@ jobs:
             echo "Still waiting..."
             sleep 2
           done
+      - name: Curl fallback API for encoded URL
+        run: |
+          curl -v "http://127.0.0.1:8000/title/https%3A%2F%2Fwww.ctee.com.tw%2Fnews%2F20221226700018-430705"
+
       - name: Set up Java and Gradle
         uses: actions/setup-java@v4
         with:
