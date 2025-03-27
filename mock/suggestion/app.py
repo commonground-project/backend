@@ -64,7 +64,10 @@ def mock_edited_text_suggestion():
     for suggestion in suggestions:
         if "<sug1>" in suggestion["message"]:  # Only provide suggestion for `<sug1>`
             new_suggestions.append({
-                "edited_message": suggestion["edited_message"].replace("來佔便宜", "可能尋求更好的經濟機會"),
+                "edited_message": suggestion["edited_message"].replace(
+                    "來佔便宜",
+                    "可能尋求更好的經濟機會"
+                ),
                 "feedback": "‘佔便宜’ 可能帶有偏見性表述，建議以更客觀的方式描述難民的處境。",
                 "replacement": "部分難民可能尋求更好的經濟機會與生活條件"
             })
