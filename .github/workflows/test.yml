@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Backend Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Clone FastAPI Server Repo
         run: |
           git clone https://github.com/commonground-project/url-crawler.git fastapi_server
@@ -40,7 +40,7 @@ jobs:
         run: |
           echo "Waiting for FastAPI to start..."
           for i in {1..10}; do
-            if curl -s http://127.0.0.1:8000/ > /dev/null; then
+            if curl -s http://127.0.0.1:8000/ ; then
               echo "FastAPI is ready!"
               break
             fi
@@ -58,4 +58,3 @@ jobs:
 
       - name: Run Gradle Tests
         run: ./gradlew test
-
