@@ -61,4 +61,4 @@ jobs:
         run: ls -la
 
       - name: Run Gradle Tests
-        run: ./gradlew test
+        run: ./gradlew test --info
