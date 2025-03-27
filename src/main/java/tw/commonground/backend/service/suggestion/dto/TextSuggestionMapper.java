@@ -3,7 +3,11 @@ package tw.commonground.backend.service.suggestion.dto;
 import tw.commonground.backend.service.suggestion.entity.TextSuggestionDetailEntity;
 import tw.commonground.backend.service.suggestion.entity.TextSuggestionEntity;
 
-public class TextSuggestionMapper {
+public final class TextSuggestionMapper {
+
+    private TextSuggestionMapper() {
+        // hide constructor
+    }
 
     public static TextSuggestionEntity toEntity(TextSuggestionRequest request) {
         return TextSuggestionEntity.builder()

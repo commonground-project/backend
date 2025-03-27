@@ -3,7 +3,11 @@ package tw.commonground.backend.service.suggestion.dto;
 import tw.commonground.backend.service.suggestion.entity.EditedTextSuggestionDetailEntity;
 import tw.commonground.backend.service.suggestion.entity.EditedTextSuggestionEntity;
 
-public class EditedTextSuggestionMapper {
+public final class EditedTextSuggestionMapper {
+
+    private EditedTextSuggestionMapper() {
+        // hide constructor
+    }
 
     public static EditedTextSuggestionEntity toEntity(EditedTextSuggestionRequest request) {
         return EditedTextSuggestionEntity.builder()
