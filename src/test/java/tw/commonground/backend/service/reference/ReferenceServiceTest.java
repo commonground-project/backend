@@ -30,23 +30,16 @@ class ReferenceServiceTest {
     @Captor
     private ArgumentCaptor<List<ReferenceEntity>> captor;
 
-//    @Test
-//    void testGetWebsiteInfo() {
-//        String url = "https://www.ctee.com.tw/news/20221226700018-430705";
-//
-//        WebsiteInfoResponse websiteInfoResponse = referenceService.getWebsiteInfo(url);
-//        System.out.println("title: " + websiteInfoResponse.getTitle());
-//
-//        String expectedTitle = "歐洲｜移民難解德國缺工 - 國際 - 工商時報";
-//        if (websiteInfoResponse.getIcon() != null) {
-//            System.out.println("The title is fetched using the fallback API");
-//        } else {
-//            System.out.println("The title is fetched using the document");
-//            System.out.println(websiteInfoResponse.getIcon());
-//        }
-//        assertThat(websiteInfoResponse.getTitle()).isEqualTo(expectedTitle);
-//    }
+    @Test
+    void testGetWebsiteInfo() {
+        String url = "https://www.ctee.com.tw/news/20221226700018-430705";
+        String expectedTitle = "歐洲｜移民難解德國缺工 - 國際 - 工商時報";
 
+        WebsiteInfoResponse websiteInfoResponse = referenceService.getWebsiteInfo(url);
+
+        Mockito.when(referenceService.fetchTitleFromFallback(url)).thenReturn(expectedTitle);
+        assertThat(websiteInfoResponse.getTitle()).isEqualTo(expectedTitle);
+    }
     @Test
     void testParseReferenceEntity_withExistedUrl() {
 
