@@ -1,10 +1,7 @@
 package tw.commonground.backend.service.reference.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -12,6 +9,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @AllArgsConstructor
+@Builder
 public class ReferenceResponseForAI {
     private UUID id;
     @JsonProperty("create_at")

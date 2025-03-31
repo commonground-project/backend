@@ -10,8 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import tw.commonground.backend.service.reference.dto.FallbackResponse;
-import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
+import tw.commonground.backend.service.reference.dto.*;
 import tw.commonground.backend.shared.tracing.Traced;
 import org.springframework.http.HttpHeaders;
 
@@ -31,7 +30,7 @@ public class ReferenceService {
 
     private final ReferenceRepository referenceRepository;
 
-    private static final String FALLBACK_CRAWLER_API = "http://127.0.0.1:8000/title/";
+    private static final String CRAWLER_API = "http://127.0.0.1:8000/title/";
 
     public ReferenceService(ReferenceRepository referenceRepository) {
         this.referenceRepository = referenceRepository;
@@ -40,6 +39,17 @@ public class ReferenceService {
     public ReferenceEntity createReferenceFromUrl(String url) {
         Set<ReferenceEntity> referenceEntities = createReferencesFromUrls(List.of(url));
         return referenceEntities.stream().findFirst().orElseThrow();
+    }
+
+    public ReferenceResponseForAI createDescriptionFromReference(ReferenceEntity referenceEntity) {
+
+        String url = referenceEntity.getUrl();
+
+        String description = fetchContentFromFallback(url);
+
+        referenceEntity.setDescription(description);
+        referenceRepository.save(referenceEntity);
+        return ReferenceMapper.toResponseForAI(referenceEntity);
     }
 
     public Set<ReferenceEntity> createReferencesFromUrls(List<String> urls) {
@@ -124,6 +134,26 @@ public class ReferenceService {
         return websiteInfoResponse;
     }
 
+    public String fetchContentFromFallback(String urlString) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            String apiUrl = CRAWLER_API + "content/"+  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            ResponseEntity<ContentCrawlerResponse> response = restTemplate.exchange(
+                    apiUrl, HttpMethod.GET, entity, ContentCrawlerResponse.class
+            );
+            if (response.getBody() != null) {
+                return  response.getBody().getContent();
+            }
+        } catch (Exception e) {
+            log.error("Fallback API for content failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
+        }
+    }
+
     public String fetchTitleFromFallback(String urlString) {
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -133,15 +163,15 @@ public class ReferenceService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
 
-            String apiUrl = FALLBACK_CRAWLER_API + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
-            ResponseEntity<FallbackResponse> response = restTemplate.exchange(
-                    apiUrl, HttpMethod.GET, entity, FallbackResponse.class
+            String apiUrl = CRAWLER_API + "title/"+  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            ResponseEntity<TitleCrawlerResponse> response = restTemplate.exchange(
+                    apiUrl, HttpMethod.GET, entity, TitleCrawlerResponse.class
             );
             if (response.getBody() != null) {
                 return  response.getBody().getTitle();
             }
         } catch (Exception e) {
-            log.error("Fallback API failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
+            log.error("Fallback API for title failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
         }
         return null;
     }

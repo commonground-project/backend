@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class FallbackResponse {
+public class TitleCrawlerResponse {
     @JsonProperty("url")
     private String url;
 
