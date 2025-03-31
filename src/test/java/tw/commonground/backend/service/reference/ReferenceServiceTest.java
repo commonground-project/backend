@@ -34,10 +34,11 @@ class ReferenceServiceTest {
     void testGetWebsiteInfo() {
         String url = "https://www.ctee.com.tw/news/20221226700018-430705";
         String expectedTitle = "歐洲｜移民難解德國缺工 - 國際 - 工商時報";
+        ReferenceService spyReferenceService = Mockito.spy(referenceService);
+        Mockito.when(spyReferenceService.fetchTitleFromFallback(url)).thenReturn(expectedTitle);
 
-        WebsiteInfoResponse websiteInfoResponse = referenceService.getWebsiteInfo(url);
+        WebsiteInfoResponse websiteInfoResponse = spyReferenceService.getWebsiteInfo(url);
 
-        Mockito.when(referenceService.fetchTitleFromFallback(url)).thenReturn(expectedTitle);
         assertThat(websiteInfoResponse.getTitle()).isEqualTo(expectedTitle);
     }
     @Test
