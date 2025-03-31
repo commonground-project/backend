@@ -124,7 +124,7 @@ public class ReferenceService {
         return websiteInfoResponse;
     }
 
-    private String fetchTitleFromFallback(String urlString) {
+    public String fetchTitleFromFallback(String urlString) {
         try {
             RestTemplate restTemplate = new RestTemplate();
 
@@ -132,12 +132,13 @@ public class ReferenceService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
+
             String apiUrl = FALLBACK_CRAWLER_API + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
             ResponseEntity<FallbackResponse> response = restTemplate.exchange(
                     apiUrl, HttpMethod.GET, entity, FallbackResponse.class
             );
             if (response.getBody() != null) {
-                return response.getBody().getTitle();
+                return  response.getBody().getTitle();
             }
         } catch (Exception e) {
             log.error("Fallback API failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
