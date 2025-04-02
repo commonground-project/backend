@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.user.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -7,6 +8,11 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.lang.Nullable;
 import tw.commonground.backend.security.UserRole;
+import tw.commonground.backend.service.user.entity.UserGender;
+import tw.commonground.backend.service.user.entity.UserOccupation;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -25,4 +31,10 @@ public class UpdateUserRequest {
 
     @Nullable
     private UserRole role;
+
+    private UserOccupation occupation;
+
+    private UserGender gender;
+
+    private LocalDate birthdate;
 }

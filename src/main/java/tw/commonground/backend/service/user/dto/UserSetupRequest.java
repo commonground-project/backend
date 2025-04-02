@@ -7,6 +7,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.lang.Nullable;
+import tw.commonground.backend.service.user.entity.UserGender;
+import tw.commonground.backend.service.user.entity.UserOccupation;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,4 +28,10 @@ public class UserSetupRequest {
     @Size(min = 1, max = 20, message = "Nickname must be between 1 and 20 characters long")
     @NotBlank(message = "Nickname is required")
     private String nickname;
+
+    private UserOccupation occupation;
+
+    private UserGender gender;
+
+    private LocalDate birthdate;
 }
