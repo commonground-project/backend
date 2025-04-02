@@ -1,9 +1,7 @@
 package tw.commonground.backend.service.user.dto;
 
 import tw.commonground.backend.service.user.entity.DetailUserEntity;
-import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
-import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.List;
 

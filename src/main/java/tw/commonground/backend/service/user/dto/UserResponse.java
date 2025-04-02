@@ -2,7 +2,6 @@ package tw.commonground.backend.service.user.dto;
 
 
 import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import tw.commonground.backend.service.user.entity.UserGender;
 import tw.commonground.backend.service.user.entity.UserOccupation;
 

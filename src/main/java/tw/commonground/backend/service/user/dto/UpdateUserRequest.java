@@ -1,6 +1,5 @@
 package tw.commonground.backend.service.user.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -12,7 +11,6 @@ import tw.commonground.backend.service.user.entity.UserGender;
 import tw.commonground.backend.service.user.entity.UserOccupation;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

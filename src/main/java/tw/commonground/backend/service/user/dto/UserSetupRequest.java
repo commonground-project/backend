@@ -7,12 +7,10 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.lang.Nullable;
 import tw.commonground.backend.service.user.entity.UserGender;
 import tw.commonground.backend.service.user.entity.UserOccupation;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
