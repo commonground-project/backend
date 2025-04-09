@@ -52,7 +52,7 @@ public class SimilarityController {
                 }).toList());
     }
 
-    @GetMapping("/similarities/{userId}")
+    @GetMapping("/similarity/{userId}")
     public ResponseEntity<SimilarityResponse> getSimilarityByUserId(@PathVariable("userId") UUID userId) {
         Pair<List<IssueSimilarityEntity>, List<ViewpointSimilarityEntity>> pair
                 = similarityService.getSimilaritiesByUserId(userId);
@@ -61,7 +61,7 @@ public class SimilarityController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/similarities/{userId}")
+    @PutMapping("/similarity/{userId}")
     public ResponseEntity<SimilarityResponse> updateSimilarityByUserId(
             @PathVariable("userId") UUID userId,
             @RequestBody UserSimilarityRequest request) {
