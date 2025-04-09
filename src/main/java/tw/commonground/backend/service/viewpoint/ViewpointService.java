@@ -64,6 +64,10 @@ public class ViewpointService {
         return viewpointRepository.findAll(pageable);
     }
 
+    public Page<ViewpointEntity> getIssueViewpointsWithSimilarity(Long userId, UUID issueId, Pageable pageable) {
+        return viewpointRepository.findAllWithSimilarityByIssueID(userId, issueId, pageable);
+    }
+
     public Page<ViewpointEntity> getIssueViewpoints(UUID issueId, Pageable pageable) {
         return viewpointRepository.findAllByIssueId(issueId, pageable);
     }

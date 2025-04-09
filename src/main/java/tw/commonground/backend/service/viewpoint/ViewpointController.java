@@ -48,11 +48,13 @@ public class ViewpointController {
             @Valid PaginationRequest request) {
 
         Pageable pageable = paginationParser.parsePageable(request);
-        Page<ViewpointEntity> pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
+        Page<ViewpointEntity> pageViewpoints;
 
         if (user == null) {
+             pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
             return getPaginationResponse(pageViewpoints);
         } else {
+            pageViewpoints = viewpointService.getIssueViewpointsWithSimilarity(user.getId(), id, pageable);
             return getPaginationResponse(user.getId(), pageViewpoints);
         }
     }

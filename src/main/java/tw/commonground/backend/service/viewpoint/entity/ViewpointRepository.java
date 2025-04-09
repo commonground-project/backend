@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import tw.commonground.backend.shared.entity.Reaction;
 
 import java.util.UUID;
@@ -12,6 +13,15 @@ import java.util.UUID;
 public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID>, ViewpointRepositoryCustom {
 
     Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
+
+    @Query("SELECT v FROM ViewpointEntity v "
+            + "LEFT JOIN ViewpointSimilarityEntity vs ON v.id = vs.key.viewpointId AND vs.key.userId = :userId "
+            + "WHERE v.issue.id = :issueId "
+            + "ORDER BY "
+            + "CASE WHEN vs.similarity IS NOT NULL THEN 0 ELSE 1 END, "
+            + "vs.similarity DESC, "
+            + "v.createdAt DESC")
+    Page<ViewpointEntity> findAllWithSimilarityByIssueID(Long userId, UUID issueId, Pageable pageable);
 
 }
 

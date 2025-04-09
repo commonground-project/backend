@@ -47,9 +47,16 @@ public class IssueController {
     }
 
     @GetMapping("/issues")
-    public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(@Valid PaginationRequest pagination) {
+    public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(@AuthenticationPrincipal FullUserEntity user,
+                                                                           @Valid PaginationRequest pagination) {
         Pageable pageable = paginationParser.parsePageable(pagination);
-        Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
+        Page<SimpleIssueEntity> pageIssues;
+
+        if (user != null) {
+            pageIssues = issueService.getIssuesWithSimilarity(user.getId(), pageable);
+        } else {
+            pageIssues = issueService.getIssues(pageable);
+        }
 
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()

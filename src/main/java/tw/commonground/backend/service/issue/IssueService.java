@@ -49,6 +49,10 @@ public class IssueService {
         return issueRepository.findAllIssueEntityBy(pageable);
     }
 
+    public Page<SimpleIssueEntity> getIssuesWithSimilarity(Long userId, Pageable pageable) {
+        return issueRepository.findAllWithSimilarity(userId, pageable);
+    }
+
     public IssueEntity getIssue(UUID id) {
         return issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
