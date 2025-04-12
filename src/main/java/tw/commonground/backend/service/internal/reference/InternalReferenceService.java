@@ -1,11 +1,13 @@
 package tw.commonground.backend.service.internal.reference;
 
-import tw.commonground.backend.service.internal.reference.dto.InternalDetailReferenceResponse;
-import tw.commonground.backend.service.internal.reference.dto.InternalReferenceMapper;
+import org.springframework.stereotype.Service;
 import tw.commonground.backend.service.reference.ReferenceEntity;
 import tw.commonground.backend.service.reference.ReferenceRepository;
 import tw.commonground.backend.service.reference.ReferenceService;
+import tw.commonground.backend.shared.tracing.Traced;
 
+@Traced
+@Service
 public class InternalReferenceService {
 
     ReferenceService referenceService;

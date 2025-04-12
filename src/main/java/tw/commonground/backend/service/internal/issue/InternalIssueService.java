@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.internal.issue.dto.InternalDetailIssueResponse;
+import tw.commonground.backend.service.issue.entity.ManualIssueFactEntity;
 import tw.commonground.backend.service.internal.issue.dto.InternalIssueMapper;
 import tw.commonground.backend.service.internal.reference.InternalReferenceService;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalDetailViewpointResponse;
@@ -77,6 +78,18 @@ public class InternalIssueService {
                 }
             }
             internalDetailViewpointResponses.add(InternalViewpointMapper.toDetailResponse(viewpoint, facts));
+        }
+
+        // we also need to deal with the fact directly related to this issue
+        List<FactEntity> facts = issueEntity.getManualFacts()
+                .stream()
+                .map(ManualIssueFactEntity::getFact)
+                .toList();
+        for(FactEntity fact : facts) {
+            Set<ReferenceEntity> references = fact.getReferences();
+            for(ReferenceEntity reference : references) {
+                internalReferenceService.createDescriptionForReference(reference);
+            }
         }
         return InternalIssueMapper.toDetailResponse(issueEntity, internalDetailViewpointResponses);
     }

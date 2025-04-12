@@ -1,19 +1,16 @@
 package tw.commonground.backend.service.internal.viewpoint.dto;
 
-import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.internal.fact.dto.InternalFactMapper;
-import tw.commonground.backend.service.viewpoint.dto.ViewpointResponse;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
 import tw.commonground.backend.shared.content.ContentParser;
-import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.List;
 import java.util.UUID;
 
-import static tw.commonground.backend.service.viewpoint.dto.ViewpointMapper.toReactionResponse;
+// import static tw.commonground.backend.service.viewpoint.dto.ViewpointMapper.toReactionResponse;
 
 public final class InternalViewpointMapper {
 

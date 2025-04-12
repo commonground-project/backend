@@ -12,12 +12,7 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
-import tw.commonground.backend.service.reference.ReferenceEntity;
-import tw.commonground.backend.service.reference.ReferenceService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
-import tw.commonground.backend.service.viewpoint.ViewpointService;
-import tw.commonground.backend.service.viewpoint.dto.ViewpointMapper;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.tracing.Traced;
 
@@ -42,7 +37,7 @@ public class IssueService {
                         IssueFollowRepository issueFollowRepository,
                         ManualFactRepository manualFactRepository,
                         FactRepository factRepository,
-                        FactService factService, ViewpointService viewpointService) {
+                        FactService factService) {
         this.issueRepository = issueRepository;
         this.issueFollowRepository = issueFollowRepository;
         this.manualFactRepository = manualFactRepository;
@@ -168,6 +163,4 @@ public class IssueService {
             throw new EntityNotFoundException("Issue", "id", id.toString());
         }
     }
-
-
 }
