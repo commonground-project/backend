@@ -12,7 +12,12 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
+import tw.commonground.backend.service.reference.ReferenceEntity;
+import tw.commonground.backend.service.reference.ReferenceService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.service.viewpoint.ViewpointService;
+import tw.commonground.backend.service.viewpoint.dto.ViewpointMapper;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.tracing.Traced;
 
@@ -33,16 +38,21 @@ public class IssueService {
 
     private final FactService factService;
 
+    private final ViewpointService viewpointService;
+
+    private final ReferenceService referenceService;
+
     public IssueService(IssueRepository issueRepository,
                         IssueFollowRepository issueFollowRepository,
                         ManualFactRepository manualFactRepository,
                         FactRepository factRepository,
-                        FactService factService) {
+                        FactService factService, ViewpointService viewpointService) {
         this.issueRepository = issueRepository;
         this.issueFollowRepository = issueFollowRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
+        this.viewpointService = viewpointService;
     }
 
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
@@ -163,4 +173,6 @@ public class IssueService {
             throw new EntityNotFoundException("Issue", "id", id.toString());
         }
     }
+
+
 }

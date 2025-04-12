@@ -5,8 +5,11 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.issue.entity.IssueFollowEntity;
 import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
+import tw.commonground.backend.service.viewpoint.dto.ViewpointMapper;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.pagination.PaginationResponse;
 import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.List;

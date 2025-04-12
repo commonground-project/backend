@@ -1,10 +1,10 @@
-package tw.commonground.backend.service.fact.dto;
+package tw.commonground.backend.service.internal.fact.dto;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import tw.commonground.backend.service.reference.dto.ReferenceResponseForAI;
+import tw.commonground.backend.service.internal.reference.dto.InternalDetailReferenceResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @Builder
-public class FactResponseForAI {
+public class InternalDetailFactResponse {
 
     private UUID id;
 
@@ -29,5 +29,5 @@ public class FactResponseForAI {
 
     private String authorAvatar;
 
-    private List<ReferenceResponseForAI> references;
+    private List<InternalDetailReferenceResponse> references;
 }

@@ -41,17 +41,6 @@ public class ReferenceService {
         return referenceEntities.stream().findFirst().orElseThrow();
     }
 
-    public ReferenceResponseForAI createDescriptionFromReference(ReferenceEntity referenceEntity) {
-
-        String url = referenceEntity.getUrl();
-
-        String description = fetchContentFromFallback(url);
-
-        referenceEntity.setDescription(description);
-        referenceRepository.save(referenceEntity);
-        return ReferenceMapper.toResponseForAI(referenceEntity);
-    }
-
     public Set<ReferenceEntity> createReferencesFromUrls(List<String> urls) {
         urls = urlHandling(urls);
 

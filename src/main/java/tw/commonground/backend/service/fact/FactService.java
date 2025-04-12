@@ -42,6 +42,7 @@ public class FactService {
         );
     }
 
+
     public FactEntity createFact(FactRequest factRequest, FullUserEntity user) {
         FactEntity factEntity = FactEntity.builder()
                 .title(factRequest.getTitle())

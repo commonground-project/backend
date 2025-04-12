@@ -2,6 +2,7 @@ package tw.commonground.backend.service.internal.issue;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tw.commonground.backend.service.internal.issue.dto.InternalDetailIssueResponse;
 import tw.commonground.backend.service.internal.issue.dto.InternalIssueResponse;
 import tw.commonground.backend.shared.tracing.Traced;
 
@@ -28,6 +29,12 @@ public class InternalIssueController {
     @GetMapping("/{issueId}")
     public ResponseEntity<InternalIssueResponse> getIssue(@PathVariable UUID issueId) {
         InternalIssueResponse issue = internalIssueService.getIssue(issueId);
+        return ResponseEntity.ok(issue);
+    }
+
+    @GetMapping("/detail/{issueId}")  // get issue with references which has description
+    public ResponseEntity<InternalDetailIssueResponse> getDetailIssue(@PathVariable UUID issueId) {
+        InternalDetailIssueResponse issue = internalIssueService.getDetailIssue(issueId);
         return ResponseEntity.ok(issue);
     }
 }
