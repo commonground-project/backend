@@ -151,7 +151,6 @@ public class ReferenceService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-
             String apiUrl = CRAWLER_API + "title/"+  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
             ResponseEntity<TitleCrawlerResponse> response = restTemplate.exchange(
                     apiUrl, HttpMethod.GET, entity, TitleCrawlerResponse.class
