@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.dto.FactMapper;
@@ -15,13 +16,15 @@ import tw.commonground.backend.service.reference.ReferenceMapper;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.PaginationParser;
-import tw.commonground.backend.service.reference.ReferenceRequest;
-import tw.commonground.backend.service.reference.ReferenceResponse;
+import tw.commonground.backend.service.reference.dto.ReferenceRequest;
+import tw.commonground.backend.service.reference.dto.ReferenceResponse;
 import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 
+@Traced
 @RestController
 public class FactController {
     private static final int MAX_SIZE = 200;
@@ -48,12 +51,13 @@ public class FactController {
                 .toList();
 
         return ResponseEntity.ok(new WrappedPaginationResponse<>(factResponses,
-                                                                 PaginationMapper.toResponse(factEntityPage)));
+                PaginationMapper.toResponse(factEntityPage)));
     }
 
     @PostMapping("/api/facts")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<FactResponse> createFact(@AuthenticationPrincipal FullUserEntity user,
-                                   @Valid @RequestBody FactRequest factRequest) {
+                                                   @Valid @RequestBody FactRequest factRequest) {
         return ResponseEntity.ok(FactMapper.toResponse(factService.createFact(factRequest, user)));
     }
 
@@ -63,12 +67,14 @@ public class FactController {
     }
 
     @PutMapping("/api/fact/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<FactResponse> updateFact(@PathVariable String id,
                                                    @Valid @RequestBody FactRequest factRequest) {
         return ResponseEntity.ok(FactMapper.toResponse(factService.updateFact(UUID.fromString(id), factRequest)));
     }
 
     @DeleteMapping("/api/fact/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteFact(@PathVariable String id) {
         factService.deleteFact(UUID.fromString(id));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -81,14 +87,17 @@ public class FactController {
     }
 
     @PostMapping("/api/fact/{id}/references")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<ReferenceResponse>> updateFactReferences(@PathVariable String id,
-                                                        @RequestBody List<@Valid ReferenceRequest> referenceRequests) {
+                                                                        @RequestBody List<@Valid ReferenceRequest>
+                                                                                referenceRequests) {
 
         return ResponseEntity.ok(factService.createFactReferences(UUID.fromString(id), referenceRequests)
                 .stream().map(ReferenceMapper::toResponse).toList());
     }
 
     @DeleteMapping("/api/fact/{id}/reference/{referenceId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteFactReferences(@PathVariable String id, @PathVariable String referenceId) {
         factService.deleteFactReferences(UUID.fromString(id), UUID.fromString(referenceId));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

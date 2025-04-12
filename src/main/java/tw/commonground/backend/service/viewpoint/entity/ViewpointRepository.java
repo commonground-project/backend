@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import tw.commonground.backend.shared.entity.Reaction;
 
 import java.util.UUID;
 

@@ -8,9 +8,12 @@ import tw.commonground.backend.service.jwt.entity.RefreshTokenProjection;
 import tw.commonground.backend.service.jwt.entity.RefreshTokenRepository;
 import tw.commonground.backend.service.jwt.exception.RefreshTokenInvalidException;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.shared.tracing.Traced;
 
+import java.time.Clock;
 import java.util.UUID;
 
+@Traced
 @Service
 public class JwtService {
 
@@ -18,7 +21,10 @@ public class JwtService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public JwtService(JwtAccessUtil jwtAccessUtil, RefreshTokenRepository refreshTokenRepository) {
+    private final Clock clock;
+
+    public JwtService(Clock clock, JwtAccessUtil jwtAccessUtil, RefreshTokenRepository refreshTokenRepository) {
+        this.clock = clock;
         this.jwtAccessUtil = jwtAccessUtil;
         this.refreshTokenRepository = refreshTokenRepository;
 
@@ -32,7 +38,7 @@ public class JwtService {
     public RefreshTokenResponse generateTokens(FullUserEntity fullUserEntity) {
         String accessToken = jwtAccessUtil.generateAccessToken(fullUserEntity);
         RefreshTokenEntity refreshToken = jwtAccessUtil.generateRefreshToken(fullUserEntity);
-        Long expirationTime = System.currentTimeMillis() + jwtAccessUtil.getRefreshTokenExpirationMillis();
+        Long expirationTime = clock.millis() + jwtAccessUtil.getRefreshTokenExpirationMillis();
 
         return new RefreshTokenResponse(refreshToken.getId().toString(), expirationTime, accessToken);
     }
@@ -40,7 +46,7 @@ public class JwtService {
     public RefreshTokenResponse refreshToken(UUID refreshToken) {
         RefreshTokenProjection refreshTokenProjection = refreshTokenRepository
                 .findByIdAndIsActiveAndExpirationTimeAfter(refreshToken,
-                        true, System.currentTimeMillis()).orElseThrow(RefreshTokenInvalidException::new);
+                        true, clock.millis()).orElseThrow(RefreshTokenInvalidException::new);
 
         String accessToken = jwtAccessUtil.generateAccessToken(refreshTokenProjection.getUser());
         RefreshTokenEntity newRefreshToken = jwtAccessUtil.generateRefreshToken(refreshTokenProjection.getUser());
@@ -54,6 +60,6 @@ public class JwtService {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void rotateRefreshTokens() {
-        refreshTokenRepository.deleteAllByExpirationTimeBefore(System.currentTimeMillis());
+        refreshTokenRepository.deleteAllByExpirationTimeBefore(clock.millis());
     }
 }

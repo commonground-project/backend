@@ -3,12 +3,13 @@ package tw.commonground.backend.service.fact.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import tw.commonground.backend.service.reference.ReferenceRequest;
+import tw.commonground.backend.service.reference.dto.ReferenceRequest;
 
 import java.util.*;
 
 @Getter
 @Setter
+@ToString
 public class FactRequest {
 
     @NotBlank(message = "Title is required")

@@ -13,14 +13,19 @@ import tw.commonground.backend.service.fact.entity.FactRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
-import tw.commonground.backend.shared.content.ContentContainFactParser;
+import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.tracing.Traced;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
+@Traced
 @Service
 public class IssueService {
 
     private final IssueRepository issueRepository;
+
+    private final IssueFollowRepository issueFollowRepository;
 
     private final ManualFactRepository manualFactRepository;
 
@@ -28,9 +33,13 @@ public class IssueService {
 
     private final FactService factService;
 
-    public IssueService(IssueRepository issueRepository, ManualFactRepository manualFactRepository,
-                        FactRepository factRepository, FactService factService) {
+    public IssueService(IssueRepository issueRepository,
+                        IssueFollowRepository issueFollowRepository,
+                        ManualFactRepository manualFactRepository,
+                        FactRepository factRepository,
+                        FactService factService) {
         this.issueRepository = issueRepository;
+        this.issueFollowRepository = issueFollowRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
@@ -51,7 +60,7 @@ public class IssueService {
 
         String insight;
         try {
-            insight = ContentContainFactParser.convertLinkIntToUuid(request.getInsight(), request.getFacts());
+            insight = ContentParser.convertLinkIntToUuid(request.getInsight(), request.getFacts());
         } catch (Exception e) {
             throw new ValidationException("Insight is invalid: " + e.getMessage());
         }
@@ -76,7 +85,7 @@ public class IssueService {
         });
 
         try {
-            issueEntity.setInsight(ContentContainFactParser.convertLinkIntToUuid(issueRequest.getInsight(),
+            issueEntity.setInsight(ContentParser.convertLinkIntToUuid(issueRequest.getInsight(),
                     issueRequest.getFacts()));
         } catch (Exception e) {
             throw new ValidationException("Insight is invalid: " + e.getMessage());
@@ -123,6 +132,34 @@ public class IssueService {
         }
 
         return factEntities;
+    }
+
+    public Integer getViewpointCount(UUID id) {
+        return issueRepository.getViewpointCount(id);
+    }
+
+    @Transactional
+    public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
+        IssueFollowKey id = new IssueFollowKey(userId, issueId);
+        if (issueFollowRepository.findById(id).isPresent()) {
+            issueFollowRepository.updateFollowById(id, follow);
+        } else {
+            issueFollowRepository.insertFollowById(id, follow);
+        }
+        IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
+        issueFollowEntity.setId(id);
+        issueFollowEntity.setFollow(follow);
+        issueFollowEntity.setUpdatedAt(LocalDateTime.now());
+        return issueFollowEntity;
+    }
+
+    public Boolean getFollowForIssue(Long userId, UUID issueId) {
+        IssueFollowKey id = new IssueFollowKey(userId, issueId);
+        return issueFollowRepository.findFollowById(id).orElse(false);
+    }
+
+    public List<Long> getIssueFollowersById(UUID issueId) {
+        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
     }
 
     public void throwIfIssueNotExist(UUID id) {

@@ -1,8 +1,10 @@
 package tw.commonground.backend.service.viewpoint;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.exception.ValidationException;
@@ -10,17 +12,27 @@ import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
-import tw.commonground.backend.shared.content.ContentContainFactParser;
+import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.tracing.Traced;
+import tw.commonground.backend.shared.entity.Reaction;
+import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
+import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Traced
 @Service
 public class ViewpointService {
+    private static final String VIEWPOINT_KEY = "Viewpoint";
+
+    private static final String VIEWPOINT_REACTION_LOCK_FORMAT = "viewpoint.reaction.%s.%d";
+
     private final ViewpointRepository viewpointRepository;
 
     private final ViewpointReactionRepository viewpointReactionRepository;
@@ -29,20 +41,26 @@ public class ViewpointService {
 
     private final IssueService issueService;
 
+    private final LockService lockService;
+
     private final ViewpointFactRepository viewpointFactRepository;
     private final UserRepository userRepository;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ViewpointService(ViewpointRepository viewpointRepository,
                             ViewpointReactionRepository viewpointReactionRepository,
                             FactService factService,
                             ViewpointFactRepository viewpointFactRepository,
-                            IssueService issueService, UserRepository userRepository) {
+                            IssueService issueService, LockService lockService,
+                            ApplicationEventPublisher applicationEventPublisher) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
         this.issueService = issueService;
-        this.userRepository = userRepository;
+        this.lockService = lockService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
@@ -58,7 +76,7 @@ public class ViewpointService {
         factService.throwIfFactsNotExist(request.getFacts());
         issueService.throwIfIssueNotExist(issueId);
 
-        String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
 
         ViewpointEntity viewpointEntity = new ViewpointEntity();
         viewpointEntity.setTitle(request.getTitle());
@@ -71,19 +89,22 @@ public class ViewpointService {
             viewpointFactRepository.saveByViewpointIdAndFactId(viewpointEntity.getId(), factId);
         }
 
+        applicationEventPublisher.publishEvent(new UserViewpointCommentedEvent(this,
+                user.getId(), viewpointEntity.getId(), request.getContent()));
+
         return viewpointEntity;
     }
 
     public ViewpointEntity getViewpoint(UUID id) {
         return viewpointRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
+                () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
     }
 
     @Transactional
     public ViewpointEntity createViewpoint(ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
 
-        String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
 
         ViewpointEntity viewpointEntity = new ViewpointEntity();
         viewpointEntity.setTitle(request.getTitle());
@@ -102,9 +123,9 @@ public class ViewpointService {
     public ViewpointEntity updateViewpoint(UUID id, ViewpointRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
         ViewpointEntity viewpointEntity = viewpointRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
+                () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
 
-        String content = ContentContainFactParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
 
         viewpointEntity.setTitle(request.getTitle());
         viewpointEntity.setContent(content);
@@ -121,17 +142,25 @@ public class ViewpointService {
         viewpointRepository.deleteById(id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
-        throwIfViewpointNotExist(viewpointId);
-        throwIfUserNotExist(userId);
+        String lockKey = String.format(VIEWPOINT_REACTION_LOCK_FORMAT, viewpointId, userId);
 
-        ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
+        return lockService.executeWithLock(lockKey, () -> {
+            ViewpointReactionKey viewpointReactionKey = new ViewpointReactionKey(userId, viewpointId);
 
-        Optional<ViewpointReactionEntity> reactionOptional = viewpointReactionRepository.findById(viewpointReactionKey);
-        return reactionOptional
-                .map(viewpointReactionEntity -> handleExistingReaction(viewpointReactionEntity, viewpointId, reaction))
-                .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
+            Optional<ViewpointReactionEntity> reactionOptional =
+                    viewpointReactionRepository.findById(viewpointReactionKey);
+
+            ViewpointReactionEntity viewpointReactionEntity = reactionOptional
+                    .map(reactionEntity -> handleExistingReaction(reactionEntity, viewpointId, reaction))
+                    .orElseGet(() -> handleNewReaction(viewpointReactionKey, viewpointId, reaction));
+
+            applicationEventPublisher.publishEvent(new UserViewpointReactedEvent(this,
+                    userId, viewpointId, reaction));
+
+            return viewpointReactionEntity;
+        });
     }
 
     private void throwIfUserNotExist(Long userId) {
@@ -186,7 +215,7 @@ public class ViewpointService {
 
     public void throwIfViewpointNotExist(UUID viewpointId) {
         if (!viewpointRepository.existsById(viewpointId)) {
-            throw new ValidationException("Viewpoint not found");
+            throw new EntityNotFoundException(VIEWPOINT_KEY, "id", viewpointId.toString());
         }
     }
 
@@ -218,23 +247,4 @@ public class ViewpointService {
         ViewpointReactionKey id = new ViewpointReactionKey(userId, viewpointId);
         return viewpointReactionRepository.findReactionById(id).orElse(Reaction.NONE);
     }
-
-//    public ViewpointEntity addFactToViewpoint(UUID id, UUID factId) {
-//        ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(id).orElseThrow(
-//                () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
-//        FactEntity factEntity = factRepository.findById(factId).orElseThrow(
-//                () -> new EntityNotFoundException("Fact", "id", factId.toString()));
-//        viewpointEntity.getFacts().add(factEntity);
-//        viewpointRepository.save(viewpointEntity);
-//        return viewpointEntity;
-//    }
-
-//    public void deleteFactFromViewpoint(UUID id, UUID factId) {
-//        ViewpointEntity viewpointEntity = viewpointRepository.findViewpointEntityById(id).orElseThrow(
-//                () -> new EntityNotFoundException("Viewpoint", "id", id.toString()));
-//        FactEntity factEntity = factRepository.findById(factId).orElseThrow(
-//                () -> new EntityNotFoundException("Fact", "id", factId.toString()));
-//        viewpointEntity.getFacts().remove(factEntity);
-//        viewpointRepository.save(viewpointEntity);
-//    }
 }

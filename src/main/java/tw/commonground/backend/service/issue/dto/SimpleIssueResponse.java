@@ -3,21 +3,23 @@ package tw.commonground.backend.service.issue.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
+import lombok.ToString;
 
 @Getter
 @Setter
 @Builder
+@ToString
 public class SimpleIssueResponse {
 
     private String id;
 
-    private LocalDateTime createdAt;
+    private String createdAt;
 
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     private String title;
 
     private String description;
+
+    private Integer viewpointCount;
 }

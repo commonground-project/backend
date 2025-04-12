@@ -3,6 +3,7 @@ package tw.commonground.backend.service.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import tw.commonground.backend.security.UserRole;
 
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity implements SimpleUserEntity, FullUserEntity {
@@ -34,6 +36,10 @@ public class UserEntity implements SimpleUserEntity, FullUserEntity {
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private UserSettingEntity setting;
 
     @PrePersist
     public void prePersist() {

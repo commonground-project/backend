@@ -3,6 +3,7 @@ package tw.commonground.backend.service.jwt.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@ToString
 public class RefreshTokenEntity {
 
     @Id

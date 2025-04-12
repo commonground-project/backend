@@ -3,9 +3,9 @@ package tw.commonground.backend.service.viewpoint.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import tw.commonground.backend.service.fact.dto.FactResponse;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,12 +13,13 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@ToString
 public class ViewpointResponse {
     private UUID id;
 
-    private LocalDateTime createdAt;
+    private String createdAt;
 
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     private String title;
 

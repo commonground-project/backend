@@ -2,6 +2,7 @@ package tw.commonground.backend.service.fact.dto;
 
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.reference.ReferenceMapper;
+import tw.commonground.backend.shared.util.DateTimeUtils;
 
 import java.util.Collection;
 import java.util.Set;
@@ -18,8 +19,8 @@ public final class FactMapper {
         return FactResponse.builder()
                 .id(factEntity.getId())
                 .title(factEntity.getTitle())
-                .createdAt(factEntity.getCreatedAt())
-                .updatedAt(factEntity.getUpdatedAt())
+                .createdAt(DateTimeUtils.toIso8601String(factEntity.getCreatedAt()))
+                .updatedAt(DateTimeUtils.toIso8601String(factEntity.getUpdatedAt()))
                 .authorId(factEntity.getAuthorId())
                 .authorName(factEntity.getAuthorName())
                 .authorAvatar(factEntity.getAuthorAvatar())

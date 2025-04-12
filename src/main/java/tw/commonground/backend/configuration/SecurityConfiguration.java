@@ -4,7 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,9 +22,13 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import tw.commonground.backend.exception.ProblemTemplate;
+import tw.commonground.backend.service.internal.account.ServiceAccountService;
+import tw.commonground.backend.service.internal.account.seurity.TokenAuthenticationFilter;
 import tw.commonground.backend.service.jwt.security.JwtAuthenticationFilter;
 import tw.commonground.backend.service.jwt.JwtService;
 import tw.commonground.backend.service.jwt.security.OAuthRequestResolver;
@@ -29,7 +36,7 @@ import tw.commonground.backend.service.jwt.security.OAuthSuccessHandler;
 import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
-import tw.commonground.backend.service.user.entity.UserRole;
+import tw.commonground.backend.security.UserRole;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -52,7 +59,7 @@ public class SecurityConfiguration {
 
     private final OAuthRequestResolver requestResolver;
 
-    public SecurityConfiguration(UserService userService, JwtService jwtService,
+    public SecurityConfiguration(@Lazy UserService userService, JwtService jwtService,
                                  OAuthSuccessHandler successHandler, OAuthRequestResolver requestResolver) {
         this.userService = userService;
         this.jwtService = jwtService;
@@ -61,19 +68,25 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ServiceAccountService serviceAccountService)
+            throws Exception {
+
         http
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .addFilterBefore(new TokenAuthenticationFilter(serviceAccountService),
+                        UsernamePasswordAuthenticationFilter.class)
+
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/internal/**").hasAnyRole("ADMIN", "SERVICE_ACCOUNT_READ")
                         .requestMatchers("/api/user/avatar/**").permitAll()
                         .requestMatchers("/api/jwt/refresh/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/setup/**").hasRole("SETUP_REQUIRED")
                         .requestMatchers("/api/debug/**").anonymous()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/completed-sign-in.html").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/**").permitAll()
@@ -94,6 +107,13 @@ public class SecurityConfiguration {
                         .deleteCookies("JSESSIONID")
                 )
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(List.of("*"));
+                    configuration.setAllowedMethods(List.of("*"));
+                    configuration.setAllowedHeaders(List.of("*"));
+                    return configuration;
+                }))
 
                 // Only handle exceptions thrown by Spring Security
                 .exceptionHandling(this::exceptionHandling);
@@ -161,5 +181,23 @@ public class SecurityConfiguration {
             var authorities = List.of(new SimpleGrantedAuthority(userEntity.getRole().name()));
             return new DefaultOAuth2User(authorities, attributes, "email");
         };
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("*");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.fromHierarchy("ROLE_ADMIN > ROLE_USER");
     }
 }

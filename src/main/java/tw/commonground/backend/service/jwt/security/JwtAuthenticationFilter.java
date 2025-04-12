@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tw.commonground.backend.service.jwt.JwtAuthentication;
+import tw.commonground.backend.security.UserAuthentication;
 import tw.commonground.backend.service.jwt.JwtService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 
@@ -33,12 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        if (authHeader != null && authHeader.startsWith("Bearer ")
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
 
+            String token = authHeader.substring(7);
             try {
                 FullUserEntity user = jwtService.authenticate(token);
-                JwtAuthentication authentication = new JwtAuthentication(user);
+                UserAuthentication authentication = new UserAuthentication(user);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
                 SecurityContextHolder.clearContext();

@@ -17,10 +17,15 @@ import java.util.UUID;
 @Setter
 @Entity
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class ViewpointEntity extends BaseEntityWithAuthor {
+
+    public ViewpointEntity(UUID id) {
+        this.id = id;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,6 +53,7 @@ public class ViewpointEntity extends BaseEntityWithAuthor {
     private Integer dislikeCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private IssueEntity issue;
 
     @OneToMany(mappedBy = "viewpoint")
