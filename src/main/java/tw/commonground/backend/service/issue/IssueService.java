@@ -134,6 +134,10 @@ public class IssueService {
         return factEntities;
     }
 
+    public Integer getViewpointCount(UUID id) {
+        return issueRepository.getViewpointCount(id);
+    }
+
     @Transactional
     public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
         IssueFollowKey id = new IssueFollowKey(userId, issueId);
