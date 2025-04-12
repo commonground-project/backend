@@ -38,10 +38,6 @@ public class IssueService {
 
     private final FactService factService;
 
-    private final ViewpointService viewpointService;
-
-    private final ReferenceService referenceService;
-
     public IssueService(IssueRepository issueRepository,
                         IssueFollowRepository issueFollowRepository,
                         ManualFactRepository manualFactRepository,
@@ -52,7 +48,6 @@ public class IssueService {
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
-        this.viewpointService = viewpointService;
     }
 
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
