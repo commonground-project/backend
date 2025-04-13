@@ -34,7 +34,9 @@ public class ReadService {
     public ReadEntity updateReadStatus(Long userId, UUID objectId, ReadRequest request) {
         ReadObjectType objectType = request.getObjectType();
         Boolean readStatus = request.getReadStatus();
-        ReadEntity entity = getReadEntity(userId, objectId, objectType);
+        ReadEntity entity = readRepository.findByUserIdAndObjectId(userId, objectId)
+                .orElseGet(() -> getReadEntity(userId, objectId, objectType));
+
         entity.setReadStatus(readStatus);
         return readRepository.save(entity);
     }
