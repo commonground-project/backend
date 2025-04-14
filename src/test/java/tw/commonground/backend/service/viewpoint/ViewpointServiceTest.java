@@ -11,7 +11,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.user.entity.UserRepository;
-import tw.commonground.backend.service.viewpoint.entity.Reaction;
+import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionKey;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;

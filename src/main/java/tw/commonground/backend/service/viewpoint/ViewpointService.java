@@ -44,6 +44,7 @@ public class ViewpointService {
     private final LockService lockService;
 
     private final ViewpointFactRepository viewpointFactRepository;
+
     private final UserRepository userRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -53,13 +54,14 @@ public class ViewpointService {
                             FactService factService,
                             ViewpointFactRepository viewpointFactRepository,
                             IssueService issueService, LockService lockService,
-                            ApplicationEventPublisher applicationEventPublisher) {
+                            UserRepository userRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.viewpointRepository = viewpointRepository;
         this.viewpointReactionRepository = viewpointReactionRepository;
         this.factService = factService;
         this.viewpointFactRepository = viewpointFactRepository;
         this.issueService = issueService;
         this.lockService = lockService;
+        this.userRepository = userRepository;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -144,6 +146,8 @@ public class ViewpointService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
+        throwIfViewpointNotExist(viewpointId);
+        throwIfUserNotExist(userId);
         String lockKey = String.format(VIEWPOINT_REACTION_LOCK_FORMAT, viewpointId, userId);
 
         return lockService.executeWithLock(lockKey, () -> {
