@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.viewpoint;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,37 +34,31 @@ public class ViewpointService {
 
     private static final String VIEWPOINT_REACTION_LOCK_FORMAT = "viewpoint.reaction.%s.%d";
 
-    private final ViewpointRepository viewpointRepository;
+    @Autowired
+    private ViewpointRepository viewpointRepository;
 
-    private final ViewpointReactionRepository viewpointReactionRepository;
+    @Autowired
+    private ViewpointReactionRepository viewpointReactionRepository;
 
-    private final FactService factService;
+    @Autowired
+    private FactService factService;
 
-    private final IssueService issueService;
+    @Autowired
+    private ViewpointFactRepository viewpointFactRepository;
 
-    private final LockService lockService;
+    @Autowired
+    private IssueService issueService;
 
-    private final ViewpointFactRepository viewpointFactRepository;
+    @Autowired
+    private LockService lockService;
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
-    public ViewpointService(ViewpointRepository viewpointRepository,
-                            ViewpointReactionRepository viewpointReactionRepository,
-                            FactService factService,
-                            ViewpointFactRepository viewpointFactRepository,
-                            IssueService issueService, LockService lockService,
-                            UserRepository userRepository, ApplicationEventPublisher applicationEventPublisher) {
-        this.viewpointRepository = viewpointRepository;
-        this.viewpointReactionRepository = viewpointReactionRepository;
-        this.factService = factService;
-        this.viewpointFactRepository = viewpointFactRepository;
-        this.issueService = issueService;
-        this.lockService = lockService;
-        this.userRepository = userRepository;
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+    public ViewpointService() {} // since MegaLinter can't accept parameter more than 7, thus, use @Autowired here
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
         return viewpointRepository.findAll(pageable);
@@ -168,7 +163,7 @@ public class ViewpointService {
     }
 
     private void throwIfUserNotExist(Long userId) {
-        if(!userRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new ValidationException("User not found");
             // can't determine this is just user not found or null user id
         }
@@ -176,8 +171,6 @@ public class ViewpointService {
 
     private ViewpointReactionEntity handleNewReaction(ViewpointReactionKey reactionKey, UUID viewpointId,
                                                       Reaction reaction) {
-
-
         if (reaction != Reaction.NONE) {
             viewpointReactionRepository.insertReaction(reactionKey, reaction.name());
             // can cause NullPointerException here
