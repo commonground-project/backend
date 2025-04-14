@@ -30,7 +30,7 @@ public class ReferenceService {
 
     private final ReferenceRepository referenceRepository;
 
-    private static final String CRAWLER_API = "http://127.0.0.1:8000/title/";
+    private static final String CRAWLER_API = "http://127.0.0.1:8000/";
 
     public ReferenceService(ReferenceRepository referenceRepository) {
         this.referenceRepository = referenceRepository;
@@ -136,11 +136,12 @@ public class ReferenceService {
                     apiUrl, HttpMethod.GET, entity, ContentCrawlerResponse.class
             );
             if (response.getBody() != null) {
-                return  response.getBody().getContent();
+                return response.getBody().getContent();
             }
         } catch (Exception e) {
             log.error("Fallback API for content failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
         }
+        return "";
     }
 
     public String fetchTitleFromFallback(String urlString) {

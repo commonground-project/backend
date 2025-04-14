@@ -24,10 +24,8 @@ public class InternalReferenceService {
     }
 
     public InternalDetailReferenceResponse getDetailReference(UUID id) {
-//        Long referenceID = id.tolong();
         ReferenceEntity referenceEntity = referenceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reference", "id", id.toString()));
-
 
         if(referenceEntity.getDescription() != null) {
             return InternalReferenceMapper.toInternalDetailResponse(referenceEntity);
