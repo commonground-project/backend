@@ -12,10 +12,11 @@ import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.fact.dto.LinkFactsRequest;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.dto.*;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
-import tw.commonground.backend.service.issue.entity.IssueFollowEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
 import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.PaginationParser;
@@ -41,9 +42,12 @@ public class IssueController {
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    public IssueController(IssueService issueService, FactService factService) {
+    private final FollowService followService;
+
+    public IssueController(IssueService issueService, FactService factService, FollowService followService) {
         this.issueService = issueService;
         this.factService = factService;
+        this.followService = followService;
     }
 
     @GetMapping("/issues")
@@ -69,7 +73,7 @@ public class IssueController {
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
-        Boolean follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
+        Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
         return ResponseEntity.ok(response);
     }
@@ -84,7 +88,7 @@ public class IssueController {
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = false;
         if (user != null) {
-            follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
+            follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         }
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
         return ResponseEntity.ok(response);
@@ -100,7 +104,7 @@ public class IssueController {
                 .separateContentAndFacts(issueEntity.getInsight());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
-        Boolean follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
+        Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
         return ResponseEntity.ok(response);
     }
@@ -111,14 +115,6 @@ public class IssueController {
         issueService.deleteIssue(UUID.fromString(id));
     }
 
-    @PostMapping("/issue/{id}/follow/me")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<FollowResponse> followIssue(@AuthenticationPrincipal FullUserEntity user,
-                                                           @PathVariable UUID id,
-                                                           @RequestBody IssueFollowRequest request) {
-        IssueFollowEntity entity = issueService.followIssue(user.getId(), id, request.getFollow());
-        return ResponseEntity.ok(IssueMapper.toFollowResponse(entity));
-    }
 
     @GetMapping("/issue/{id}/facts")
     public WrappedPaginationResponse<List<FactResponse>> getIssueFacts(@PathVariable UUID id,

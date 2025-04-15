@@ -3,6 +3,7 @@ package tw.commonground.backend.service.notification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.notification.dto.NotificationDto;
@@ -18,6 +19,7 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
+import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
@@ -29,7 +31,7 @@ public class NotificationService {
 
     private final ViewpointService viewpointService;
 
-    private final IssueService issueService;
+    private final FollowService followService;
 
     private final ReplyRepository replyRepository;
 
@@ -40,13 +42,13 @@ public class NotificationService {
     private final SubscriptionService subscriptionService;
 
     public NotificationService(ViewpointService viewpointService,
-                               IssueService issueService,
+                               FollowService followService,
                                ReplyRepository replyRepository,
                                UserRepository userRepository,
                                UserSettingService userSettingService,
                                SubscriptionService subscriptionService) {
         this.viewpointService = viewpointService;
-        this.issueService = issueService;
+        this.followService = followService;
         this.replyRepository = replyRepository;
         this.userRepository = userRepository;
         this.userSettingService = userSettingService;
@@ -135,7 +137,7 @@ public class NotificationService {
         String issueId = issueEntity.getId().toString();
 
         // Collect users that need to be notified
-        List<Long> userIds = issueService.getIssueFollowersById(issueEntity.getId());
+        List<Long> userIds = followService.getFollowersById(issueEntity.getId(), RelatedObject.ISSUE);
         List<FullUserEntity> needNotificationUser = new ArrayList<>();
 
         userIds.forEach(userId -> userRepository.findUserEntityById(userId).ifPresent(user -> {

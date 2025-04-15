@@ -10,6 +10,9 @@ import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
+import tw.commonground.backend.service.follow.entity.FollowEntity;
+import tw.commonground.backend.service.follow.entity.FollowKey;
+import tw.commonground.backend.service.follow.entity.FollowRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -25,7 +28,6 @@ public class IssueService {
 
     private final IssueRepository issueRepository;
 
-    private final IssueFollowRepository issueFollowRepository;
 
     private final ManualFactRepository manualFactRepository;
 
@@ -34,12 +36,10 @@ public class IssueService {
     private final FactService factService;
 
     public IssueService(IssueRepository issueRepository,
-                        IssueFollowRepository issueFollowRepository,
                         ManualFactRepository manualFactRepository,
                         FactRepository factRepository,
                         FactService factService) {
         this.issueRepository = issueRepository;
-        this.issueFollowRepository = issueFollowRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
@@ -132,30 +132,6 @@ public class IssueService {
         }
 
         return factEntities;
-    }
-
-    @Transactional
-    public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        if (issueFollowRepository.findById(id).isPresent()) {
-            issueFollowRepository.updateFollowById(id, follow);
-        } else {
-            issueFollowRepository.insertFollowById(id, follow);
-        }
-        IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
-        issueFollowEntity.setId(id);
-        issueFollowEntity.setFollow(follow);
-        issueFollowEntity.setUpdatedAt(LocalDateTime.now());
-        return issueFollowEntity;
-    }
-
-    public Boolean getFollowForIssue(Long userId, UUID issueId) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        return issueFollowRepository.findFollowById(id).orElse(false);
-    }
-
-    public List<Long> getIssueFollowersById(UUID issueId) {
-        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
     }
 
     public void throwIfIssueNotExist(UUID id) {

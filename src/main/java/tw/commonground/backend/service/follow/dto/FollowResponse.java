@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.issue.dto;
+package tw.commonground.backend.service.follow.dto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
-public class IssueFollowResponse {
+public class FollowResponse {
     private Boolean follow;
+    private String updatedAt;
 }
