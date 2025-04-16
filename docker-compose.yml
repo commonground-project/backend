@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  mock-suggestion:
+    build:
+      context: ./mock/suggestion
+      dockerfile: Dockerfile
+    container_name: mock-suggestion
+    ports:
+      - "5001:5000"
+    networks:
+      - cg-network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: commonground
+    ports:
+      - "5432:5432"
+    networks:
+      - cg-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  cg-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
