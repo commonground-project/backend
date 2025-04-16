@@ -26,6 +26,15 @@ jobs:
           token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
           fetch-depth: 0 # If you use VALIDATE_ALL_CODEBASE = true, you can remove this line to improve performances
 
+      # Add Python dependencies
+      - name: Set up Python and install dependencies
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12.7
+      - run: |
+          pip install -r requirements.txt
+        working-directory: ./mock/suggestion
+
       # MegaLinter
       - name: MegaLinter
         id: ml
