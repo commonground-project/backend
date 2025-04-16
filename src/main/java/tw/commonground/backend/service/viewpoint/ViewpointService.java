@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.viewpoint;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,12 +8,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
+import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
@@ -31,34 +34,31 @@ public class ViewpointService {
 
     private static final String VIEWPOINT_REACTION_LOCK_FORMAT = "viewpoint.reaction.%s.%d";
 
-    private final ViewpointRepository viewpointRepository;
+    @Autowired
+    private ViewpointRepository viewpointRepository;
 
-    private final ViewpointReactionRepository viewpointReactionRepository;
+    @Autowired
+    private ViewpointReactionRepository viewpointReactionRepository;
 
-    private final FactService factService;
+    @Autowired
+    private FactService factService;
 
-    private final IssueService issueService;
+    @Autowired
+    private ViewpointFactRepository viewpointFactRepository;
 
-    private final LockService lockService;
+    @Autowired
+    private IssueService issueService;
 
-    private final ViewpointFactRepository viewpointFactRepository;
+    @Autowired
+    private LockService lockService;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    @Autowired
+    private UserRepository userRepository;
 
-    public ViewpointService(ViewpointRepository viewpointRepository,
-                            ViewpointReactionRepository viewpointReactionRepository,
-                            FactService factService,
-                            ViewpointFactRepository viewpointFactRepository,
-                            IssueService issueService, LockService lockService,
-                            ApplicationEventPublisher applicationEventPublisher) {
-        this.viewpointRepository = viewpointRepository;
-        this.viewpointReactionRepository = viewpointReactionRepository;
-        this.factService = factService;
-        this.viewpointFactRepository = viewpointFactRepository;
-        this.issueService = issueService;
-        this.lockService = lockService;
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    public ViewpointService() {} // since MegaLinter can't accept parameter more than 7, thus, use @Autowired here
 
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
         return viewpointRepository.findAll(pageable);
@@ -141,6 +141,8 @@ public class ViewpointService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
+        throwIfViewpointNotExist(viewpointId);
+        throwIfUserNotExist(userId);
         String lockKey = String.format(VIEWPOINT_REACTION_LOCK_FORMAT, viewpointId, userId);
 
         return lockService.executeWithLock(lockKey, () -> {
@@ -160,11 +162,18 @@ public class ViewpointService {
         });
     }
 
+    private void throwIfUserNotExist(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new ValidationException("User not found");
+            // can't determine this is just user not found or null user id
+        }
+    }
+
     private ViewpointReactionEntity handleNewReaction(ViewpointReactionKey reactionKey, UUID viewpointId,
                                                       Reaction reaction) {
-
         if (reaction != Reaction.NONE) {
             viewpointReactionRepository.insertReaction(reactionKey, reaction.name());
+            // can cause NullPointerException here
             updateReactionCount(viewpointId, reaction, 1);
         }
 
