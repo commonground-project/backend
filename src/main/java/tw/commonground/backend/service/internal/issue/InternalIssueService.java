@@ -64,9 +64,8 @@ public class InternalIssueService {
 
     public InternalDetailIssueResponse getDetailIssue(UUID issueId) {
         IssueEntity issueEntity = issueRepository.findById(issueId).orElseThrow(
-                () -> new EntityNotFoundException("Issue", "id", issueId.toString())
+                () -> new EntityNotFoundException("InternalIssue", "id", issueId.toString())
         );
-
         List<ViewpointEntity> viewpoints = viewpointRepository.findAllByIssueId(issueId);
         List<InternalDetailViewpointResponse> internalDetailViewpointResponses = new ArrayList<>();
         for (ViewpointEntity viewpoint : viewpoints) {

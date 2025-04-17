@@ -31,13 +31,14 @@ public class ReferenceEntity {
     @Column(nullable = false)
     private LocalDateTime createAt;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, columnDefinition = "TEXT")
     private String url;
 
     private String favicon;
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
 }

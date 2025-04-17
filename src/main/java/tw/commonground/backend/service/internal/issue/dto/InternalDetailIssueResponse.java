@@ -5,10 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.internal.fact.dto.InternalDetailFactResponse;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalDetailViewpointResponse;
-import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointResponse;
 import tw.commonground.backend.service.issue.dto.IssueFollowResponse;
 
 import java.util.List;
@@ -47,5 +45,4 @@ public class InternalDetailIssueResponse {
     private List<InternalDetailFactResponse> facts;
 
     private List<InternalDetailViewpointResponse> viewpoints;
-
 }
