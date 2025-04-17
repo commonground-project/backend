@@ -6,6 +6,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ReadRepository extends JpaRepository<ReadEntity, ReadKey> {
-    Optional<ReadEntity> findByUserIdAndObjectId(Long userId, UUID objectId);
-
+    Optional<ReadEntity> findByIdUserIdAndIdObjectIdAndIdObjectType(Long userId, UUID objectId, ReadObjectType objectType);
 }

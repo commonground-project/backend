@@ -8,6 +8,7 @@ import tw.commonground.backend.service.read.dto.ReadMapper;
 import tw.commonground.backend.service.read.dto.ReadRequest;
 import tw.commonground.backend.service.read.dto.ReadResponse;
 import tw.commonground.backend.service.read.entity.ReadEntity;
+import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.tracing.Traced;
 
@@ -24,12 +25,30 @@ public class ReadController {
         this.readService = readService;
     }
 
-    @PutMapping("/read/{id}/me")
+    @PostMapping("/read/issue/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> updateReadStatus(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<ReadResponse> ReadIssue(@AuthenticationPrincipal FullUserEntity user,
                                                            @PathVariable UUID id,
                                                            @RequestBody ReadRequest request) {
-        ReadEntity entity = readService.updateReadStatus(user.getId(), id, request);
+        ReadEntity entity = readService.updateReadStatus(user.getId(), id, request, ReadObjectType.ISSUE);
         return ResponseEntity.ok(ReadMapper.toResponse(entity));
     }
+
+    @GetMapping("/read/issue/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ReadResponse> ReadIssue(@AuthenticationPrincipal FullUserEntity user,
+                                                  @PathVariable UUID id) {
+        ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.ISSUE);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/read/viewpoint/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ReadResponse> ReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
+                                                               @PathVariable UUID id,
+                                                               @RequestBody ReadRequest request) {
+        ReadEntity entity = readService.updateReadStatus(user.getId(), id, request, ReadObjectType.VIEWPOINT);
+        return ResponseEntity.ok(ReadMapper.toResponse(entity));
+    }
+
 }

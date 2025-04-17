@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.issue.entity.IssueRepository;
+import tw.commonground.backend.service.read.dto.ReadMapper;
 import tw.commonground.backend.service.read.dto.ReadRequest;
+import tw.commonground.backend.service.read.dto.ReadResponse;
 import tw.commonground.backend.service.read.entity.ReadEntity;
+import tw.commonground.backend.service.read.entity.ReadKey;
 import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.read.entity.ReadRepository;
 import tw.commonground.backend.service.user.entity.UserEntity;
@@ -31,10 +34,9 @@ public class ReadService {
         this.viewpointRepository = viewpointRepository;
     }
 
-    public ReadEntity updateReadStatus(Long userId, UUID objectId, ReadRequest request) {
-        ReadObjectType objectType = request.getObjectType();
+    public ReadEntity updateReadStatus(Long userId, UUID objectId, ReadRequest request, ReadObjectType objectType) {
         Boolean readStatus = request.getReadStatus();
-        ReadEntity entity = readRepository.findByUserIdAndObjectId(userId, objectId)
+        ReadEntity entity = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType)
                 .orElseGet(() -> getReadEntity(userId, objectId, objectType));
 
         entity.setReadStatus(readStatus);
@@ -58,8 +60,14 @@ public class ReadService {
         } else {
             throw new IllegalArgumentException("Invalid object type for read status update");
         }
-        entity.setObjectType(objectType);
+        ReadKey key = new ReadKey(userId, objectId, objectType);
+        entity.setId(key);
         return entity;
     }
 
+    public ReadResponse getReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
+        ReadEntity entity = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType)
+                .orElseThrow(() -> new EntityNotFoundException("Read status not found"));
+        return ReadMapper.toResponse(entity);
+    }
 }

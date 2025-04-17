@@ -11,7 +11,6 @@ public class ReadMapper {
         return ReadResponse.builder()
                 .userId(readEntity.getUser().getId())
                 .objectId(readEntity.getObjectId())
-                .objectType(readEntity.getObjectType())
                 .readStatus(readEntity.getReadStatus())
                 .build();
     }
