@@ -15,6 +15,7 @@ import tw.commonground.backend.service.image.ImageService;
 import tw.commonground.backend.service.user.dto.UpdateUserRequest;
 import tw.commonground.backend.service.user.dto.UserInitRequest;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
+import tw.commonground.backend.service.user.entity.ProfileEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
@@ -33,6 +34,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final ImageService imageService;
+
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @PersistenceContext
@@ -43,8 +45,7 @@ public class UserService {
 
     public UserService(
             UserRepository userRepository,
-            ImageService imageService,
-            ApplicationEventPublisher applicationEventPublisher) {
+            ImageService imageService, ApplicationEventPublisher applicationEventPublisher) {
         this.userRepository = userRepository;
         this.imageService = imageService;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -74,31 +75,35 @@ public class UserService {
         return (List<UserEntity>) userRepository.findAll();
     }
 
-    public Optional<FullUserEntity> getUserByUsername(String username) {
-        return userRepository.findUserEntityByUsername(username);
+    public Optional<ProfileEntity> getDetailedUserByUsername(String username) {
+        return userRepository.findProfileEntityByUsername(username);
     }
 
     public Optional<FullUserEntity> getUserByEmail(String email) {
         return userRepository.findUserEntityByEmail(email);
     }
 
-    public FullUserEntity updateUser(String username, UpdateUserRequest request) {
+    public ProfileEntity updateUser(String username, UpdateUserRequest request) {
         UserEntity userEntity = userRepository.getUserEntityByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
 
         userEntity.setUsername(Optional.ofNullable(request.getUsername()).orElse(userEntity.getUsername()));
         userEntity.setNickname(Optional.ofNullable(request.getNickname()).orElse(userEntity.getNickname()));
         userEntity.setRole(Optional.ofNullable(request.getRole()).orElse(userEntity.getRole()));
+        userEntity.setGender(request.getGender());
+        userEntity.setOccupation(request.getOccupation());
+        userEntity.setBirthdate(request.getBirthdate());
 
         userRepository.save(userEntity);
 
         // Use to clear hibernate second level cache before fetching and returning user
         entityManager.clear();
-        return userRepository.getUserEntityByUsername(Optional.ofNullable(request.getUsername()).orElse(username))
-                .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
+        return userRepository
+            .findProfileEntityByUsername(Optional.ofNullable(request.getUsername()).orElse(username))
+            .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
     }
 
-    public FullUserEntity completeSetup(UserSetupRequest setupRequest, String email) {
+    public ProfileEntity completeSetup(UserSetupRequest setupRequest, String email) {
         FullUserEntity fullUser = userRepository.findUserEntityByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User", "email", email));
 
@@ -126,9 +131,15 @@ public class UserService {
                     setupRequest.getNickname(),
                     defaultRole);
 
+            // Setup user information for AI recommendation system
+            userRepository.setupUserInformationById(fullUser.getId(),
+                    setupRequest.getBirthdate(),
+                    setupRequest.getOccupation(),
+                    setupRequest.getGender());
+
             // Use to clear hibernate second level cache before fetching and returning user
             entityManager.clear();
-            return userRepository.findUserEntityByEmail(email).orElseThrow();
+            return userRepository.findProfileEntityByEmail(fullUser.getEmail()).orElseThrow();
         }
     }
 
