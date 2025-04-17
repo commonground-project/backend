@@ -3,7 +3,7 @@ package tw.commonground.backend.service.internal.issue.dto;
 import tw.commonground.backend.service.internal.fact.dto.InternalFactMapper;
 import tw.commonground.backend.service.issue.entity.ManualIssueFactEntity;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalDetailViewpointResponse;
-import tw.commonground.backend.service.follow.dto.IssueFollowResponse;
+import tw.commonground.backend.service.follow.dto.FollowResponse;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.util.DateTimeUtils;
@@ -36,7 +36,7 @@ public final class InternalIssueMapper {
                 .authorId(issue.getAuthorId())
                 .authorName(issue.getAuthorName())
                 .authorAvatar(issue.getAuthorAvatar())
-                .userFollow(IssueFollowResponse.builder().follow(false).build()) // TODO: Replace hardcoded follow with actual value
+                .userFollow(FollowResponse.builder().follow(false).build()) // TODO: Replace hardcoded follow with actual value
                 .description(issue.getDescription())
                 .insight(ContentParser.separateContentAndFacts(issue.getInsight(), List.of()).getText()) // TODO: Replace with actual facts
                 .viewpoints(internalDetailViewpointResponses)

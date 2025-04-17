@@ -26,16 +26,16 @@ public class FollowEntity {
 
     private Boolean follow;
 
-    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;
 
-    @MapsId("ObjectId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "object_id", insertable = false, updatable = false)
     private IssueEntity issue;
 
-    @MapsId("ObjectId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "object_id", insertable = false, updatable = false)
     private ViewpointEntity viewpoint;
 
     @LastModifiedDate

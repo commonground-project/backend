@@ -2,13 +2,14 @@ package tw.commonground.backend.service.follow;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tw.commonground.backend.service.fact.FactService;
-import tw.commonground.backend.service.fact.entity.FactRepository;
+import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.follow.entity.FollowEntity;
 import tw.commonground.backend.service.follow.entity.FollowKey;
 import tw.commonground.backend.service.follow.entity.FollowRepository;
-import tw.commonground.backend.service.issue.entity.IssueRepository;
-import tw.commonground.backend.service.issue.entity.ManualFactRepository;
+import tw.commonground.backend.service.issue.IssueService;
+import tw.commonground.backend.service.user.UserService;
+import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.tracing.Traced;
 
@@ -21,31 +22,29 @@ import java.util.UUID;
 @Service
 public class FollowService {
 
-    private final IssueRepository issueRepository;
-
     private final FollowRepository followRepository;
+    private final UserService userService;
+    private final IssueService issueService;
+    private final ViewpointService viewpointService;
 
-    private final ManualFactRepository manualFactRepository;
-
-    private final FactRepository factRepository;
-
-    private final FactService factService;
-
-    public FollowService(IssueRepository issueRepository,
-                        FollowRepository followRepository,
-                        ManualFactRepository manualFactRepository,
-                        FactRepository factRepository,
-                        FactService factService) {
-        this.issueRepository = issueRepository;
+    public FollowService(FollowRepository followRepository, UserService userService, IssueService issueService, ViewpointService viewpointService) {
         this.followRepository = followRepository;
-        this.manualFactRepository = manualFactRepository;
-        this.factRepository = factRepository;
-        this.factService = factService;
+        this.userService = userService;
+        this.issueService = issueService;
+        this.viewpointService = viewpointService;
     }
 
     @Transactional
-    public FollowEntity followObject(Long userId, UUID issueId, Boolean follow, RelatedObject objectType) {
-        FollowKey id = new FollowKey(userId, issueId, objectType);
+    public FollowEntity followObject(Long userId, UUID objectId, Boolean follow, RelatedObject objectType) {
+        userService.throwIfUserNotExist(userId);
+        if (objectType == RelatedObject.ISSUE) {
+            issueService.throwIfIssueNotExist(objectId);
+        } else {
+            viewpointService.throwIfViewpointNotExist(objectId);
+        }
+
+        FollowKey id = new FollowKey(userId,objectId, objectType);
+
         if (followRepository.findById(id).isPresent()) {
             followRepository.updateFollowById(id, follow);
         } else {

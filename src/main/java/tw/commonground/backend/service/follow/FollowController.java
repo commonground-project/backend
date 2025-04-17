@@ -11,6 +11,7 @@ import tw.commonground.backend.service.follow.entity.FollowEntity;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.dto.IssueMapper;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.UUID;
@@ -21,11 +22,9 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class FollowController {
 
-    private final IssueService issueService;
     private final FollowService followService;
 
-    public FollowController(IssueService issueService, FollowService followService) {
-        this.issueService = issueService;
+    public FollowController(FollowService followService) {
         this.followService = followService;
     }
 
@@ -34,7 +33,7 @@ public class FollowController {
     public ResponseEntity<FollowResponse> followIssue(@AuthenticationPrincipal FullUserEntity user,
                                                       @PathVariable UUID id,
                                                       @RequestBody FollowRequest request) {
-        FollowEntity entity = followService.followIssue(user.getId(), id, request.getFollow());
+        FollowEntity entity = followService.followObject(user.getId(), id, request.getFollow(), RelatedObject.ISSUE);
         return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
     }
 
@@ -43,7 +42,8 @@ public class FollowController {
     public ResponseEntity<FollowResponse> followViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                            @PathVariable UUID id,
                                                            @RequestBody FollowRequest request) {
-        FollowEntity entity = followService.followViewpoint(user.getId(), id, request.getFollow());
+        FollowEntity entity = followService.followObject(user.getId(), id, request.getFollow(),
+                                                        RelatedObject.VIEWPOINT);
         return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
     }
 }
