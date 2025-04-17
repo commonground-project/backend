@@ -22,11 +22,11 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     Optional<FullUserEntity> findIdByEmail(String email);
 
-    Optional<DetailUserEntity> findDetailUserEntityById(Long id);
+    Optional<ProfileEntity> findProfileEntityById(Long id);
 
-    Optional<DetailUserEntity> findDetailUserEntityByUsername(String username);
+    Optional<ProfileEntity> findProfileEntityByUsername(String username);
 
-    Optional<DetailUserEntity> findDetailUserEntityByEmail(String email);
+    Optional<ProfileEntity> findProfileEntityByEmail(String email);
 
     Optional<UserEntity> getUserEntityByUsername(String username);
 

@@ -1,6 +1,6 @@
 package tw.commonground.backend.service.user.dto;
 
-import tw.commonground.backend.service.user.entity.DetailUserEntity;
+import tw.commonground.backend.service.user.entity.ProfileEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 
 import java.util.List;
@@ -10,7 +10,7 @@ public final class UserMapper {
         // hide the constructor
     }
 
-    public static UserResponse toResponse(DetailUserEntity entity) {
+    public static UserResponse toResponse(ProfileEntity entity) {
         return new UserResponse(
                 entity.getUsername(),
                 entity.getNickname(),
