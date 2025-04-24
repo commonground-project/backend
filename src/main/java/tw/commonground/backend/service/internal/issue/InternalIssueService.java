@@ -34,7 +34,10 @@ public class InternalIssueService {
     private final ViewpointRepository viewpointRepository;
     private final InternalReferenceService internalReferenceService;
 
-    public InternalIssueService(IssueRepository issueRepository, ViewpointService viewpointService, ViewpointRepository viewpointRepository, InternalReferenceService internalReferenceService) {
+    public InternalIssueService(IssueRepository issueRepository,
+                                ViewpointService viewpointService,
+                                ViewpointRepository viewpointRepository,
+                                InternalReferenceService internalReferenceService) {
         this.issueRepository = issueRepository;
         this.viewpointService = viewpointService;
         this.viewpointRepository = viewpointRepository;
@@ -70,9 +73,9 @@ public class InternalIssueService {
         List<InternalDetailViewpointResponse> internalDetailViewpointResponses = new ArrayList<>();
         for (ViewpointEntity viewpoint : viewpoints) {
             List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpoint.getId());
-            for(FactEntity fact : facts) {
+            for (FactEntity fact : facts) {
                 Set<ReferenceEntity> references = fact.getReferences();
-                for(ReferenceEntity reference : references) {
+                for (ReferenceEntity reference : references) {
                     internalReferenceService.createDescriptionForReference(reference);
                 }
             }
@@ -84,9 +87,9 @@ public class InternalIssueService {
                 .stream()
                 .map(ManualIssueFactEntity::getFact)
                 .toList();
-        for(FactEntity fact : facts) {
+        for (FactEntity fact : facts) {
             Set<ReferenceEntity> references = fact.getReferences();
-            for(ReferenceEntity reference : references) {
+            for (ReferenceEntity reference : references) {
                 internalReferenceService.createDescriptionForReference(reference);
             }
         }

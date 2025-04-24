@@ -19,7 +19,8 @@ public final class InternalFactMapper {
                 .authorId(factEntity.getAuthorId())
                 .authorName(factEntity.getAuthorName())
                 .authorAvatar(factEntity.getAuthorAvatar())
-                .references(factEntity.getReferences().stream().map(InternalReferenceMapper::toInternalDetailResponse).toList())
+                .references(factEntity.getReferences().stream()
+                        .map(InternalReferenceMapper::toInternalDetailResponse).toList())
                 .build();
     }
 }

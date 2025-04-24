@@ -131,7 +131,7 @@ public class ReferenceService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            String apiUrl = CRAWLER_API + "content/"+ URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            String apiUrl = CRAWLER_API + "content/" + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
             System.out.println("API URL: " + apiUrl);
             ResponseEntity<ContentCrawlerResponse> response = restTemplate.exchange(
                     apiUrl, HttpMethod.GET, entity, ContentCrawlerResponse.class
@@ -140,7 +140,8 @@ public class ReferenceService {
                 return response.getBody().getContent();
             }
         } catch (Exception e) {
-            log.error("Fallback API for content failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
+            log.error("Fallback API for content failed, type: {}, message: {}",
+                    e.getClass().getSimpleName(), e.getMessage());
         }
         return "";
     }

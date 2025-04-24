@@ -27,7 +27,8 @@ public final class InternalIssueMapper {
                 .build();
     }
 
-    public static InternalDetailIssueResponse toDetailResponse(IssueEntity issue, List<InternalDetailViewpointResponse> internalDetailViewpointResponses) {
+    public static InternalDetailIssueResponse toDetailResponse(IssueEntity issue,
+                                                               List<InternalDetailViewpointResponse> internalDetailViewpointResponses) {
         return InternalDetailIssueResponse.builder()
                 .id(issue.getId())
                 .createdAt(DateTimeUtils.toIso8601String(issue.getCreatedAt()))
@@ -36,9 +37,11 @@ public final class InternalIssueMapper {
                 .authorId(issue.getAuthorId())
                 .authorName(issue.getAuthorName())
                 .authorAvatar(issue.getAuthorAvatar())
-                .userFollow(IssueFollowResponse.builder().follow(false).build()) // TODO: Replace hardcoded follow with actual value
+                .userFollow(IssueFollowResponse.builder().follow(false).build())
+                // TODO: Replace hardcoded follow with actual value
                 .description(issue.getDescription())
-                .insight(ContentParser.separateContentAndFacts(issue.getInsight(), List.of()).getText()) // TODO: Replace with actual facts
+                .insight(ContentParser.separateContentAndFacts(issue.getInsight(), List.of()).getText())
+                // TODO: Replace with actual facts
                 .viewpoints(internalDetailViewpointResponses)
                 .facts(issue.getManualFacts()
                         .stream()

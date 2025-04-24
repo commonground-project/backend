@@ -27,7 +27,7 @@ public class InternalReferenceService {
         ReferenceEntity referenceEntity = referenceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reference", "id", id.toString()));
 
-        if(referenceEntity.getDescription() != null) {
+        if (referenceEntity.getDescription() != null) {
             return InternalReferenceMapper.toInternalDetailResponse(referenceEntity);
         }
 
@@ -42,7 +42,7 @@ public class InternalReferenceService {
 
     public void createDescriptionForReference(ReferenceEntity referenceEntity) {
         String url = referenceEntity.getUrl();
-        if(referenceEntity.getDescription() != null) {
+        if (referenceEntity.getDescription() != null) {
             return;
 //            return InternalReferenceMapper.toInternalDetailResponse(referenceEntity);
         }
