@@ -26,6 +26,7 @@ public class FollowEntity {
 
     private Boolean follow;
 
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;
