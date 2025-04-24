@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.internal.fact.dto.InternalDetailFactResponse;
-import tw.commonground.backend.service.viewpoint.dto.ViewpointReactionResponse;
 
 import java.util.List;
 import java.util.UUID;

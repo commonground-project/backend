@@ -27,8 +27,8 @@ public final class InternalIssueMapper {
                 .build();
     }
 
-    public static InternalDetailIssueResponse toDetailResponse(IssueEntity issue,
-                                                               List<InternalDetailViewpointResponse> internalDetailViewpointResponses) {
+    public static InternalDetailIssueResponse toDetailResponse(
+            IssueEntity issue, List<InternalDetailViewpointResponse> internalDetailViewpointResponses) {
         return InternalDetailIssueResponse.builder()
                 .id(issue.getId())
                 .createdAt(DateTimeUtils.toIso8601String(issue.getCreatedAt()))

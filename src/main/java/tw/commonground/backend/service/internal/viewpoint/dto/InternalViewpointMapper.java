@@ -41,7 +41,8 @@ public final class InternalViewpointMapper {
                 .build();
     }
 
-    public static InternalDetailViewpointResponse toDetailResponse(ViewpointEntity viewpointEntity, List<FactEntity> factEntities) {
+    public static InternalDetailViewpointResponse toDetailResponse(ViewpointEntity viewpointEntity,
+                                                                   List<FactEntity> factEntities) {
 
         ContentContainFact content = ContentParser.separateContentAndFacts(viewpointEntity.getContent(),
                 factEntities.stream().map(FactEntity::getId).toList());

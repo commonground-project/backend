@@ -154,7 +154,7 @@ public class ReferenceService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            String apiUrl = CRAWLER_API + "title/"+  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            String apiUrl = CRAWLER_API + "title/" +  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
             ResponseEntity<TitleCrawlerResponse> response = restTemplate.exchange(
                     apiUrl, HttpMethod.GET, entity, TitleCrawlerResponse.class
             );
@@ -162,7 +162,8 @@ public class ReferenceService {
                 return  response.getBody().getTitle();
             }
         } catch (Exception e) {
-            log.error("Fallback API for title failed, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
+            log.error("Fallback API for title failed, type: {}, message: {}",
+                    e.getClass().getSimpleName(), e.getMessage());
         }
         return null;
     }
