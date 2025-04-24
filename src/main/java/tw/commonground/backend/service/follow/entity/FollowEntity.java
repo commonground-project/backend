@@ -31,11 +31,11 @@ public class FollowEntity {
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "object_id", insertable = false, updatable = false)
+    @JoinColumn(name = "issue_id", nullable = true, insertable = false, updatable = false)
     private IssueEntity issue;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "object_id", insertable = false, updatable = false)
+    @JoinColumn(name = "viewpoint_id", nullable = true, insertable = false, updatable = false)
     private ViewpointEntity viewpoint;
 
     @LastModifiedDate
