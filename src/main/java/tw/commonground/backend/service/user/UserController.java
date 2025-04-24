@@ -43,7 +43,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/user/{username}")
+    @GetMapping("/user/username/{username}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getUserByUsername(@PathVariable @NotBlank String username) {
         FullUserEntity userEntity = userService.getUserByUsername(username).orElseThrow(
@@ -53,7 +53,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/user/{username}")
+    @PutMapping("/user/username/{username}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateUser(@PathVariable @NotBlank String username,
                                                    @Valid @RequestBody UpdateUserRequest updateRequest) {

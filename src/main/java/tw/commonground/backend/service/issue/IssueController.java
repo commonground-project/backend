@@ -57,7 +57,10 @@ public class IssueController {
 
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()
-                .map(IssueMapper::toResponse)
+                .map(issue -> {
+                    Integer viewpointCount = issueService.getViewpointCount(issue.getId());
+                    return IssueMapper.toResponse(issue, viewpointCount);
+                })
                 .toList();
 
         return new WrappedPaginationResponse<>(issueResponses, PaginationMapper.toResponse(pageIssues));
@@ -90,7 +93,8 @@ public class IssueController {
         if (user != null) {
             follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         }
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
+        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
         return ResponseEntity.ok(response);
     }
 

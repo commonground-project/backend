@@ -36,5 +36,7 @@ public class IssueResponse {
 
     private FollowResponse userFollow;
 
+    private Integer viewpointCount;
+
     private List<FactResponse> facts;
 }
