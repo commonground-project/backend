@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Traced
 @RestController
-@RequestMapping("/api/internal/issues")
+@RequestMapping("/api/internal")
 public class InternalIssueController {
 
     private final InternalIssueService internalIssueService;
@@ -20,19 +20,19 @@ public class InternalIssueController {
         this.internalIssueService = internalIssueService;
     }
 
-    @GetMapping
+    @GetMapping("/issues")
     public ResponseEntity<List<InternalIssueResponse>> getIssues() {
         List<InternalIssueResponse> issues = internalIssueService.getIssues();
         return ResponseEntity.ok(issues);
     }
 
-    @GetMapping("/{issueId}")
+    @GetMapping("/issues/{issueId}")
     public ResponseEntity<InternalIssueResponse> getIssue(@PathVariable UUID issueId) {
         InternalIssueResponse issue = internalIssueService.getIssue(issueId);
         return ResponseEntity.ok(issue);
     }
 
-    @GetMapping("/detail/{issueId}")  // get issue with references which has description
+    @GetMapping("/issue/detail/{issueId}")  // get issue with references which has description
     public ResponseEntity<InternalDetailIssueResponse> getDetailIssue(@PathVariable UUID issueId) {
         InternalDetailIssueResponse issue = internalIssueService.getDetailIssue(issueId);
         return ResponseEntity.ok(issue);
