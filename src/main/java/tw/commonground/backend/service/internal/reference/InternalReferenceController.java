@@ -21,7 +21,7 @@ public class InternalReferenceController {
         this.internalReferenceService = internalReferenceService;
     }
 
-    @GetMapping("/reference/{referenceId}")
+    @GetMapping("/reference/detail/{referenceId}")
     public ResponseEntity<InternalDetailReferenceResponse> getDetailReference(@PathVariable UUID referenceId) {
         InternalDetailReferenceResponse reference = internalReferenceService.getDetailReference(referenceId);
         return ResponseEntity.ok(reference);
