@@ -12,7 +12,7 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.lock.LockService;
-import tw.commonground.backend.service.reply.ReplyService;
+import tw.commonground.backend.service.reply.entity.ReplyRepository;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
@@ -41,7 +41,7 @@ public class ViewpointService {
 
     private final LockService lockService;
 
-    private final ReplyService replyService;
+    private final ReplyRepository replyRepository;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -49,13 +49,13 @@ public class ViewpointService {
                             FactService factService,
                             IssueService issueService,
                             LockService lockService,
-                            ReplyService replyService,
+                            ReplyRepository replyRepository,
                             ApplicationEventPublisher applicationEventPublisher) {
         this.viewpointRepositoryContainer = viewpointRepositoryContainer;
         this.factService = factService;
         this.issueService = issueService;
         this.lockService = lockService;
-        this.replyService = replyService;
+        this.replyRepository = replyRepository;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -239,11 +239,11 @@ public class ViewpointService {
         return viewpointIds.stream()
                 .collect(Collectors.toMap(
                         viewpointId -> viewpointId,
-                        replyService::getReplyCountByViewpointId
+                        replyRepository::countByViewpointId
                 ));
     }
 
     public Integer getReplyCountByViewpointId(UUID viewpointId) {
-        return replyService.getReplyCountByViewpointId(viewpointId);
+        return replyRepository.countByViewpointId(viewpointId);
     }
 }
