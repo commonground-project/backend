@@ -239,6 +239,10 @@ public class ReplyService {
         );
     }
 
+    public Integer getReplyCountByViewpointId(UUID viewpointId) {
+        return replyRepository.countByViewpointId(viewpointId);
+    }
+
     private void throwIfReplyNotExist(UUID replyId) {
         if (!replyRepository.existsById(replyId)) {
             throw new EntityNotFoundException("Reply", "id", replyId.toString());
