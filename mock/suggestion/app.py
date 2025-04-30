@@ -6,6 +6,7 @@ from config import KEYWORDS, REPLACEMENTS
 app = Flask(__name__)
 CORS(app)
 
+
 def highlight_text(text):
     """Scan text for predefined keywords and highlight them with <sugX> tags."""
     highlighted_text = text
@@ -19,12 +20,15 @@ def highlight_text(text):
                 highlighted_text = highlighted_text.replace(word, tag, 1)
                 suggestions.append({
                     "message": f"{highlighted_text}",
-                    "feedback": f"This phrase falls under {category}. Consider rewording.",
-                    "replacement": REPLACEMENTS.get(word, f"Consider rewording '{word}'")
+                    "feedback":
+                        f"This phrase falls under {category}. Consider rewording.",
+                    "replacement":
+                        REPLACEMENTS.get(word, f"Consider rewording '{word}'")
                 })
                 counter += 1
 
     return highlighted_text, suggestions
+
 
 @app.route('/api/mock-text-suggestion', methods=['POST'])
 def mock_text_suggestion():
@@ -47,6 +51,7 @@ def mock_text_suggestion():
         status=200,
         mimetype="application/json"
     )
+
 
 @app.route('/api/mock-edited-text-suggestion', methods=['POST'])
 def mock_edited_text_suggestion():
@@ -82,6 +87,7 @@ def mock_edited_text_suggestion():
         status=200,
         mimetype="application/json"
     )
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
