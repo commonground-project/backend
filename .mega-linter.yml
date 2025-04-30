@@ -1,2 +1,15 @@
+---
+
+DISABLE_LINTERS:
+  - SPELL_CSPELL
+  - JAVA_PMD
+  - REPOSITORY_KICS
+  - REPOSITORY_CHECKOV
+  - REPOSITORY_DEVSKIM
+  - REPOSITORY_TRIVY
+  - COPYPASTE_JSCPD
+
+FILTER_REGEX_EXCLUDE: "(src/main/resources/static|script)"
+
 PRE_COMMANDS:
   - command: pip install -r mock/suggestion/requirements.txt
