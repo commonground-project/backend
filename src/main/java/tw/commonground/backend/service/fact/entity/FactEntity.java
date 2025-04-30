@@ -40,5 +40,6 @@ public class FactEntity extends BaseEntityWithAuthor {
     private String title;
 
     @ManyToMany
+    @ToString.Exclude
     private Set<ReferenceEntity> references;
 }
