@@ -47,7 +47,8 @@ public class SearchService {
                     .setHitsPerPage(size);
 
             SearchResultPaginated factEntitySearchResult = (SearchResultPaginated) factEntityIndex.search(factRequest);
-            SearchResultPaginated referenceEntitySearchResult = (SearchResultPaginated) referenceEntityIndex.search(referenceRequest);
+            SearchResultPaginated referenceEntitySearchResult =
+                    (SearchResultPaginated) referenceEntityIndex.search(referenceRequest);
             List<String> factIds = mergeFactIds(factEntitySearchResult, referenceEntitySearchResult);
 
             long total = factEntitySearchResult.getTotalHits()
