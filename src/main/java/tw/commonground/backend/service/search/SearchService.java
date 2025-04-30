@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tw.commonground.backend.exception.SearchServiceException;
 import tw.commonground.backend.service.reference.ReferenceRepository;
 
 import java.util.*;
@@ -24,18 +25,21 @@ public class SearchService {
         this.referenceRepository = referenceRepository;
     }
 
-    public List<String> search(String query) throws Exception {
-        Index factEntityIndex = client.index("fact_entity");
-        Index referenceEntityIndex = client.index("reference_entity");
+    public List<String> search(String query) {
+        try {
+            Index factEntityIndex = client.index("fact_entity");
+            Index referenceEntityIndex = client.index("reference_entity");
 
-        SearchResult factEntitySearchResult = factEntityIndex.search(query);
-        SearchResult referenceEntitySearchResult = referenceEntityIndex.search(query);
+            SearchResult factEntitySearchResult = factEntityIndex.search(query);
+            SearchResult referenceEntitySearchResult = referenceEntityIndex.search(query);
 
-        logger.info("Fact Entity Search Result: {}", factEntitySearchResult.getHits());
-        logger.info("Reference Entity Search Result: {}", referenceEntitySearchResult.getHits());
-
-        return mergeFactIds(factEntitySearchResult, referenceEntitySearchResult);
+            return mergeFactIds(factEntitySearchResult, referenceEntitySearchResult);
+        } catch (Exception e) {
+            logger.error("Error calling MeiliSearch", e);
+            throw new SearchServiceException("Search failed", e);
+        }
     }
+
 
     private List<String> mergeFactIds(SearchResult factEntitySearchResult, SearchResult referenceEntitySearchResult) {
         List<Map<String, Object>> factHits = new ArrayList<>(factEntitySearchResult.getHits());
