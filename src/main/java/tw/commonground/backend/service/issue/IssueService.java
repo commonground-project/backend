@@ -149,6 +149,10 @@ public class IssueService {
         return factEntities;
     }
 
+    public Integer getViewpointCount(UUID id) {
+        return issueRepository.getViewpointCount(id);
+    }
+
     @Caching(
             evict = {
                     @CacheEvict(value = "issue", key = "#issueId"),

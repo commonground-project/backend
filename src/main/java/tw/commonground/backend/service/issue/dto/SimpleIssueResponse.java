@@ -20,4 +20,6 @@ public class SimpleIssueResponse {
     private String title;
 
     private String description;
+
+    private Integer viewpointCount;
 }

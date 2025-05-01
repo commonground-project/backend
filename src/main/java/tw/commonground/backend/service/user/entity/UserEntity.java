@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import tw.commonground.backend.security.UserRole;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 
@@ -36,6 +37,14 @@ public class UserEntity implements SimpleUserEntity, FullUserEntity {
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    private LocalDate birthdate;
+
+    @Enumerated(EnumType.STRING)
+    private UserOccupation occupation;
+
+    @Enumerated(EnumType.STRING)
+    private UserGender gender;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn

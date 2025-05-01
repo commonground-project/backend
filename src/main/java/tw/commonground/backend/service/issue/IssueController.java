@@ -53,7 +53,10 @@ public class IssueController {
 
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()
-                .map(IssueMapper::toResponse)
+                .map(issue -> {
+                    Integer viewpointCount = issueService.getViewpointCount(issue.getId());
+                    return IssueMapper.toResponse(issue, viewpointCount);
+                })
                 .toList();
 
         return new WrappedPaginationResponse<>(issueResponses, PaginationMapper.toResponse(pageIssues));
@@ -70,7 +73,8 @@ public class IssueController {
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
+        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
         return ResponseEntity.ok(response);
     }
 
@@ -86,7 +90,8 @@ public class IssueController {
         if (user != null) {
             follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
         }
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
+        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
         return ResponseEntity.ok(response);
     }
 
@@ -101,7 +106,8 @@ public class IssueController {
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = issueService.getFollowForIssue(user.getId(), issueEntity.getId());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
+        Integer viewpointCount = issueService.getViewpointCount(id);
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
         return ResponseEntity.ok(response);
     }
 
