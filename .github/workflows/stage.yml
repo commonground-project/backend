@@ -107,7 +107,7 @@ jobs:
       - name: Deploy to Stage
         run: |
           export MODE='Stage'
-          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@10.2.1.57
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
