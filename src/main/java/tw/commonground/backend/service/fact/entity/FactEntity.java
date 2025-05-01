@@ -40,6 +40,11 @@ public class FactEntity extends BaseEntityWithAuthor {
     private String title;
 
     @ManyToMany
+    @JoinTable(
+            name = "fact_entity_references",
+            joinColumns = @JoinColumn(name = "fact_entity_id"),
+            inverseJoinColumns = @JoinColumn(name = "reference_entity_id")
+    )
     @ToString.Exclude
     private Set<ReferenceEntity> references;
 }
