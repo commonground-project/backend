@@ -101,13 +101,13 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/id_rsa
+          chmod 600 ~/id_rsa
 
       - name: Deploy to Stage
         run: |
           export MODE='Stage'
-          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.211.3
+          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/id_rsa gh-runner@192.168.211.3
 
       - name: Clear up
-        run: rm ~/.ssh/id_rsa
+        run: rm ~/id_rsa
