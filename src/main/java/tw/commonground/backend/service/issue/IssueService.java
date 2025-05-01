@@ -16,7 +16,6 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.tracing.Traced;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Traced
@@ -25,8 +24,6 @@ public class IssueService {
 
     private final IssueRepository issueRepository;
 
-    private final IssueFollowRepository issueFollowRepository;
-
     private final ManualFactRepository manualFactRepository;
 
     private final FactRepository factRepository;
@@ -34,12 +31,10 @@ public class IssueService {
     private final FactService factService;
 
     public IssueService(IssueRepository issueRepository,
-                        IssueFollowRepository issueFollowRepository,
                         ManualFactRepository manualFactRepository,
                         FactRepository factRepository,
                         FactService factService) {
         this.issueRepository = issueRepository;
-        this.issueFollowRepository = issueFollowRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
@@ -138,29 +133,7 @@ public class IssueService {
         return issueRepository.getViewpointCount(id);
     }
 
-    @Transactional
-    public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        if (issueFollowRepository.findById(id).isPresent()) {
-            issueFollowRepository.updateFollowById(id, follow);
-        } else {
-            issueFollowRepository.insertFollowById(id, follow);
-        }
-        IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
-        issueFollowEntity.setId(id);
-        issueFollowEntity.setFollow(follow);
-        issueFollowEntity.setUpdatedAt(LocalDateTime.now());
-        return issueFollowEntity;
-    }
 
-    public Boolean getFollowForIssue(Long userId, UUID issueId) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        return issueFollowRepository.findFollowById(id).orElse(false);
-    }
-
-    public List<Long> getIssueFollowersById(UUID issueId) {
-        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
-    }
 
     public void throwIfIssueNotExist(UUID id) {
         if (!issueRepository.existsById(id)) {

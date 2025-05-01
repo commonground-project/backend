@@ -41,5 +41,6 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     @Query("UPDATE UserEntity u SET u.username = ?2, u.nickname = ?3, u.role = ?4 WHERE u.id = ?1")
     void setupUserById(Long id, String username, String nickname, UserRole role);
 
+    Optional<UserEntity> getUserById(Long id);
 }
 
