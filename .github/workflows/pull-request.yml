@@ -120,5 +120,18 @@ jobs:
           export TITLE='${{ env.title }}'
           ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/.ssh/id_rsa gh-runner@192.168.80.21
 
+      - name: Check container logs
+        run: |
+          ssh -i ~/.ssh/id_rsa gh-runner@192.168.80.21 << 'EOF'
+            echo "[Postgres Container Logs]"
+            docker logs pr-93-postgres-1 || echo "No logs found for Postgres"
+          
+            echo "[Postgres Container Health Status]"
+            docker inspect --format='{{json .State.Health}}' pr-93-postgres-1 || echo "No health status"
+          EOF
+
       - name: Clear up
         run: rm ~/.ssh/id_rsa
+
+
+
