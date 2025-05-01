@@ -1,15 +1,12 @@
 package tw.commonground.backend.service.reference;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import tw.commonground.backend.service.fact.entity.FactEntity;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -41,8 +38,4 @@ public class ReferenceEntity {
 
     private String title;
 
-    @ManyToMany(mappedBy = "references")
-    @ToString.Exclude
-    @JsonIgnore
-    private Set<FactEntity> facts;
 }
