@@ -28,7 +28,9 @@ public class FollowService {
     private final IssueService issueService;
     private final ViewpointService viewpointService;
 
-    public FollowService(FollowRepository followRepository, UserService userService, IssueService issueService, ViewpointService viewpointService) {
+    public FollowService(FollowRepository followRepository, UserService userService,
+                         IssueService issueService,
+                         ViewpointService viewpointService) {
         this.followRepository = followRepository;
         this.userService = userService;
         this.issueService = issueService;
@@ -153,11 +155,13 @@ public class FollowService {
     }
 
     public List<Long> getFollowersById(UUID objectId, RelatedObject objectType) {
-        return followRepository.findUsersIdByObjectIdAndFollowTrue(objectId, objectType).orElse(Collections.emptyList());
+        return followRepository.findUsersIdByObjectIdAndFollowTrue(objectId, objectType).
+                orElse(Collections.emptyList());
     }
 
     public FollowEntity getfollowObject(Long userId, UUID objectId, RelatedObject objectType) {
         FollowKey key = new FollowKey(userId, objectId, objectType);
-        return followRepository.findById(key).orElseThrow(() -> new EntityNotFoundException("Follow", "id", key.toString()));
+        return followRepository.findById(key).orElseThrow(() ->
+                new EntityNotFoundException("Follow", "id", key.toString()));
     }
 }

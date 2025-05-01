@@ -14,7 +14,8 @@ public interface FollowRepository extends JpaRepository<FollowEntity, FollowKey>
     @Query("select i.follow from FollowEntity i where i.id = :id")
     Optional<Boolean> findFollowById(FollowKey id);
 
-    @Query("select i.user.id from FollowEntity i where i.id.objectId = :objectId and i.id.objectType = :objectType and i.follow = true")
+    @Query("select i.user.id from FollowEntity i where i.id.objectId = :objectId " +
+            "and i.id.objectType = :objectType " + "and i.follow = true")
     Optional<List<Long>> findUsersIdByObjectIdAndFollowTrue(UUID objectId, RelatedObject objectType);
 
 //    @Modifying
