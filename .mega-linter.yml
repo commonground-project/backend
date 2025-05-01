@@ -10,3 +10,6 @@ DISABLE_LINTERS:
   - COPYPASTE_JSCPD
 
 FILTER_REGEX_EXCLUDE: "(src/main/resources/static|script)"
+
+PRE_COMMANDS:
+  - command: pip install -r mock/suggestion/requirements.txt
