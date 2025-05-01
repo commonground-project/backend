@@ -8,8 +8,6 @@ import tw.commonground.backend.service.follow.dto.FollowMapper;
 import tw.commonground.backend.service.follow.dto.FollowRequest;
 import tw.commonground.backend.service.follow.dto.FollowResponse;
 import tw.commonground.backend.service.follow.entity.FollowEntity;
-import tw.commonground.backend.service.issue.IssueService;
-import tw.commonground.backend.service.issue.dto.IssueMapper;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.tracing.Traced;
@@ -46,4 +44,26 @@ public class FollowController {
                                                         RelatedObject.VIEWPOINT);
         return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
     }
+
+    @GetMapping("/issue/{id}/follow/me")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<FollowResponse> getIssueFollow(@AuthenticationPrincipal FullUserEntity user,
+                                                             @PathVariable UUID id) {
+        FollowEntity entity = followService.getfollowObject(user.getId(), id, RelatedObject.ISSUE);
+        return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
+    }
+
+    @GetMapping("/viewpoint/{id}/follow/me")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<FollowResponse> getViewpointFollow(@AuthenticationPrincipal FullUserEntity user,
+                                                                @PathVariable UUID id) {
+        FollowEntity entity = followService.getfollowObject(user.getId(), id, RelatedObject.VIEWPOINT);
+        return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
+    }
+
+//    public ResponseEntity<List<FollowResponse>> getFollowedObjects(@AuthenticationPrincipal FullUserEntity user) {
+//        List<FollowEntity> followedEntities = followService.getFollowedObjects(user.getId());
+//        List<FollowResponse> response = FollowMapper.toFollowResponseList(followedEntities);
+//        return ResponseEntity.ok(response);
+//    }
 }

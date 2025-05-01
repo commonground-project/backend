@@ -1,9 +1,7 @@
 package tw.commonground.backend.service.follow.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
@@ -24,6 +22,7 @@ public class FollowEntity {
     @EmbeddedId
     private FollowKey id;
 
+    @Column(nullable = false)
     private Boolean follow;
 
     @MapsId("userId")

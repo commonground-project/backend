@@ -38,6 +38,7 @@ public class ReferenceEntity {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
 
 }

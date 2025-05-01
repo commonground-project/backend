@@ -82,6 +82,14 @@ public class UserService {
         return userRepository.findUserEntityByEmail(email);
     }
 
+    public Optional<FullUserEntity> getFullUserById(Long id) {
+        return userRepository.findUserEntityById(id);
+    }
+
+    public Optional<UserEntity> getUserById(Long id) {
+        return userRepository.getUserById(id);
+    }
+
     public FullUserEntity updateUser(String username, UpdateUserRequest request) {
         UserEntity userEntity = userRepository.getUserEntityByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
