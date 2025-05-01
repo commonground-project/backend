@@ -23,6 +23,9 @@ public class InternalProfileResponse {
     private String occupation = "";
 
     @Builder.Default
+    private String birthdate = "";
+
+    @Builder.Default
     private String location = "";
 
     @Builder.Default

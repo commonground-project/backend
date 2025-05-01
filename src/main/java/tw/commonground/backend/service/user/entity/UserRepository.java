@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import tw.commonground.backend.security.UserRole;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,6 +21,12 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     Optional<FullUserEntity> findUserEntityById(Long id);
 
     Optional<FullUserEntity> findIdByEmail(String email);
+
+    Optional<ProfileEntity> findProfileEntityById(Long id);
+
+    Optional<ProfileEntity> findProfileEntityByUsername(String username);
+
+    Optional<ProfileEntity> findProfileEntityByEmail(String email);
 
     Optional<UserEntity> getUserEntityByUsername(String username);
 
@@ -42,5 +49,9 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     void setupUserById(Long id, String username, String nickname, UserRole role);
 
     Optional<UserEntity> getUserById(Long id);
-}
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE UserEntity u SET u.birthdate = ?2, u.occupation = ?3, u.gender = ?4 WHERE u.id = ?1")
+    void setupUserInformationById(Long id, LocalDate birthdate, UserOccupation occupation, UserGender gender);
+}
