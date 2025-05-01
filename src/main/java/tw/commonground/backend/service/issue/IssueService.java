@@ -10,16 +10,12 @@ import tw.commonground.backend.exception.ValidationException;
 import tw.commonground.backend.service.fact.FactService;
 import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.fact.entity.FactRepository;
-import tw.commonground.backend.service.follow.entity.FollowEntity;
-import tw.commonground.backend.service.follow.entity.FollowKey;
-import tw.commonground.backend.service.follow.entity.FollowRepository;
 import tw.commonground.backend.service.issue.dto.IssueRequest;
 import tw.commonground.backend.service.issue.entity.*;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.tracing.Traced;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Traced
@@ -43,6 +39,10 @@ public class IssueService {
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
+    }
+
+    public Integer getViewpointCount(UUID id) {
+        return issueRepository.getViewpointCount(id);
     }
 
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {

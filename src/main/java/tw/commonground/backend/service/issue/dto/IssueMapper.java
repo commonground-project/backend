@@ -16,9 +16,13 @@ public final class IssueMapper {
         // hide the constructor
     }
 
+    public static IssueResponse toResponse(
+            IssueEntity entity,
+            Boolean follow,
+            List<FactEntity> factEntities,
+            Integer viewpointCount) {
         ContentContainFact insight = ContentParser.separateContentAndFacts(entity.getInsight(),
                 factEntities.stream().map(FactEntity::getId).toList());
-
         return IssueResponse.builder()
                 .id(entity.getId().toString())
                 .createdAt(DateTimeUtils.toIso8601String(entity.getCreatedAt()))
@@ -30,6 +34,7 @@ public final class IssueMapper {
                 .authorName(entity.getAuthorName())
                 .authorAvatar(entity.getAuthorAvatar())
                 .userFollow(FollowResponse.builder().follow(follow).build())
+                .viewpointCount(viewpointCount)
                 .facts(factEntities.stream().map(FactMapper::toResponse).toList())
                 .build();
     }
@@ -45,11 +50,11 @@ public final class IssueMapper {
                 .build();
     }
 
-    public static IssueEntity toEntity(IssueRequest request) {
-        return IssueEntity.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .insight(request.getInsight())
-                .build();
-    }
+//    public static IssueEntity toEntity(IssueRequest request) {
+//        return IssueEntity.builder()
+//                .title(request.getTitle())
+//                .description(request.getDescription())
+//                .insight(request.getInsight())
+//                .build();
+//    }
 }

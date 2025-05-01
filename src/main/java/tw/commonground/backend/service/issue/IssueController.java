@@ -55,6 +55,8 @@ public class IssueController {
         Pageable pageable = paginationParser.parsePageable(pagination);
         Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
 
+
+
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()
                 .map(issue -> {
@@ -67,7 +69,7 @@ public class IssueController {
     }
 
     @PostMapping("/issues")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<IssueResponse> createIssue(@AuthenticationPrincipal FullUserEntity user,
                                                      @Valid @RequestBody IssueRequest issueRequest) {
 
@@ -75,9 +77,11 @@ public class IssueController {
         ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
 
+
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
+        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
         return ResponseEntity.ok(response);
     }
 
@@ -109,7 +113,8 @@ public class IssueController {
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses);
+        Integer viewpointCount = issueService.getViewpointCount(id);
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
         return ResponseEntity.ok(response);
     }
 
