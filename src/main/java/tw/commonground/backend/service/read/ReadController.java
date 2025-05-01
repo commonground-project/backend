@@ -51,4 +51,12 @@ public class ReadController {
         return ResponseEntity.ok(ReadMapper.toResponse(entity));
     }
 
+    @GetMapping("/read/viewpoint/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ReadResponse> ReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
+                                                  @PathVariable UUID id) {
+        ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
+        return ResponseEntity.ok(response);
+    }
+
 }
