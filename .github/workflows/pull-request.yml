@@ -109,11 +109,7 @@ jobs:
           mkdir -p ~/.ssh
           echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
-
       - name: Deploy image
-        env:
-          title: ${{ github.event.pull_request.title }}
         run: |
           echo "PR title: ${{ github.event.pull_request.title }}"
           echo "ENV: ${{ github.event.number }}"
