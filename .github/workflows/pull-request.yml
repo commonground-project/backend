@@ -109,7 +109,7 @@ jobs:
           export ENV='${{ github.event.number }}'
           export DRAFT='${{ github.event.pull_request.draft }}'
           export TITLE='${{ env.title }}'
-          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/.ssh/id_rsa gh-runner@10.2.1.57
+          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/.ssh/id_rsa gh-runner@192.168.211.3
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa

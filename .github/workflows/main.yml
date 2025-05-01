@@ -107,7 +107,7 @@ jobs:
       - name: Deploy Dev
         run: |
           export MODE='Dev'
-          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@10.2.1.57
+          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.211.3
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
