@@ -90,14 +90,14 @@ public class FollowService {
 //        IssueFollowKey id = new IssueFollowKey(userId, issueId);
 //        return issueFollowRepository.findFollowById(id).orElse(false);
 //    }
-//
-//    public List<Long> getIssueFollowersById(UUID issueId) {
-//        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
-//    }
 
     public List<Long> getIssueFollowersById(UUID id) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.ISSUE)
                 .orElse(Collections.emptyList());
-//        IssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
+    }
+
+    public List<Long> getViewpointFollowersById(UUID id) {
+        return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.VIEWPOINT)
+                .orElse(Collections.emptyList());
     }
 }

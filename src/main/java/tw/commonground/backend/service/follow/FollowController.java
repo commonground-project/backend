@@ -61,6 +61,7 @@ public class FollowController {
         return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
     }
 
+
 //    public ResponseEntity<List<FollowResponse>> getFollowedObjects(@AuthenticationPrincipal FullUserEntity user) {
 //        List<FollowEntity> followedEntities = followService.getFollowedObjects(user.getId());
 //        List<FollowResponse> response = FollowMapper.toFollowResponseList(followedEntities);
