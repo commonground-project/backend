@@ -16,6 +16,7 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.entity.Preference;
 import tw.commonground.backend.shared.tracing.Traced;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
@@ -234,5 +235,9 @@ public class ViewpointService {
     public Reaction getReactionForViewpoint(Long userId, UUID viewpointId) {
         ViewpointReactionKey id = new ViewpointReactionKey(userId, viewpointId);
         return viewpointReactionRepository.findReactionById(id).orElse(Reaction.NONE);
+    }
+
+    public void setViewpointPreference(Long userId, UUID viewpointId, Preference preference) {
+        applicationEventPublisher.publishEvent();
     }
 }

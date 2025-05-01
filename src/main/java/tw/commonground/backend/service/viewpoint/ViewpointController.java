@@ -146,6 +146,23 @@ public class ViewpointController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/viewpoint/{id}/preference/me")
+    public ResponseEntity<ViewpointPreferenceResponse> setViewpointPreference(
+            @AuthenticationPrincipal FullUserEntity user,
+            @PathVariable UUID id,
+            @RequestBody ViewpointPreferenceRequest preferenceRequest) {
+
+        Long userId = user.getId();
+
+        viewpointService.setViewpointPreference(userId, id,
+                preferenceRequest.getPreference());
+
+        return ResponseEntity.ok(
+                ViewpointPreferenceResponse.builder()
+                .preference(preferenceRequest.getPreference())
+                        .build());
+    }
+
     private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
             Long userId,
             Page<ViewpointEntity> pageViewpoints) {
