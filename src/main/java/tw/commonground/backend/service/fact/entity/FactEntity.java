@@ -41,7 +41,7 @@ public class FactEntity extends BaseEntityWithAuthor {
 
     @ManyToMany
     @JoinTable(
-            name = "fact_entity_reference",
+            name = "fact_entity_references",
             joinColumns = @JoinColumn(name = "fact_entity_id"),
             inverseJoinColumns = @JoinColumn(name = "references_id")
     )
