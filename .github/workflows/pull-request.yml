@@ -114,24 +114,17 @@ jobs:
         env:
           title: ${{ github.event.pull_request.title }}
         run: |
+          echo "PR title: ${{ github.event.pull_request.title }}"
+          echo "ENV: ${{ github.event.number }}"
           export MODE='Snapshot'
           export ENV='${{ github.event.number }}'
           export DRAFT='${{ github.event.pull_request.draft }}'
           export TITLE='${{ env.title }}'
-          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/.ssh/id_rsa gh-runner@192.168.80.21
-
-      - name: Check container logs
-        run: |
-          ssh -i ~/.ssh/id_rsa gh-runner@192.168.80.21 << 'EOF'
-            echo "[Postgres Container Logs]"
-            docker logs pr-93-postgres-1 || echo "No logs found for Postgres"
-          
-            echo "[Postgres Container Health Status]"
-            docker inspect --format='{{json .State.Health}}' pr-93-postgres-1 || echo "No health status"
-          EOF
+#          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/.ssh/id_rsa gh-runner@192.168.80.21
+          ssh -i ~/.ssh/id_rsa gh-runner@192.168.80.21 "
+          MODE='Snapshot' ENV='${{ github.event.number }}' DRAFT='${{ github.event.pull_request.draft }}' TITLE='${{ github.event.pull_request.title }}' bash -s" <<'EOF'
+          echo "ENV=$ENV"
+          docker-compose up -d
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
-
-
-
