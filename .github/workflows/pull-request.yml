@@ -122,4 +122,3 @@ jobs:
 
       - name: Clear up
         run: rm ~/.ssh/id_rsa
-
