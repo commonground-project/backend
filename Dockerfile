@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends jq=1.7.1-3build
 WORKDIR /app
 COPY build/libs/*.jar /app/app.jar
 
-#  install curl
-RUN apt-get update && apt-get install -y curl
-
 # Set Spring Boot Actuator endpoint settings in environment variables
 ENV SPRINGPROFILES=prod
 
