@@ -27,7 +27,8 @@ public class ReadService {
     private final IssueRepository issueRepository;
     private final ViewpointRepository viewpointRepository;
 
-    public ReadService(ReadRepository readRepository, UserRepository userRepository, IssueRepository issueRepository, ViewpointRepository viewpointRepository) {
+    public ReadService(ReadRepository readRepository, UserRepository userRepository,
+                       IssueRepository issueRepository, ViewpointRepository viewpointRepository) {
         this.readRepository = readRepository;
         this.userRepository = userRepository;
         this.issueRepository = issueRepository;

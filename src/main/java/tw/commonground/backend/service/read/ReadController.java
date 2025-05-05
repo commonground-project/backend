@@ -27,7 +27,7 @@ public class ReadController {
 
     @PostMapping("/read/issue/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> ReadIssue(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<ReadResponse> readIssue(@AuthenticationPrincipal FullUserEntity user,
                                                            @PathVariable UUID id,
                                                            @RequestBody ReadRequest request) {
         ReadEntity entity = readService.updateReadStatus(user.getId(), id, request, ReadObjectType.ISSUE);
@@ -36,7 +36,7 @@ public class ReadController {
 
     @GetMapping("/read/issue/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> ReadIssue(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<ReadResponse> readIssue(@AuthenticationPrincipal FullUserEntity user,
                                                   @PathVariable UUID id) {
         ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.ISSUE);
         return ResponseEntity.ok(response);
@@ -44,7 +44,7 @@ public class ReadController {
 
     @PostMapping("/read/viewpoint/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> ReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<ReadResponse> readViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                                @PathVariable UUID id,
                                                                @RequestBody ReadRequest request) {
         ReadEntity entity = readService.updateReadStatus(user.getId(), id, request, ReadObjectType.VIEWPOINT);
@@ -53,7 +53,7 @@ public class ReadController {
 
     @GetMapping("/read/viewpoint/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> ReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<ReadResponse> readViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                   @PathVariable UUID id) {
         ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
         return ResponseEntity.ok(response);
