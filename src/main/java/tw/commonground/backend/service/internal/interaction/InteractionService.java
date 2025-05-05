@@ -40,8 +40,11 @@ public class InteractionService {
             return;
         }
 
-        InteractionEntity interactionEntity = createReactionInteractionEntityBuilder(event.getDateTime(), event.getUserId(),
-                event.getEntityId(), RelatedObjectType.VIEWPOINT, event.getReaction());
+        InteractionEntity interactionEntity = createReactionInteractionEntityBuilder(event.getDateTime(),
+                event.getUserId(),
+                event.getEntityId(),
+                RelatedObjectType.VIEWPOINT,
+                event.getReaction());
 
         interactionRepository.save(interactionEntity);
     }
@@ -53,8 +56,11 @@ public class InteractionService {
             return;
         }
 
-        InteractionEntity interactionEntity = createReactionInteractionEntityBuilder(event.getDateTime(), event.getUserId(),
-                event.getEntityId(), RelatedObjectType.REPLY, event.getReaction());
+        InteractionEntity interactionEntity = createReactionInteractionEntityBuilder(event.getDateTime(),
+                event.getUserId(),
+                event.getEntityId(),
+                RelatedObjectType.REPLY,
+                event.getReaction());
 
         interactionRepository.save(interactionEntity);
     }

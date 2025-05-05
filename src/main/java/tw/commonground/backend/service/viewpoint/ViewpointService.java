@@ -23,7 +23,6 @@ import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
