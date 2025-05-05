@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface ReferenceRepository extends JpaRepository<ReferenceEntity, UUID> {
 
     Optional<ReferenceEntity> findByUrl(String reference);
+
+    Optional<ReferenceEntity> findById(UUID referenceId);
 }

@@ -40,6 +40,7 @@ dependencies {
 	implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
 	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
 	implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.13.1'
+	implementation 'com.meilisearch.sdk:meilisearch-java:0.14.3'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'org.postgresql:postgresql'
