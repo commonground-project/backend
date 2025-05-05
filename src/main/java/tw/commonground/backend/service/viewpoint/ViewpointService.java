@@ -1,5 +1,9 @@
 package tw.commonground.backend.service.viewpoint;
 
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Traced
 @Service
+@CacheConfig(cacheNames = "viewpoint")
 public class ViewpointService {
     private static final String VIEWPOINT_KEY = "Viewpoint";
 
@@ -60,14 +65,20 @@ public class ViewpointService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    @Cacheable(key = "'allViewpoints'")
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
         return viewpointRepository.findAll(pageable);
     }
 
+    @Cacheable(key = "'allViewpoints'")
     public Page<ViewpointEntity> getIssueViewpoints(UUID issueId, Pageable pageable) {
         return viewpointRepository.findAllByIssueId(issueId, pageable);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "viewpoint", allEntries = true),
+            @CacheEvict(value = "issue", key = "{#issueId, 'allIssues'}")
+    })
     @Transactional
     public ViewpointEntity createIssueViewpoint(UUID issueId, ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -92,11 +103,13 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
+    @Cacheable(key = "#id")
     public ViewpointEntity getViewpoint(UUID id) {
         return viewpointRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
     }
 
+    @CacheEvict(key = "'allViewpoints'")
     @Transactional
     public ViewpointEntity createViewpoint(ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -116,6 +129,10 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "viewpoint", key = "#id"),
+            @CacheEvict(value = "viewpoint", key = "'allViewpoints'")
+    })
     @Transactional
     public ViewpointEntity updateViewpoint(UUID id, ViewpointRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -135,10 +152,16 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
+    @CacheEvict(key = "{#id, 'allViewpoints'}")
     public void deleteViewpoint(UUID id) {
         viewpointRepository.deleteById(id);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "viewpoint", key = "#viewpointId"),
+            @CacheEvict(value = "viewpoint", key = "'allViewpoints'"),
+            @CacheEvict(value = "reactionViewpoint", allEntries = true)
+    })
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ViewpointReactionEntity reactToViewpoint(Long userId, UUID viewpointId, Reaction reaction) {
         String lockKey = String.format(VIEWPOINT_REACTION_LOCK_FORMAT, viewpointId, userId);
@@ -207,10 +230,12 @@ public class ViewpointService {
         }
     }
 
+    @Cacheable({"fact"})
     public List<FactEntity> getFactsOfViewpoint(UUID viewpointId) {
         return viewpointFactRepository.findFactsByViewpointId(viewpointId);
     }
 
+    @Cacheable({"fact"})
     public Map<UUID, List<FactEntity>> getFactsForViewpoints(List<UUID> viewpointIds) {
         List<ViewpointFactProjection> results = viewpointFactRepository.findFactsByViewpointIds(viewpointIds);
         return results.stream()
@@ -220,6 +245,7 @@ public class ViewpointService {
                 ));
     }
 
+    @Cacheable({"reactionViewpoint"})
     public Map<UUID, Reaction> getReactionsForViewpoints(Long userId, List<UUID> viewpointIds) {
         List<ViewpointReactionEntity> reactions = viewpointReactionRepository
                 .findReactionsByUserIdAndViewpointIds(userId, viewpointIds);
@@ -231,6 +257,7 @@ public class ViewpointService {
                 ));
     }
 
+    @Cacheable({"reactionViewpoint"})
     public Reaction getReactionForViewpoint(Long userId, UUID viewpointId) {
         ViewpointReactionKey id = new ViewpointReactionKey(userId, viewpointId);
         return viewpointReactionRepository.findReactionById(id).orElse(Reaction.NONE);
