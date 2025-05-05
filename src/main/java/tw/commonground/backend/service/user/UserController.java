@@ -85,6 +85,13 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/user/complete-onboarding/me")
+    public ResponseEntity<UserResponse> completeOnboarding(@AuthenticationPrincipal FullUserEntity user) {
+        ProfileEntity userEntity = userService.completeOnboarding(user.getEmail());
+        UserResponse response = UserMapper.toResponse(userEntity);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping(value = "/user/avatar/{username}", produces = "image/png")
     public ResponseEntity<byte[]> getProfileImage(@Valid @NotBlank @PathVariable String username) {
         return ResponseEntity.ok(userService.getProfileImage(username));

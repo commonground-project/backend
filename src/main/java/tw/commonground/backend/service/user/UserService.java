@@ -21,6 +21,7 @@ import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.security.UserRole;
 import tw.commonground.backend.service.user.exception.UserAlreadySetupException;
+import tw.commonground.backend.shared.event.user.UserCreatedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
@@ -112,15 +113,6 @@ public class UserService {
             // instead of `@PreAuthorize("hasRole('SETUP_REQUIRED')")`
             throw new UserAlreadySetupException(email);
         } else {
-            UserRole defaultRole = UserRole.ROLE_USER;
-            if (adminEmail != null) {
-                for (String admin : adminEmail) {
-                    if (admin.equals(email)) {
-                        defaultRole = UserRole.ROLE_ADMIN;
-                        break;
-                    }
-                }
-            }
 
             if (userRepository.existsByUsername(setupRequest.getUsername())) {
                 throw new ValidationException("Username already exists");
@@ -128,14 +120,36 @@ public class UserService {
 
             userRepository.setupUserById(fullUser.getId(),
                     setupRequest.getUsername(),
-                    setupRequest.getNickname(),
-                    defaultRole);
+                    setupRequest.getNickname());
 
             // Setup user information for AI recommendation system
             userRepository.setupUserInformationById(fullUser.getId(),
                     setupRequest.getBirthdate(),
                     setupRequest.getOccupation(),
                     setupRequest.getGender());
+
+            // Use to clear hibernate second level cache before fetching and returning user
+            entityManager.clear();
+            return userRepository.findProfileEntityByEmail(fullUser.getEmail()).orElseThrow();
+        }
+    }
+
+    public ProfileEntity completeOnboarding(String email) {
+        FullUserEntity fullUser = userRepository.findUserEntityByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User", "email", email));
+
+        if (fullUser.getRole() != UserRole.ROLE_NOT_SETUP) {
+            // Use UserAlreadySetupException to provide more context,
+            // instead of `@PreAuthorize("hasRole('SETUP_REQUIRED')")`
+            throw new UserAlreadySetupException(email);
+        } else {
+
+            UserRole defaultRole = UserRole.ROLE_USER;
+            if (List.of(adminEmail).contains(email)) {
+                defaultRole = UserRole.ROLE_ADMIN;
+            }
+
+            userRepository.setupUserRoleById(fullUser.getId(), defaultRole);
 
             // Use to clear hibernate second level cache before fetching and returning user
             entityManager.clear();

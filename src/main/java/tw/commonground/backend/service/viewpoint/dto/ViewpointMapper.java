@@ -3,6 +3,7 @@ package tw.commonground.backend.service.viewpoint.dto;
 
 import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.shared.entity.Preference;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointReactionEntity;
@@ -46,6 +47,13 @@ public final class ViewpointMapper {
                 .dislikeCount(viewpointEntity.getDislikeCount())
                 .userReaction(toReactionResponse(reaction))
                 .facts(factEntities.stream().map(FactMapper::toResponse).toList())
+                .build();
+    }
+
+    public static ViewpointPreferenceResponse toPreferenceResponse(ViewpointPreferenceRequest request) {
+        return ViewpointPreferenceResponse.builder()
+                .id(request.getId().toString())
+                .preference(request.getPreference())
                 .build();
     }
 }
