@@ -155,31 +155,6 @@ public class IssueService {
                     @CacheEvict(value = "follow", allEntries = true)
             }
     )
-    @Transactional
-    public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        if (issueFollowRepository.findById(id).isPresent()) {
-            issueFollowRepository.updateFollowById(id, follow);
-        } else {
-            issueFollowRepository.insertFollowById(id, follow);
-        }
-        IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
-        issueFollowEntity.setId(id);
-        issueFollowEntity.setFollow(follow);
-        issueFollowEntity.setUpdatedAt(LocalDateTime.now());
-        return issueFollowEntity;
-    }
-
-    @Cacheable("follow")
-    public Boolean getFollowForIssue(Long userId, UUID issueId) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        return issueFollowRepository.findFollowById(id).orElse(false);
-    }
-
-    @Cacheable("follow")
-    public List<Long> getIssueFollowersById(UUID issueId) {
-        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
-    }
 
     public void throwIfIssueNotExist(UUID id) {
         if (!issueRepository.existsById(id)) {

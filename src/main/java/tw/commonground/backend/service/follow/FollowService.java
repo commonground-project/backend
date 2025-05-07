@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.follow;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
@@ -71,22 +72,26 @@ public class FollowService {
         return followRepository.findFollowById(id).orElse(false);
     }
 
+    @Cacheable("follow")
     public List<Long> getFollowersById(UUID objectId, RelatedObject objectType) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(objectId, objectType).
                 orElse(Collections.emptyList());
     }
 
+    @Cacheable("follow")
     public FollowEntity getFollowObject(Long userId, UUID objectId, RelatedObject objectType) {
         FollowKey key = new FollowKey(userId, objectId, objectType);
         return followRepository.findById(key).orElseThrow(() ->
                 new EntityNotFoundException("Follow", "id", key.toString()));
     }
 
+    @Cacheable("follow")
     public List<Long> getIssueFollowersById(UUID id) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.ISSUE)
                 .orElse(Collections.emptyList());
     }
 
+    @Cacheable("follow")
     public List<Long> getViewpointFollowersById(UUID id) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.VIEWPOINT)
                 .orElse(Collections.emptyList());
