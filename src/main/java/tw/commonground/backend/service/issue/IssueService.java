@@ -1,5 +1,9 @@
 package tw.commonground.backend.service.issue;
 
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +24,7 @@ import java.util.*;
 
 @Traced
 @Service
+@CacheConfig(cacheNames = "issue")
 public class IssueService {
 
     private final IssueRepository issueRepository;
@@ -40,16 +45,19 @@ public class IssueService {
         this.factService = factService;
     }
 
+    @Cacheable("'allIssues'")
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
         return issueRepository.findAllIssueEntityBy(pageable);
     }
 
+    @Cacheable(key = "{#id, 'allIssues'}")
     public IssueEntity getIssue(UUID id) {
         return issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
         );
     }
 
+    @CacheEvict(key = "'allIssues'")
     public IssueEntity createIssue(IssueRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
 
@@ -68,6 +76,7 @@ public class IssueService {
         return issueRepository.save(issueEntity);
     }
 
+    @CacheEvict(key = "{#id, 'allIssues'}")
     public IssueEntity updateIssue(UUID id, IssueRequest issueRequest) {
         IssueEntity issueEntity = issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
@@ -91,11 +100,13 @@ public class IssueService {
         return issueRepository.save(issueEntity);
     }
 
+    @CacheEvict(key = "{#id, 'allIssues'}")
     public void deleteIssue(UUID id) {
 //        Todo: need to use soft delete
         issueRepository.deleteById(id);
     }
 
+    @Cacheable(value = {"fact", "issue"}, key = "#id")
     public Page<FactEntity> getIssueFacts(UUID id, Pageable pageable) {
         List<FactEntity> factEntities = new ArrayList<>();
         Page<ManualIssueFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);
@@ -108,6 +119,10 @@ public class IssueService {
         return new PageImpl<>(factEntities, pageable, manualFactEntities.getTotalElements());
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "issue", key = "#id"),
+            @CacheEvict(value = "issue", key = "'allIssues'")
+    })
     @Transactional
     public List<FactEntity> createManualFact(UUID id, List<UUID> factIds) {
         factService.throwIfFactsNotExist(factIds);
@@ -133,7 +148,38 @@ public class IssueService {
         return issueRepository.getViewpointCount(id);
     }
 
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "issue", key = "#issueId"),
+                    @CacheEvict(value = "issue", key = "'allIssues'"),
+                    @CacheEvict(value = "follow", allEntries = true)
+            }
+    )
+    @Transactional
+    public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
+        IssueFollowKey id = new IssueFollowKey(userId, issueId);
+        if (issueFollowRepository.findById(id).isPresent()) {
+            issueFollowRepository.updateFollowById(id, follow);
+        } else {
+            issueFollowRepository.insertFollowById(id, follow);
+        }
+        IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
+        issueFollowEntity.setId(id);
+        issueFollowEntity.setFollow(follow);
+        issueFollowEntity.setUpdatedAt(LocalDateTime.now());
+        return issueFollowEntity;
+    }
 
+    @Cacheable("follow")
+    public Boolean getFollowForIssue(Long userId, UUID issueId) {
+        IssueFollowKey id = new IssueFollowKey(userId, issueId);
+        return issueFollowRepository.findFollowById(id).orElse(false);
+    }
+
+    @Cacheable("follow")
+    public List<Long> getIssueFollowersById(UUID issueId) {
+        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
+    }
 
     public void throwIfIssueNotExist(UUID id) {
         if (!issueRepository.existsById(id)) {
