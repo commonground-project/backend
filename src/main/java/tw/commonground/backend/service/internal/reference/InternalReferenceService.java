@@ -44,14 +44,11 @@ public class InternalReferenceService {
         String url = referenceEntity.getUrl();
         if (referenceEntity.getDescription() != null) {
             return;
-//            return InternalReferenceMapper.toInternalDetailResponse(referenceEntity);
         }
-
         String description = referenceService.fetchContentFromFallback(url);
 
         referenceEntity.setDescription(description);
         referenceRepository.save(referenceEntity);
-//        return InternalReferenceMapper.toInternalDetailResponse(referenceEntity);
     }
 }
 

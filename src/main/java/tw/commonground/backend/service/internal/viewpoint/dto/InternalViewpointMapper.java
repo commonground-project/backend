@@ -59,7 +59,6 @@ public final class InternalViewpointMapper {
                 .likeCount(viewpointEntity.getLikeCount())
                 .reasonableCount(viewpointEntity.getReasonableCount())
                 .dislikeCount(viewpointEntity.getDislikeCount())
-//                .userReaction(toReactionResponse(reaction))
                 .facts(factEntities.stream().map(InternalFactMapper::toDetailResponse).toList())
                 .build();
     }

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -30,7 +31,8 @@ public class ReferenceService {
 
     private final ReferenceRepository referenceRepository;
 
-    private static final String CRAWLER_API = "http://127.0.0.1:8000/";
+    @Value("${crawler.url}")
+    private String CRAWLER_API;
 
     public ReferenceService(ReferenceRepository referenceRepository) {
         this.referenceRepository = referenceRepository;
@@ -132,7 +134,7 @@ public class ReferenceService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             String apiUrl = CRAWLER_API + "content/" + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
-            System.out.println("API URL: " + apiUrl);
+            log.debug("API URL: {}", apiUrl);
             ResponseEntity<ContentCrawlerResponse> response = restTemplate.exchange(
                     apiUrl, HttpMethod.GET, entity, ContentCrawlerResponse.class
             );

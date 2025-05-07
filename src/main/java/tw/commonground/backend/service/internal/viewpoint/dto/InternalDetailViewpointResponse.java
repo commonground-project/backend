@@ -17,10 +17,6 @@ import java.util.UUID;
 @ToString
 public class InternalDetailViewpointResponse {
 
-    @JsonProperty("user_id")
-    private UUID authorId;
-
-    @JsonProperty("interaction_id")
     private UUID id;
 
     private String content;
@@ -34,18 +30,22 @@ public class InternalDetailViewpointResponse {
     @JsonProperty("reasonable_count")
     private Integer reasonableCount;
 
-    @JsonProperty("timestamp")
+    @JsonProperty("created_at")
     private String createdAt;
 
+    @JsonProperty("updated_at")
     private String updatedAt;
 
     private String title;
 
+    @JsonProperty("user_id")
+    private UUID authorId;
+
+    @JsonProperty("publisher_name")
     private String authorName;
 
+    @JsonProperty("author_avatar")
     private String authorAvatar;
-
-//    private ViewpointReactionResponse userReaction;
 
     private List<InternalDetailFactResponse> facts;
 }
