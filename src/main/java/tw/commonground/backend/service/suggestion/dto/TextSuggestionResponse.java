@@ -13,6 +13,5 @@ import java.util.List;
 public class TextSuggestionResponse {
     private String text;
 
-    @ToString.Exclude
     private List<TextResponseSuggestionItem> suggestions;
 }

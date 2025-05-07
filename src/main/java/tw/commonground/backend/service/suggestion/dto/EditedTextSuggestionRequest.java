@@ -17,6 +17,5 @@ public class EditedTextSuggestionRequest {
     @JsonProperty("edited_text")
     private String editedText;
 
-    @ToString.Exclude
     private List<EditedTextRequestSuggestionItem> suggestions;
 }

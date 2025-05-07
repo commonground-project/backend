@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.suggestion;
 
+import org.springframework.beans.factory.annotation.Value;
 import tw.commonground.backend.service.suggestion.dto.*;
 import tw.commonground.backend.service.suggestion.entity.*;
 import tw.commonground.backend.service.suggestion.dto.TextSuggestionMapper;
@@ -15,7 +16,9 @@ import java.util.List;
 public class SuggestionService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String mockApiUrl = "http://localhost:5001";
+
+    @Value("${mockApiUrl}")
+    private String mockApiUrl;
 
     private final TextSuggestionRepository textSuggestionRepository;
     private final TextSuggestionDetailRepository textSuggestionDetailRepository;
