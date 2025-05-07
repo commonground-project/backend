@@ -148,13 +148,6 @@ public class IssueService {
         return issueRepository.getViewpointCount(id);
     }
 
-    @Caching(
-            evict = {
-                    @CacheEvict(value = "issue", key = "#issueId"),
-                    @CacheEvict(value = "issue", key = "'allIssues'"),
-            }
-    )
-
     public void throwIfIssueNotExist(UUID id) {
         if (!issueRepository.existsById(id)) {
             throw new EntityNotFoundException("Issue", "id", id.toString());
