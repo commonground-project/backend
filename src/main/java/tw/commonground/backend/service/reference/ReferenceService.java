@@ -32,7 +32,7 @@ public class ReferenceService {
     private final ReferenceRepository referenceRepository;
 
     @Value("${crawler.url}")
-    private String CRAWLER_API;
+    private String crawlerApi;
 
     public ReferenceService(ReferenceRepository referenceRepository) {
         this.referenceRepository = referenceRepository;
@@ -133,7 +133,7 @@ public class ReferenceService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            String apiUrl = CRAWLER_API + "content/" + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            String apiUrl = crawlerApi + "content/" + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
             log.debug("API URL: {}", apiUrl);
             ResponseEntity<ContentCrawlerResponse> response = restTemplate.exchange(
                     apiUrl, HttpMethod.GET, entity, ContentCrawlerResponse.class
@@ -156,7 +156,7 @@ public class ReferenceService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            String apiUrl = CRAWLER_API + "title/" +  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            String apiUrl = crawlerApi + "title/" +  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
             ResponseEntity<TitleCrawlerResponse> response = restTemplate.exchange(
                     apiUrl, HttpMethod.GET, entity, TitleCrawlerResponse.class
             );
