@@ -152,7 +152,6 @@ public class IssueService {
             evict = {
                     @CacheEvict(value = "issue", key = "#issueId"),
                     @CacheEvict(value = "issue", key = "'allIssues'"),
-                    @CacheEvict(value = "follow", allEntries = true)
             }
     )
 

@@ -1,6 +1,8 @@
 package tw.commonground.backend.service.follow;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
@@ -39,6 +41,14 @@ public class FollowService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "issue", key = "#objectId", condition =
+                    "#objectType == T(tw.commonground.backend.shared.entity.RelatedObject).ISSUE"),
+            @CacheEvict(value = "viewpoint", key = "#objectId", condition =
+                    "#objectType == T(tw.commonground.backend.shared.entity.RelatedObject).VIEWPOINT"),
+            @CacheEvict(value = "follow", key = "'follow_'+#userId+'_'+#objectId+'_'+#objectType"),
+            @CacheEvict(value = "follow_list", key = "'followers_'+#objectId+'_'+#objectType")
+    })
     public FollowEntity followObject(Long userId, UUID objectId, Boolean follow, RelatedObject objectType) {
         userService.throwIfUserNotExist(userId);
         if (objectType == RelatedObject.ISSUE) {
@@ -72,26 +82,26 @@ public class FollowService {
         return followRepository.findFollowById(id).orElse(false);
     }
 
-    @Cacheable("follow")
+    @Cacheable(value = "follow_list", key = "'followers_'+#objectId+'_'+#objectType")
     public List<Long> getFollowersById(UUID objectId, RelatedObject objectType) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(objectId, objectType).
                 orElse(Collections.emptyList());
     }
 
-    @Cacheable("follow")
+    @Cacheable(value = "follow", key = "'follow_'+#userId+'_'+#objectId+'_'+#objectType")
     public FollowEntity getFollowObject(Long userId, UUID objectId, RelatedObject objectType) {
         FollowKey key = new FollowKey(userId, objectId, objectType);
         return followRepository.findById(key).orElseThrow(() ->
                 new EntityNotFoundException("Follow", "id", key.toString()));
     }
 
-    @Cacheable("follow")
+    @Cacheable(value = "follow_list", key = "'followers_'+#id+'_ISSUE'")
     public List<Long> getIssueFollowersById(UUID id) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.ISSUE)
                 .orElse(Collections.emptyList());
     }
 
-    @Cacheable("follow")
+    @Cacheable(value = "follow_list", key = "'followers_'+#id+'_VIEWPOINT'")
     public List<Long> getViewpointFollowersById(UUID id) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.VIEWPOINT)
                 .orElse(Collections.emptyList());
