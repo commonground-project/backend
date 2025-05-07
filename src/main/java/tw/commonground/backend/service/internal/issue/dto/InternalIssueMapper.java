@@ -34,8 +34,6 @@ public final class InternalIssueMapper {
                 .updatedAt(DateTimeUtils.toIso8601String(issue.getUpdatedAt()))
                 .title(issue.getTitle())
                 .authorId(issue.getAuthorId())
-                .authorName(issue.getAuthorName())
-                .authorAvatar(issue.getAuthorAvatar())
                 .description(issue.getDescription())
                 .insight(ContentParser.separateContentAndFacts(issue.getInsight(), List.of()).getText())
                 // TODO: Replace with actual facts

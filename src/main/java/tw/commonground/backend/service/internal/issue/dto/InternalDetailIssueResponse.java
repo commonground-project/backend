@@ -35,12 +35,6 @@ public class InternalDetailIssueResponse {
     @JsonProperty("publisher_id")
     private UUID authorId;
 
-    @JsonProperty("author_name")
-    private String authorName;
-
-    @JsonProperty("author_avatar")
-    private String authorAvatar;
-
     private List<InternalDetailFactResponse> facts;
 
     private List<InternalDetailViewpointResponse> viewpoints;

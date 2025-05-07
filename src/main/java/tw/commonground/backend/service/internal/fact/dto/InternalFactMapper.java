@@ -17,8 +17,6 @@ public final class InternalFactMapper {
                 .createdAt(DateTimeUtils.toIso8601String(factEntity.getCreatedAt()))
                 .updatedAt(DateTimeUtils.toIso8601String(factEntity.getUpdatedAt()))
                 .authorId(factEntity.getAuthorId())
-                .authorName(factEntity.getAuthorName())
-                .authorAvatar(factEntity.getAuthorAvatar())
                 .references(factEntity.getReferences().stream()
                         .map(InternalReferenceMapper::toInternalDetailResponse).toList())
                 .build();

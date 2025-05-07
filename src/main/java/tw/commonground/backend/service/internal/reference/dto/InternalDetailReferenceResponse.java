@@ -12,8 +12,8 @@ import java.util.UUID;
 @Builder
 public class InternalDetailReferenceResponse {
     private UUID id;
-    @JsonProperty("create_at")
-    private String createAt;
+    @JsonProperty("created_at")
+    private String createdAt;
     private String url;
     private String icon;
     private String title;

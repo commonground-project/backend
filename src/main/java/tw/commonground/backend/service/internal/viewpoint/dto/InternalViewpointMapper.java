@@ -54,8 +54,6 @@ public final class InternalViewpointMapper {
                 .title(viewpointEntity.getTitle())
                 .content(content.getText())
                 .authorId(viewpointEntity.getAuthorId())
-                .authorName(viewpointEntity.getAuthorName())
-                .authorAvatar(viewpointEntity.getAuthorAvatar())
                 .likeCount(viewpointEntity.getLikeCount())
                 .reasonableCount(viewpointEntity.getReasonableCount())
                 .dislikeCount(viewpointEntity.getDislikeCount())
