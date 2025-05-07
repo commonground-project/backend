@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -31,8 +30,10 @@ public class ReferenceService {
 
     private final ReferenceRepository referenceRepository;
 
-    @Value("${crawler.url}")
-    private String crawlerApi;
+//    @Value("${crawler.url}")
+//    private String crawlerApi;
+
+    private final String crawlerApi = "http://127.0.0.1:8000/";
 
     public ReferenceService(ReferenceRepository referenceRepository) {
         this.referenceRepository = referenceRepository;
