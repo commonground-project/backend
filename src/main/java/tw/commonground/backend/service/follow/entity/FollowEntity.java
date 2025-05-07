@@ -27,14 +27,17 @@ public class FollowEntity {
 
     @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     @JoinColumn(name = "issue_id", nullable = true, insertable = false, updatable = false)
     private IssueEntity issue;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     @JoinColumn(name = "viewpoint_id", nullable = true, insertable = false, updatable = false)
     private ViewpointEntity viewpoint;
 

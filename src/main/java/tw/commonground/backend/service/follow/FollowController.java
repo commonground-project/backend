@@ -49,7 +49,7 @@ public class FollowController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<FollowResponse> getIssueFollow(@AuthenticationPrincipal FullUserEntity user,
                                                          @PathVariable UUID id) {
-        FollowEntity entity = followService.getfollowObject(user.getId(), id, RelatedObject.ISSUE);
+        FollowEntity entity = followService.getFollowObject(user.getId(), id, RelatedObject.ISSUE);
         return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
     }
 
@@ -57,14 +57,7 @@ public class FollowController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<FollowResponse> getViewpointFollow(@AuthenticationPrincipal FullUserEntity user,
                                                              @PathVariable UUID id) {
-        FollowEntity entity = followService.getfollowObject(user.getId(), id, RelatedObject.VIEWPOINT);
+        FollowEntity entity = followService.getFollowObject(user.getId(), id, RelatedObject.VIEWPOINT);
         return ResponseEntity.ok(FollowMapper.toFollowResponse(entity));
     }
-
-
-//    public ResponseEntity<List<FollowResponse>> getFollowedObjects(@AuthenticationPrincipal FullUserEntity user) {
-//        List<FollowEntity> followedEntities = followService.getFollowedObjects(user.getId());
-//        List<FollowResponse> response = FollowMapper.toFollowResponseList(followedEntities);
-//        return ResponseEntity.ok(response);
-//    }
 }

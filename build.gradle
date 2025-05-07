@@ -39,7 +39,6 @@ dependencies {
 	implementation "io.opentelemetry:opentelemetry-api:1.32.0"
 	implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
 	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.13.1'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'

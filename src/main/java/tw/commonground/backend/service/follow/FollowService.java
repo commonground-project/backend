@@ -64,8 +64,6 @@ public class FollowService {
             followEntity.setUpdatedAt(LocalDateTime.now());
             return followRepository.save(followEntity);
         }
-        //            followRepository.updateFollowById(id, follow);
-        //            followRepository.insertFollowById(id, follow);
     }
 
     public Boolean getFollow(Long userId, UUID objectId, RelatedObject objectType) {
@@ -78,18 +76,11 @@ public class FollowService {
                 orElse(Collections.emptyList());
     }
 
-    public FollowEntity getfollowObject(Long userId, UUID objectId, RelatedObject objectType) {
+    public FollowEntity getFollowObject(Long userId, UUID objectId, RelatedObject objectType) {
         FollowKey key = new FollowKey(userId, objectId, objectType);
         return followRepository.findById(key).orElseThrow(() ->
                 new EntityNotFoundException("Follow", "id", key.toString()));
     }
-
-
-
-    //    public Boolean getFollowForIssue(Long userId, UUID issueId) {
-//        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-//        return issueFollowRepository.findFollowById(id).orElse(false);
-//    }
 
     public List<Long> getIssueFollowersById(UUID id) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.ISSUE)

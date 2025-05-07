@@ -52,11 +52,11 @@ public final class IssueMapper {
                 .build();
     }
 
-//    public static IssueEntity toEntity(IssueRequest request) {
-//        return IssueEntity.builder()
-//                .title(request.getTitle())
-//                .description(request.getDescription())
-//                .insight(request.getInsight())
-//                .build();
-//    }
+    public static IssueEntity toEntity(IssueRequest request) {
+        return IssueEntity.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .insight(request.getInsight())
+                .build();
+    }
 }
