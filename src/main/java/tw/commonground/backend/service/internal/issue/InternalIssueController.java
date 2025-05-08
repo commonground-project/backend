@@ -2,6 +2,7 @@ package tw.commonground.backend.service.internal.issue;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tw.commonground.backend.service.internal.issue.dto.InternalDetailIssueResponse;
 import tw.commonground.backend.service.internal.issue.dto.InternalIssueResponse;
 import tw.commonground.backend.shared.tracing.Traced;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Traced
 @RestController
-@RequestMapping("/api/internal/issues")
+@RequestMapping("/api/internal")
 public class InternalIssueController {
 
     private final InternalIssueService internalIssueService;
@@ -19,15 +20,21 @@ public class InternalIssueController {
         this.internalIssueService = internalIssueService;
     }
 
-    @GetMapping
+    @GetMapping("/issues")
     public ResponseEntity<List<InternalIssueResponse>> getIssues() {
         List<InternalIssueResponse> issues = internalIssueService.getIssues();
         return ResponseEntity.ok(issues);
     }
 
-    @GetMapping("/{issueId}")
+    @GetMapping("/issues/{issueId}")
     public ResponseEntity<InternalIssueResponse> getIssue(@PathVariable UUID issueId) {
         InternalIssueResponse issue = internalIssueService.getIssue(issueId);
+        return ResponseEntity.ok(issue);
+    }
+
+    @GetMapping("/issue/detail/{issueId}")  // get issue with references which has description
+    public ResponseEntity<InternalDetailIssueResponse> getDetailIssue(@PathVariable UUID issueId) {
+        InternalDetailIssueResponse issue = internalIssueService.getDetailIssue(issueId);
         return ResponseEntity.ok(issue);
     }
 }
