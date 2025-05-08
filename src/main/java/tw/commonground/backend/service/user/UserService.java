@@ -104,6 +104,15 @@ public class UserService {
             .orElseThrow(() -> new EntityNotFoundException("User", "username", username));
     }
 
+    public Optional<FullUserEntity> getFullUserById(Long id) {
+        return userRepository.findUserEntityById(id);
+    }
+
+    public Optional<UserEntity> getUserById(Long id) {
+        return userRepository.getUserById(id);
+    }
+
+
     public ProfileEntity completeSetup(UserSetupRequest setupRequest, String email) {
         FullUserEntity fullUser = userRepository.findUserEntityByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User", "email", email));

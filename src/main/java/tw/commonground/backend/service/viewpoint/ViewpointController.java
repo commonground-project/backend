@@ -160,7 +160,7 @@ public class ViewpointController {
         return ResponseEntity.ok(preferenceRequests.stream().map(ViewpointMapper::toPreferenceResponse).toList());
     }
 
-    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
+    public WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
             Long userId,
             Page<ViewpointEntity> pageViewpoints) {
 
@@ -182,7 +182,7 @@ public class ViewpointController {
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));
     }
 
-    private WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
+    public WrappedPaginationResponse<List<ViewpointResponse>> getPaginationResponse(
             Page<ViewpointEntity> pageViewpoints) {
 
         Map<UUID, List<FactEntity>> factsMap = viewpointService.getFactsForViewpoints(pageViewpoints.getContent()

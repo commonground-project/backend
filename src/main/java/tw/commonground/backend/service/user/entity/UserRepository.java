@@ -32,6 +32,8 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     SimpleUserEntity findByEmail(String email);
 
+    Optional<UserEntity> getUserById(Long id);
+
     boolean existsByUsername(String username);
 
     @Query("SELECT u.id FROM UserEntity u WHERE u.uuid = ?1")

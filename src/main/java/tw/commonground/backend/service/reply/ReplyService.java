@@ -1,5 +1,8 @@
 package tw.commonground.backend.service.reply;
 
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Traced
 @Service
+@CacheConfig(cacheNames = "reply")
 public class ReplyService {
 
     private static final String REPLY_REACTION_LOCK_FORMAT = "reply.reaction.%s.%d";
@@ -62,10 +66,12 @@ public class ReplyService {
         this.lockService = lockService;
     }
 
+    @Cacheable
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
         return replyRepository.findAllByViewpointId(id, pageable);
     }
 
+    @CacheEvict(allEntries = true)
     @Transactional
     public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -95,12 +101,14 @@ public class ReplyService {
         return replyEntity;
     }
 
+    @Cacheable
     public ReplyEntity getReply(UUID id) {
         return replyRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Reply", "id", id.toString())
         );
     }
 
+    @CacheEvict(allEntries = true)
     @Transactional
     public ReplyEntity updateReply(UUID id, ReplyRequest request) {
         ReplyEntity replyEntity = replyRepository.findById(id).orElseThrow(
@@ -124,6 +132,7 @@ public class ReplyService {
         return replyEntity;
     }
 
+    @CacheEvict(allEntries = true)
     public void deleteReply(UUID id) {
         replyRepository.deleteById(id);
     }
