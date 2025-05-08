@@ -47,8 +47,13 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE UserEntity u SET u.username = ?2, u.nickname = ?3, u.role = ?4 WHERE u.id = ?1")
-    void setupUserById(Long id, String username, String nickname, UserRole role);
+    @Query("UPDATE UserEntity u SET u.username = ?2, u.nickname = ?3 WHERE u.id = ?1")
+    void setupUserById(Long id, String username, String nickname);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE UserEntity u SET u.role = ?2 WHERE u.id = ?1")
+    void setupUserRoleById(Long id, UserRole role);
 
     @Modifying
     @Transactional

@@ -48,4 +48,11 @@ public final class ViewpointMapper {
                 .facts(factEntities.stream().map(FactMapper::toResponse).toList())
                 .build();
     }
+
+    public static ViewpointPreferenceResponse toPreferenceResponse(ViewpointPreferenceRequest request) {
+        return ViewpointPreferenceResponse.builder()
+                .id(request.getId().toString())
+                .preference(request.getPreference())
+                .build();
+    }
 }

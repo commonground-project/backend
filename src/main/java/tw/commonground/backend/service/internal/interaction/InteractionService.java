@@ -8,9 +8,11 @@ import tw.commonground.backend.service.internal.interaction.entity.InteractionRe
 import tw.commonground.backend.service.internal.interaction.entity.InteractionType;
 import tw.commonground.backend.service.internal.interaction.entity.RelatedObjectType;
 import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.shared.entity.Preference;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.event.comment.UserReplyCommentedEvent;
 import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
+import tw.commonground.backend.shared.event.preference.UserPreferToViewpointEvent;
 import tw.commonground.backend.shared.event.react.UserReplyReactedEvent;
 import tw.commonground.backend.shared.event.react.UserViewpointReactedEvent;
 import tw.commonground.backend.service.internal.interaction.dto.InteractionMapper;
@@ -38,8 +40,11 @@ public class InteractionService {
             return;
         }
 
-        InteractionEntity interactionEntity = createInteractionEntityBuilder(event.getDateTime(), event.getUserId(),
-                event.getEntityId(), RelatedObjectType.VIEWPOINT, event.getReaction());
+        InteractionEntity interactionEntity = createReactionInteractionEntityBuilder(event.getDateTime(),
+                event.getUserId(),
+                event.getEntityId(),
+                RelatedObjectType.VIEWPOINT,
+                event.getReaction());
 
         interactionRepository.save(interactionEntity);
     }
@@ -51,8 +56,11 @@ public class InteractionService {
             return;
         }
 
-        InteractionEntity interactionEntity = createInteractionEntityBuilder(event.getDateTime(), event.getUserId(),
-                event.getEntityId(), RelatedObjectType.REPLY, event.getReaction());
+        InteractionEntity interactionEntity = createReactionInteractionEntityBuilder(event.getDateTime(),
+                event.getUserId(),
+                event.getEntityId(),
+                RelatedObjectType.REPLY,
+                event.getReaction());
 
         interactionRepository.save(interactionEntity);
     }
@@ -77,6 +85,18 @@ public class InteractionService {
         interactionRepository.save(interactionEntity);
     }
 
+    @EventListener
+    @Transactional
+    public void onUserViewpointPreferredEvent(UserPreferToViewpointEvent event) {
+        InteractionEntity interactionEntity = createPreferenceInteractionEntityBuilder(
+                event.getDateTime(),
+                event.getUserId(),
+                event.getViewpointId(),
+                event.getPreference());
+
+        interactionRepository.save(interactionEntity);
+    }
+
     private InteractionEntity createReplyInteractionEntityBuilder(LocalDateTime dateTime, Long userId, UUID entityId,
                                                                   RelatedObjectType objectType, String content) {
         UUID userUid = userRepository.getUidById(userId);
@@ -90,9 +110,11 @@ public class InteractionService {
                 .content(content).build();
     }
 
-    private InteractionEntity createInteractionEntityBuilder(LocalDateTime dateTime, Long userId, UUID entityId,
-                                                             RelatedObjectType objectType,
-                                                             Reaction reaction) {
+    private InteractionEntity createReactionInteractionEntityBuilder(LocalDateTime dateTime,
+                                                                     Long userId,
+                                                                     UUID entityId,
+                                                                     RelatedObjectType objectType,
+                                                                     Reaction reaction) {
         UUID userUid = userRepository.getUidById(userId);
         InteractionType interactionType = InteractionMapper.toInteractionType(reaction);
 
@@ -102,6 +124,21 @@ public class InteractionService {
                 .timestamp(dateTime)
                 .type(interactionType)
                 .objectType(objectType).build();
+    }
+
+    private InteractionEntity createPreferenceInteractionEntityBuilder(LocalDateTime dateTime,
+                                                                       Long userId,
+                                                                       UUID entityId,
+                                                                       Preference preference) {
+        UUID userUid = userRepository.getUidById(userId);
+        InteractionType interactionType = InteractionMapper.toInteractionType(preference);
+
+        return InteractionEntity.builder()
+                .userId(userUid)
+                .objectId(entityId)
+                .timestamp(dateTime)
+                .type(interactionType)
+                .objectType(RelatedObjectType.VIEWPOINT).build();
     }
 
     public List<InteractionEntity> getAllInteractions() {

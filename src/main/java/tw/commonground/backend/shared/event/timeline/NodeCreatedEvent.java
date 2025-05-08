@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.timeline;
+package tw.commonground.backend.shared.event.timeline;
 
 import lombok.Getter;
 import lombok.Setter;

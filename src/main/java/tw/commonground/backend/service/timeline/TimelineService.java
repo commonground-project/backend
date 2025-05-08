@@ -11,6 +11,7 @@ import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.timeline.dto.NodeRequest;
 import tw.commonground.backend.service.timeline.entity.NodeEntity;
 import tw.commonground.backend.service.timeline.entity.NodeRepository;
+import tw.commonground.backend.shared.event.timeline.NodeCreatedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.time.LocalDate;

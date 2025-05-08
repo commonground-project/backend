@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.user;
+package tw.commonground.backend.shared.event.user;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
