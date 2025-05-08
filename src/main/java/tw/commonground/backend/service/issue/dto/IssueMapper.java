@@ -2,8 +2,8 @@ package tw.commonground.backend.service.issue.dto;
 
 import tw.commonground.backend.service.fact.dto.FactMapper;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.service.follow.dto.FollowResponse;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
-import tw.commonground.backend.service.issue.entity.IssueFollowEntity;
 import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
 import tw.commonground.backend.shared.content.ContentContainFact;
 import tw.commonground.backend.shared.content.ContentParser;
@@ -14,13 +14,6 @@ import java.util.List;
 public final class IssueMapper {
     private IssueMapper() {
         // hide the constructor
-    }
-
-    public static FollowResponse toFollowResponse(IssueFollowEntity entity) {
-        return FollowResponse.builder()
-                .follow(entity.getFollow())
-                .updatedAt(DateTimeUtils.toIso8601String(entity.getUpdatedAt()))
-                .build();
     }
 
     public static IssueResponse toResponse(
@@ -42,7 +35,7 @@ public final class IssueMapper {
                 .authorId(entity.getAuthorId())
                 .authorName(entity.getAuthorName())
                 .authorAvatar(entity.getAuthorAvatar())
-                .userFollow(IssueFollowResponse.builder().follow(follow).build())
+                .userFollow(FollowResponse.builder().follow(follow).build())
                 .viewpointCount(viewpointCount)
                 .facts(factEntities.stream().map(FactMapper::toResponse).toList())
                 .build();
