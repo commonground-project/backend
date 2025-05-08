@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,8 +39,11 @@ public class ViewpointController {
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    public ViewpointController(ViewpointService viewpointService) {
+    private final StringRedisTemplate redisTemplate;
+
+    public ViewpointController(ViewpointService viewpointService, StringRedisTemplate redisTemplate) {
         this.viewpointService = viewpointService;
+        this.redisTemplate = redisTemplate;
     }
 
     @GetMapping("/issue/{id}/viewpoints")
@@ -47,12 +52,29 @@ public class ViewpointController {
             @PathVariable UUID id,
             @Valid PaginationRequest request) {
 
-        Pageable pageable = paginationParser.parsePageable(request);
-        Page<ViewpointEntity> pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
-
         if (user == null) {
+            Pageable pageable = paginationParser.parsePageable(request);
+            Page<ViewpointEntity> pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
+
             return getPaginationResponse(pageViewpoints);
         } else {
+            Page<ViewpointEntity> pageViewpoints;
+
+            String key = String.format("user:%s:viewpoint_recommendations", user.getUuid());
+            int start = request.getPage() * request.getSize();
+            int end = start + request.getSize() - 1;
+
+            Set<String> resultSet = redisTemplate.opsForZSet().reverseRange(key, start, end);
+            if (resultSet != null && !resultSet.isEmpty()) {
+                List<UUID> ids = resultSet.stream()
+                        .map()
+                        .toList();
+                pageViewpoints = viewpointService.getIssueViewpoints(id, ids);
+            } else {
+                Pageable pageable = paginationParser.parsePageable(request);
+                pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
+            }
+
             return getPaginationResponse(user.getId(), pageViewpoints);
         }
     }
