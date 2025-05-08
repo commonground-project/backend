@@ -11,6 +11,8 @@ import tw.commonground.backend.service.read.entity.ReadEntity;
 import tw.commonground.backend.service.read.entity.ReadKey;
 import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.read.entity.ReadRepository;
+import tw.commonground.backend.service.reply.entity.ReplyEntity;
+import tw.commonground.backend.service.reply.entity.ReplyRepository;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
@@ -26,13 +28,15 @@ public class ReadService {
     private final UserRepository userRepository;
     private final IssueRepository issueRepository;
     private final ViewpointRepository viewpointRepository;
+    private final ReplyRepository replyRepository;
 
     public ReadService(ReadRepository readRepository, UserRepository userRepository,
-                       IssueRepository issueRepository, ViewpointRepository viewpointRepository) {
+                       IssueRepository issueRepository, ViewpointRepository viewpointRepository, ReplyRepository replyRepository) {
         this.readRepository = readRepository;
         this.userRepository = userRepository;
         this.issueRepository = issueRepository;
         this.viewpointRepository = viewpointRepository;
+        this.replyRepository = replyRepository;
     }
 
     public ReadEntity updateReadStatus(Long userId, UUID objectId, ReadRequest request, ReadObjectType objectType) {
@@ -58,6 +62,10 @@ public class ReadService {
             ViewpointEntity viewpoint = viewpointRepository.findById(objectId)
                     .orElseThrow(() -> new EntityNotFoundException("Viewpoint not found"));
             entity.setViewpoint(viewpoint);
+        } else if(objectType == ReadObjectType.REPLY) {
+            ReplyEntity reply = replyRepository.findById(objectId)
+                    .orElseThrow(() -> new EntityNotFoundException("Reply not found"));
+            entity.setReply(reply);
         } else {
             throw new IllegalArgumentException("Invalid object type for read status update");
         }

@@ -1,13 +1,12 @@
-package tw.commonground.backend.service.read.entity;
+package tw.commonground.backend.service.newcontent.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
-import tw.commonground.backend.service.reply.entity.ReplyEntity;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,9 +18,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class ReadEntity {
+public class NewcontentEntity {
+
     @EmbeddedId
-    private ReadKey id;
+    private NewcontentKey id;
 
     @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,24 +36,19 @@ public class ReadEntity {
     @JoinColumn(name = "viewpoint_id", nullable = true)
     private ViewpointEntity viewpoint;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reply_id", nullable = true)
-    private ReplyEntity reply;
-
-    private Boolean readStatus;
+    private Boolean newcontentStatus;
 
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime timestamp;
 
     public UUID getObjectId() {
-        if (id.getObjectType() == ReadObjectType.ISSUE) {
+        if (id.getObjectType() == NewcontentObjectType.ISSUE) {
             return issue != null ? issue.getId() : null;
-        } else if (id.getObjectType() == ReadObjectType.VIEWPOINT) {
+        } else if (id.getObjectType() == NewcontentObjectType.VIEWPOINT) {
             return viewpoint != null ? viewpoint.getId() : null;
-        } else if (id.getObjectType() == ReadObjectType.REPLY) {
-            return reply != null ? reply.getId() : null;
         }
         return null;
     }
+
 }
