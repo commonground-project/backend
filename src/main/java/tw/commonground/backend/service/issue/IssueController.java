@@ -111,6 +111,9 @@ public class IssueController {
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(id);
+
+        issueService.createManualFact(issueEntity.getId(), contentContainFact.getFacts());
+
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
         return ResponseEntity.ok(response);
     }
