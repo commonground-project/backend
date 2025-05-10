@@ -30,8 +30,6 @@ public class InternalProfileEntity {
     @JoinColumn(name = "id")
     private UserEntity user;
 
-    private String gender;
-    private String occupation;
     private String location;
 
     @Column(name = "browsingTags")
