@@ -95,21 +95,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Set up SSH
+      - name: Deploy
         run: |
-          mkdir -p ~/.ssh
-          echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/id_rsa
-          chmod 600 ~/id_rsa
-
-      - name: Deploy image
-        env:
-          title: ${{ github.event.pull_request.title }}
-        run: |
-          export MODE='Snapshot'
-          export ENV='${{ github.event.number }}'
-          export DRAFT='${{ github.event.pull_request.draft }}'
-          export TITLE='${{ env.title }}'
-          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -o SendEnv=ENV -o SendEnv=TITLE -o SendEnv=DRAFT -i ~/id_rsa gh-runner@192.168.211.3
-
-      - name: Clear up
-        run: rm ~/id_rsa
+          ./deploy.sh "Snapshot" "pr-${{ github.event.number }}" "${{ github.event.pull_request.title }}"
