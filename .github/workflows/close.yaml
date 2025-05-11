@@ -16,4 +16,4 @@ jobs:
 
       - name: Close
         run: |
-          ./deploy.sh "Close"
+          ~/deploy.sh "Close"

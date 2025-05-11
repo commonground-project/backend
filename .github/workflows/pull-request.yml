@@ -97,4 +97,4 @@ jobs:
 
       - name: Deploy
         run: |
-          ./deploy.sh "Snapshot" "pr-${{ github.event.number }}" "${{ github.event.pull_request.title }}"
+          ~/deploy.sh "Snapshot" "pr-${{ github.event.number }}" "${{ github.event.pull_request.title }}"
