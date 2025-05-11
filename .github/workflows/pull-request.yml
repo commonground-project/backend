@@ -96,5 +96,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy
+        env:
+          title: ${{ github.event.pull_request.title }}
         run: |
-          ~/deploy.sh "Snapshot" "pr-${{ github.event.number }}" "${{ github.event.pull_request.title }}"
+          ~/deploy.sh "Snapshot" "${{ github.event.number }}" "${{ env.title }}"
