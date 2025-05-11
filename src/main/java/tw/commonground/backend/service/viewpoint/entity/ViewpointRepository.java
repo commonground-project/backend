@@ -5,13 +5,21 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import tw.commonground.backend.shared.entity.Reaction;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID>, ViewpointRepositoryCustom {
 
     Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
+
+    @Query("SELECT v FROM ViewpointEntity v WHERE v.id IN :ids")
+    List<ViewpointEntity> findAllByIds(List<UUID> ids);
+
+    @Query("SELECT v FROM ViewpointEntity v WHERE v.id IN :ids AND v.issue.id = :issueId")
+    List<ViewpointEntity> findAllByIdsAndIssueId(List<UUID> ids, UUID issueId);
 
 }
 

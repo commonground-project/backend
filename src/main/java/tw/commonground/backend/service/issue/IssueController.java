@@ -15,6 +15,7 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.dto.*;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.recommend.RecommendService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
@@ -38,22 +39,38 @@ public class IssueController {
 
     private final FactService factService;
 
+    private final RecommendService recommendService;
+
     private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
     private final FollowService followService;
 
-    public IssueController(IssueService issueService, FactService factService, FollowService followService) {
+    public IssueController(IssueService issueService,
+                           FactService factService,
+                           RecommendService recommendService,
+                           FollowService followService) {
         this.issueService = issueService;
         this.factService = factService;
+        this.recommendService = recommendService;
         this.followService = followService;
     }
 
     @GetMapping("/issues")
-    public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(@Valid PaginationRequest pagination) {
+    public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(
+            @AuthenticationPrincipal FullUserEntity user,
+            @Valid PaginationRequest pagination) {
+
         Pageable pageable = paginationParser.parsePageable(pagination);
-        Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
+        Page<SimpleIssueEntity> pageIssues;
+
+        if (user == null) {
+            pageIssues = issueService.getIssues(pageable);
+        } else {
+            pageIssues = recommendService.getIssues(user.getUuid(), pageable)
+                    .orElseGet(() -> issueService.getIssues(pageable));
+        }
 
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()
