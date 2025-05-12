@@ -50,7 +50,7 @@ public class IssueService {
         return issueRepository.findAllIssueEntityBy(pageable);
     }
 
-    @Cacheable(key = "{#id, 'allIssues'}")
+    @Cacheable(key = "#id")
     public IssueEntity getIssue(UUID id) {
         return issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
@@ -76,7 +76,10 @@ public class IssueService {
         return issueRepository.save(issueEntity);
     }
 
-    @CacheEvict(key = "{#id, 'allIssues'}")
+    @Caching(evict = {
+            @CacheEvict(value = "issue", key = "#id"),
+            @CacheEvict(value = "issue", key = "'allIssues'")
+    })
     public IssueEntity updateIssue(UUID id, IssueRequest issueRequest) {
         IssueEntity issueEntity = issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
@@ -100,13 +103,15 @@ public class IssueService {
         return issueRepository.save(issueEntity);
     }
 
-    @CacheEvict(key = "{#id, 'allIssues'}")
+    @Caching(evict = {
+            @CacheEvict(value = "issue", key = "#id"),
+            @CacheEvict(value = "issue", key = "'allIssues'")
+    })
     public void deleteIssue(UUID id) {
 //        Todo: need to use soft delete
         issueRepository.deleteById(id);
     }
 
-    @Cacheable(value = {"fact", "issue"}, key = "#id")
     public Page<FactEntity> getIssueFacts(UUID id, Pageable pageable) {
         List<FactEntity> factEntities = new ArrayList<>();
         Page<ManualIssueFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);

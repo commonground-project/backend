@@ -77,7 +77,8 @@ public class ViewpointService {
 
     @Caching(evict = {
             @CacheEvict(value = "viewpoint", allEntries = true),
-            @CacheEvict(value = "issue", key = "{#issueId, 'allIssues'}")
+            @CacheEvict(value = "issue", key = "#issueId"),
+            @CacheEvict(value = "issue", key = "'allIssues'")
     })
     @Transactional
     public ViewpointEntity createIssueViewpoint(UUID issueId, ViewpointRequest request, FullUserEntity user) {
@@ -152,7 +153,10 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
-    @CacheEvict(key = "{#id, 'allViewpoints'}")
+    @Caching(evict = {
+            @CacheEvict(value = "viewpoint", key = "#id"),
+            @CacheEvict(value = "viewpoint", key = "'allViewpoints'"),
+    })
     public void deleteViewpoint(UUID id) {
         viewpointRepository.deleteById(id);
     }
