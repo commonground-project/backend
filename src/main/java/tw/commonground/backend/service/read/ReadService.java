@@ -2,10 +2,10 @@ package tw.commonground.backend.service.read;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tw.commonground.backend.exception.EntityNotFoundException;
 import org.springframework.context.event.EventListener;
+import tw.commonground.backend.service.follow.FollowService;
+import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
-import tw.commonground.backend.service.issue.entity.IssueRepository;
 import tw.commonground.backend.service.read.dto.ReadMapper;
 import tw.commonground.backend.service.read.dto.ReadResponse;
 import tw.commonground.backend.service.read.entity.ReadEntity;
@@ -13,13 +13,13 @@ import tw.commonground.backend.service.read.entity.ReadKey;
 import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.read.entity.ReadRepository;
 import tw.commonground.backend.service.reply.ReplyCreatedEvent;
-import tw.commonground.backend.service.reply.dto.QuoteReply;
+import tw.commonground.backend.service.reply.ReplyService;
 import tw.commonground.backend.service.reply.entity.ReplyEntity;
-import tw.commonground.backend.service.reply.entity.ReplyRepository;
+import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.entity.UserEntity;
-import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
+import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
@@ -30,18 +30,20 @@ import java.util.UUID;
 @Service
 public class ReadService {
     private final ReadRepository readRepository;
-    private final UserRepository userRepository;
-    private final IssueRepository issueRepository;
-    private final ViewpointRepository viewpointRepository;
-    private final ReplyRepository replyRepository;
+    private final FollowService followService;
+    private final UserService userService;
+    private final IssueService issueService;
+    private final ViewpointService viewpointService;
+    private final ReplyService replyService;
 
-    public ReadService(ReadRepository readRepository, UserRepository userRepository,
-                       IssueRepository issueRepository, ViewpointRepository viewpointRepository, ReplyRepository replyRepository) {
+    public ReadService(ReadRepository readRepository, FollowService followService, UserService userService,
+                       IssueService issueService, ViewpointService viewpointService, ReplyService replyService) {
         this.readRepository = readRepository;
-        this.userRepository = userRepository;
-        this.issueRepository = issueRepository;
-        this.viewpointRepository = viewpointRepository;
-        this.replyRepository = replyRepository;
+        this.followService = followService;
+        this.userService = userService;
+        this.issueService = issueService;
+        this.viewpointService = viewpointService;
+        this.replyService = replyService;
     }
 
     public ReadEntity updateReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
@@ -61,23 +63,19 @@ public class ReadService {
         * */
 
         ReadEntity entity = new ReadEntity();
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserEntity user = userService.getUserEntityById(userId);
         entity.setUser(user);
 
         if (objectType == ReadObjectType.ISSUE) {
-            IssueEntity issue = issueRepository.findById(objectId)
-                    .orElseThrow(() -> new EntityNotFoundException("Issue not found"));
+            IssueEntity issue = issueService.getIssue(objectId);
             entity.setIssue(issue);
             entity.setReadStatus(true);
         } else if (objectType == ReadObjectType.VIEWPOINT) {
-            ViewpointEntity viewpoint = viewpointRepository.findById(objectId)
-                    .orElseThrow(() -> new EntityNotFoundException("Viewpoint not found"));
+            ViewpointEntity viewpoint = viewpointService.getViewpoint(objectId);
             entity.setViewpoint(viewpoint);
             entity.setReadStatus(false);
         } else if(objectType == ReadObjectType.REPLY) {
-            ReplyEntity reply = replyRepository.findById(objectId)
-                    .orElseThrow(() -> new EntityNotFoundException("Reply not found"));
+            ReplyEntity reply = replyService.getReply(objectId);
             entity.setReply(reply);
             entity.setReadStatus(false);
         } else {
@@ -104,36 +102,50 @@ public class ReadService {
         ReplyEntity reply = event.getReplyEntity();
         ViewpointEntity viewpoint = reply.getViewpoint();
         IssueEntity issue = viewpoint.getIssue();
-        Long senderId = event.getUser().getId();
 
-//        List<UserEntity> relatedUsers = userRepository.findAllByIssueOrViewpoint(issue.getId(), viewpoint.getId());
+        // Create or update read status for issue for the followers of the viewpoint
+        List<Long> viewpointFollowersId = followService.getViewpointFollowersById(viewpoint.getId());
+        for (Long followerId : viewpointFollowersId) {
+            unread(followerId, issue.getId(), ReadObjectType.ISSUE);
+        }
 
-//        List<UserEntity> folloUsers = followRe
-//                userRepository.findAllByIssueOrViewpoint(issue.getId(), viewpoint.getId());
+        // Create or update read status for viewpoint which the reply belongs to for all users
+        unreadAllUser(viewpoint.getId(), ReadObjectType.VIEWPOINT);
 
-//        for (UserEntity user : relatedUsers) {
-//            if (user.getId().equals(senderId)) continue;
-//
-//            createOrUpdateUnread(user.getId(), reply.getId(), ReadObjectType.REPLY, reply);
-//            createOrUpdateUnread(user.getId(), viewpoint.getId(), ReadObjectType.VIEWPOINT, viewpoint);
-//        }
-//
-//        // quoteReply 也可以視情況設為綠色
-//        for (QuoteReply quote : event.getQuotes()) {
-//            UUID quotedReplyId = quote.getReplyId();
-//            ReplyEntity quotedReply = replyRepository.findById(quotedReplyId).orElse(null);
-//            if (quotedReply != null) {
-//                for (UserEntity user : relatedUsers) {
-//                    if (!user.getId().equals(senderId)) {
-//                        createOrUpdateUnread(user.getId(), quotedReply.getId(), ReadObjectType.REPLY, quotedReply);
-//                    }
-//                }
-//            }
-//        }
+        // Create or update read status for reply for all users
+        // This can be ignored, since new created readEntity of reply is unread
+        unreadAllUser(reply.getId(), ReadObjectType.REPLY);
     }
 
-    private void createOrUpdateUnread(Long userId, UUID objectId, ReadObjectType objectType, Object entityObj) {
-        Optional<ReadEntity> existing = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType);
+    @EventListener
+    @Transactional
+    public void onViewpointCreated(UserViewpointCommentedEvent event) {
+        handleViewpointCreatedEvent(event);
+    }
+
+    public void handleViewpointCreatedEvent(UserViewpointCommentedEvent event) {
+        UUID viewpointId = event.getEntityId();
+        ViewpointEntity viewpoint = viewpointService.getViewpoint(viewpointId);
+        IssueEntity issue = viewpoint.getIssue();
+
+        // Create or update read status for issue which the viewpoint belongs to for all users
+        unreadAllUser(issue.getId(), ReadObjectType.ISSUE);
+
+        // Create or update read status for viewpoint for all users
+        unreadAllUser(viewpointId, ReadObjectType.VIEWPOINT);
+    }
+
+
+    private void unreadAllUser(UUID objectId, ReadObjectType readObjectType) {
+        List<Long> userIds = userService.getUsers().stream().map(UserEntity::getId).toList();
+        for (Long userId : userIds) {
+            unread(userId, objectId, readObjectType);
+        }
+    }
+
+    private void unread(Long userId, UUID objectId, ReadObjectType objectType) {
+        Optional<ReadEntity> existing = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId,
+                                                                                                  objectId, objectType);
         if (existing.isPresent()) {
             ReadEntity read = existing.get();
             read.setReadStatus(false);
@@ -143,15 +155,14 @@ public class ReadService {
 
         ReadEntity read = new ReadEntity();
         read.setId(new ReadKey(userId, objectId, objectType));
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        UserEntity user = userService.getUserEntityById(userId);
         read.setUser(user);
         read.setReadStatus(false);
 
         switch (objectType) {
-            case ISSUE -> read.setIssue((IssueEntity) entityObj);
-            case VIEWPOINT -> read.setViewpoint((ViewpointEntity) entityObj);
-            case REPLY -> read.setReply((ReplyEntity) entityObj);
+            case ISSUE -> read.setIssue(issueService.getIssue(objectId));
+            case VIEWPOINT -> read.setViewpoint(viewpointService.getViewpoint(objectId));
+            case REPLY -> read.setReply(replyService.getReply(objectId));
         }
 
         readRepository.save(read);
