@@ -28,16 +28,16 @@ public class ReadController {
     @PostMapping("/read/issue/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReadResponse> readIssue(@AuthenticationPrincipal FullUserEntity user,
-                                                           @PathVariable UUID id,
-                                                           @RequestBody ReadRequest request) {
-        ReadEntity entity = readService.updateReadStatus(user.getId(), id, request, ReadObjectType.ISSUE);
+                                                  @PathVariable UUID id) {
+        ReadEntity entity = readService.updateReadStatus(user.getId(), id, ReadObjectType.ISSUE);
         return ResponseEntity.ok(ReadMapper.toResponse(entity));
     }
+    // since the POST method is used to set the read status to TRUE, we don't need to pass the request body
 
     @GetMapping("/read/issue/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> readIssue(@AuthenticationPrincipal FullUserEntity user,
-                                                  @PathVariable UUID id) {
+    public ResponseEntity<ReadResponse> getReadIssue(@AuthenticationPrincipal FullUserEntity user,
+                                                     @PathVariable UUID id) {
         ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.ISSUE);
         return ResponseEntity.ok(response);
     }
@@ -45,16 +45,15 @@ public class ReadController {
     @PostMapping("/read/viewpoint/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReadResponse> readViewpoint(@AuthenticationPrincipal FullUserEntity user,
-                                                               @PathVariable UUID id,
-                                                               @RequestBody ReadRequest request) {
-        ReadEntity entity = readService.updateReadStatus(user.getId(), id, request, ReadObjectType.VIEWPOINT);
+                                                      @PathVariable UUID id) {
+        ReadEntity entity = readService.updateReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
         return ResponseEntity.ok(ReadMapper.toResponse(entity));
     }
 
     @GetMapping("/read/viewpoint/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> readViewpoint(@AuthenticationPrincipal FullUserEntity user,
-                                                  @PathVariable UUID id) {
+    public ResponseEntity<ReadResponse> getReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
+                                                         @PathVariable UUID id) {
         ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
         return ResponseEntity.ok(response);
     }
