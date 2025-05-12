@@ -55,9 +55,8 @@ public class InternalIssueService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "issue", key = "'allIssues'"),
-            @CacheEvict(value = "issue", key = "#issueId"),
-            @CacheEvict(value = "fact", key = "'allFacts'")
+            @CacheEvict(value = "issue", allEntries = true),
+            @CacheEvict(value = "fact", allEntries = true),
     })
     public InternalIssueResponse updateIssueInsight(UUID issueId, InternalIssueRequest request) {
         IssueEntity issue = issueRepository.findById(issueId).orElseThrow(

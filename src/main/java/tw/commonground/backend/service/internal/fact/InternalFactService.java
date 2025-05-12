@@ -1,7 +1,6 @@
 package tw.commonground.backend.service.internal.fact;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.service.fact.dto.FactRequest;
 import tw.commonground.backend.service.fact.entity.FactEntity;
@@ -26,10 +25,7 @@ public class InternalFactService {
         this.referenceService = referenceService;
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "fact", key = "'allFacts'"),
-            @CacheEvict(value = "fact", key = "'pageFacts'")
-    })
+    @CacheEvict(value = "fact", allEntries = true)
     public FactEntity createFact(FactRequest factRequest) {
         FactEntity factEntity = FactEntity.builder()
                 .title(factRequest.getTitle())
