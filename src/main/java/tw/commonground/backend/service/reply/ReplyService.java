@@ -66,15 +66,12 @@ public class ReplyService {
         this.lockService = lockService;
     }
 
-    @Cacheable(value = "viewpointReply", key = "#id")
+    @Cacheable(value = "viewpointReply", key = "{#id, #pageable.pageNumber}")
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
         return replyRepository.findAllByViewpointId(id, pageable);
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "viewpointReply", key = "#viewpointId"),
-            @CacheEvict(value = "reply", key = "'allReplies'")
-    })
+    @CacheEvict(value = "viewpointReply", allEntries = true)
     @Transactional
     public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -113,7 +110,6 @@ public class ReplyService {
 
     @Caching(evict = {
             @CacheEvict(value = "'viewpointReply'", allEntries = true),
-            @CacheEvict(value = "reply", key = "'allReplies'"),
             @CacheEvict(value = "reply", key = "#id")
     })
     @Transactional
@@ -141,7 +137,6 @@ public class ReplyService {
 
     @Caching(evict = {
             @CacheEvict(value = "viewpointReply", allEntries = true),
-            @CacheEvict(value = "reply", key = "'allReplies'"),
             @CacheEvict(value = "reply", key = "#id")
     })
     public void deleteReply(UUID id) {
