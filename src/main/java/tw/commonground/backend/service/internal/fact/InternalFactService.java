@@ -16,7 +16,7 @@ import java.util.Set;
 @Service
 public class InternalFactService {
 
-    public final FactRepository factRepository;
+    private final FactRepository factRepository;
 
     private final ReferenceService referenceService;
 

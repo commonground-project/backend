@@ -27,7 +27,9 @@ public class InternalIssueService {
     private final ViewpointService viewpointService;
     private final IssueService issueService;
 
-    public InternalIssueService(IssueRepository issueRepository, ViewpointService viewpointService, IssueService issueService) {
+    public InternalIssueService(IssueRepository issueRepository,
+                                ViewpointService viewpointService,
+                                IssueService issueService) {
         this.issueRepository = issueRepository;
         this.viewpointService = viewpointService;
         this.issueService = issueService;
@@ -70,7 +72,7 @@ public class InternalIssueService {
                 manualFact -> manualFact.getFact().getId()
         ).toList();
 
-        List<UUID> newFacts = request.facts.stream().filter(
+        List<UUID> newFacts = request.getFacts().stream().filter(
                 fact -> !facts.contains(fact)
         ).toList();
 

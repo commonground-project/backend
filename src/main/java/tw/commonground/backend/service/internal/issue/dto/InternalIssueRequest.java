@@ -12,5 +12,5 @@ import java.util.UUID;
 public class InternalIssueRequest {
     private String insight;
 
-    public List<UUID> facts;
+    private List<UUID> facts;
 }
