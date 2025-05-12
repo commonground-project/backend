@@ -14,8 +14,9 @@ public final class InternalProfileMapper {
     public static InternalProfileResponse toResponse(InternalProfileEntity internalProfileEntity) {
         return InternalProfileResponse.builder()
                 .userUuid(internalProfileEntity.getUuid())
-                .gender(internalProfileEntity.getGender())
-                .occupation(internalProfileEntity.getOccupation())
+                .gender(internalProfileEntity.getUser().getGender().toString())
+                .occupation(internalProfileEntity.getUser().getOccupation().toString())
+                .birthdate(internalProfileEntity.getUser().getBirthdate().toString())
                 .location(internalProfileEntity.getLocation())
                 .browsingTags(internalProfileEntity.getBrowsingTags())
                 .searchKeywords(internalProfileEntity.getSearchKeywords())

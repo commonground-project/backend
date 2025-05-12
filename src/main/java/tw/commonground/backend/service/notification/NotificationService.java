@@ -3,7 +3,7 @@ package tw.commonground.backend.service.notification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import tw.commonground.backend.service.issue.IssueService;
+import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.notification.dto.NotificationDto;
 import tw.commonground.backend.service.reply.ReplyCreatedEvent;
@@ -29,7 +29,7 @@ public class NotificationService {
 
     private final ViewpointService viewpointService;
 
-    private final IssueService issueService;
+    private final FollowService followService;
 
     private final ReplyRepository replyRepository;
 
@@ -40,17 +40,17 @@ public class NotificationService {
     private final SubscriptionService subscriptionService;
 
     public NotificationService(ViewpointService viewpointService,
-                               IssueService issueService,
                                ReplyRepository replyRepository,
                                UserRepository userRepository,
                                UserSettingService userSettingService,
+                               FollowService followService,
                                SubscriptionService subscriptionService) {
         this.viewpointService = viewpointService;
-        this.issueService = issueService;
         this.replyRepository = replyRepository;
         this.userRepository = userRepository;
         this.userSettingService = userSettingService;
         this.subscriptionService = subscriptionService;
+        this.followService = followService;
     }
 
     @EventListener
@@ -135,7 +135,7 @@ public class NotificationService {
         String issueId = issueEntity.getId().toString();
 
         // Collect users that need to be notified
-        List<Long> userIds = issueService.getIssueFollowersById(issueEntity.getId());
+        List<Long> userIds = followService.getIssueFollowersById(issueEntity.getId());
         List<FullUserEntity> needNotificationUser = new ArrayList<>();
 
         userIds.forEach(userId -> userRepository.findUserEntityById(userId).ifPresent(user -> {
