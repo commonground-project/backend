@@ -31,4 +31,9 @@ public class UserSettingEntity {
     @ColumnDefault("true")
     private Boolean newNodeOfTimelineToFollowedIssue;
 
+    @ColumnDefault("true")
+    private Boolean newReplyInFollowedIssue;
+
+    @ColumnDefault("true")
+    private Boolean newReplyInFollowedViewpoint;
 }
