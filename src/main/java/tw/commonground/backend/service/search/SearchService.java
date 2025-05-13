@@ -11,10 +11,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.SearchServiceException;
+import tw.commonground.backend.service.fact.FactService;
+import tw.commonground.backend.service.fact.dto.FactMapper;
+import tw.commonground.backend.service.fact.dto.FactResponse;
 import tw.commonground.backend.service.reference.ReferenceRepository;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Traced
@@ -23,14 +27,16 @@ public class SearchService {
 
     private final Client client;
     private final ReferenceRepository referenceRepository;
+    private final FactService factService;
 
     @Autowired
-    public SearchService(Client client, ReferenceRepository referenceRepository) {
+    public SearchService(Client client, ReferenceRepository referenceRepository, FactService factService) {
         this.client = client;
         this.referenceRepository = referenceRepository;
+        this.factService = factService;
     }
 
-    public Page<String> search(String query, Pageable pageable) {
+    public Page<FactResponse> search(String query, Pageable pageable) {
         try {
             Index factEntityIndex = client.index("fact_entity");
             Index referenceEntityIndex = client.index("reference_entity");
@@ -49,19 +55,19 @@ public class SearchService {
             SearchResultPaginated factEntitySearchResult = (SearchResultPaginated) factEntityIndex.search(factRequest);
             SearchResultPaginated referenceEntitySearchResult =
                     (SearchResultPaginated) referenceEntityIndex.search(referenceRequest);
-            List<String> factIds = mergeFactIds(factEntitySearchResult, referenceEntitySearchResult);
+            List<FactResponse> factResponses = mergeFacts(factEntitySearchResult, referenceEntitySearchResult);
 
             long total = factEntitySearchResult.getTotalHits()
                     + referenceEntitySearchResult.getTotalHits();
 
-            return new PageImpl<>(factIds, pageable, total);
+            return new PageImpl<>(factResponses, pageable, total);
         } catch (Exception e) {
             log.error("Error calling MeiliSearch", e);
             throw new SearchServiceException("Search failed", e);
         }
     }
 
-    private List<String> mergeFactIds(SearchResultPaginated factEntitySearchResult,
+    private List<FactResponse> mergeFacts(SearchResultPaginated factEntitySearchResult,
                                       SearchResultPaginated referenceEntitySearchResult) {
         List<Map<String, Object>> factHits = new ArrayList<>(factEntitySearchResult.getHits());
         List<Map<String, Object>> referenceHits = new ArrayList<>(referenceEntitySearchResult.getHits());
@@ -94,7 +100,12 @@ public class SearchService {
                 log.error("Error processing referenceHit with referenceId {}: {}", referenceId, e.getMessage(), e);
             }
         }
-        return new ArrayList<>(matchedFactIds);
+        return matchedFactIds.stream()
+                .map(UUID::fromString)
+                .map(factService::getFact)
+                .map(FactMapper::toResponse)
+                .collect(Collectors.toList());
+
     }
 
     private String getFactId(Map<String, Object> factHit) {
