@@ -34,7 +34,7 @@ public class UserSettingService {
                             .newReplyInMyViewpoint(true)
                             .newReferenceToMyReply(true)
                             .newNodeOfTimelineToFollowedIssue(true)
-                            .newReplyInFollowedIssue(true)
+                            .newEventInFollowedIssue(true)
                             .newReplyInFollowedViewpoint(true)
                             .user(user)
                             .build();
@@ -54,8 +54,8 @@ public class UserSettingService {
                             .isNewReferenceToMyReply());
                     userSettingEntity.setNewNodeOfTimelineToFollowedIssue(userSettingDto.getNotification()
                             .isNewNodeOfTimelineToFollowedIssue());
-                    userSettingEntity.setNewReplyInFollowedIssue(userSettingDto.getNotification()
-                            .isNewReplyInFollowedIssue());
+                    userSettingEntity.setNewEventInFollowedIssue(userSettingDto.getNotification()
+                            .isNewEventInFollowedIssue());
                     userSettingEntity.setNewReplyInFollowedViewpoint(userSettingDto.getNotification()
                             .isNewReplyInFollowedViewpoint());
                     userSettingRepository.save(userSettingEntity);
@@ -65,8 +65,8 @@ public class UserSettingService {
                             .newReferenceToMyReply(userSettingDto.getNotification().isNewReferenceToMyReply())
                             .newNodeOfTimelineToFollowedIssue(userSettingDto
                                     .getNotification().isNewNodeOfTimelineToFollowedIssue())
-                            .newReplyInFollowedIssue(userSettingDto
-                                    .getNotification().isNewReplyInFollowedIssue())
+                            .newEventInFollowedIssue(userSettingDto
+                                    .getNotification().isNewEventInFollowedIssue())
                             .newReplyInFollowedViewpoint(userSettingDto
                                     .getNotification().isNewReplyInFollowedViewpoint())
                             .user(user)
