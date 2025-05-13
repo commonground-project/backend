@@ -18,4 +18,10 @@ public class UserSettingNotificationDto {
 
     @NotNull
     private boolean newNodeOfTimelineToFollowedIssue;
+
+    @NotNull
+    private boolean newReplyInFollowedIssue;
+
+    @NotNull
+    private boolean newReplyInFollowedViewpoint;
 }
