@@ -5,7 +5,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.read.dto.ReadMapper;
-import tw.commonground.backend.service.read.dto.ReadRequest;
 import tw.commonground.backend.service.read.dto.ReadResponse;
 import tw.commonground.backend.service.read.entity.ReadEntity;
 import tw.commonground.backend.service.read.entity.ReadObjectType;

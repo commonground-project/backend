@@ -74,7 +74,7 @@ public class ReadService {
             ViewpointEntity viewpoint = viewpointService.getViewpoint(objectId);
             entity.setViewpoint(viewpoint);
             entity.setReadStatus(false);
-        } else if(objectType == ReadObjectType.REPLY) {
+        } else if (objectType == ReadObjectType.REPLY) {
             ReplyEntity reply = replyService.getReply(objectId);
             entity.setReply(reply);
             entity.setReadStatus(false);
@@ -163,6 +163,7 @@ public class ReadService {
             case ISSUE -> read.setIssue(issueService.getIssue(objectId));
             case VIEWPOINT -> read.setViewpoint(viewpointService.getViewpoint(objectId));
             case REPLY -> read.setReply(replyService.getReply(objectId));
+            default -> throw new IllegalArgumentException("Invalid object type for read status update");
         }
 
         readRepository.save(read);
