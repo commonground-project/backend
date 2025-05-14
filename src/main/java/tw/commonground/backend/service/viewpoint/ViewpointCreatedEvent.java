@@ -6,8 +6,6 @@ import org.springframework.context.ApplicationEvent;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 
-import java.util.List;
-
 @Getter
 @ToString
 public class ViewpointCreatedEvent extends ApplicationEvent {
