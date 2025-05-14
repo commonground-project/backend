@@ -16,6 +16,7 @@ import tw.commonground.backend.service.timeline.NodeCreatedEvent;
 import tw.commonground.backend.service.user.UserSettingService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
+import tw.commonground.backend.service.viewpoint.ViewpointCreatedEvent;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.tracing.Traced;
@@ -54,6 +55,42 @@ public class NotificationService {
     }
 
     @EventListener
+    public void onViewpointCreatedEventCheckIssueSubscription(ViewpointCreatedEvent notificationEvent) {
+        // Collect notification data
+        ViewpointEntity viewpointEntity = notificationEvent.getViewpointEntity();
+
+        // Collect issue data
+        String viewpointTitle = viewpointEntity.getTitle();
+        IssueEntity issue = viewpointEntity.getIssue();
+        String issueTitle = issue.getTitle();
+        String issueId = issue.getId().toString();
+        String viewpointId = viewpointEntity.getId().toString();
+
+        // Collect the issue's followers
+        List<Long> followerIds = followService.getIssueFollowersById(issue.getId());
+        List<FullUserEntity> needNotificationUsers = new ArrayList<>();
+
+        followerIds.forEach(userId ->
+                userRepository.findUserEntityById(userId).ifPresent(user -> {
+                    if (userSettingService.getUserSetting(userId).getNewEventInFollowedIssue()) {
+                        needNotificationUsers.add(user);
+                    }
+                })
+        );
+
+        if (!needNotificationUsers.isEmpty()) {
+            try {
+                NotificationDto dto = NotificationFactory.createIssueViewpointNotification(
+                        issueTitle, viewpointTitle, issueId, viewpointId);
+                int sent = sendNotification(needNotificationUsers, dto);
+                log.info("Sent new viewpoint notification to {} issue followers", sent);
+            } catch (NotificationDeliveryException e) {
+                log.error("Failed to send notification to users: {}", needNotificationUsers, e);
+            }
+        }
+    }
+
+    @EventListener
     public void onReplyCreatedEventCheckViewpointSubscription(ReplyCreatedEvent notificationEvent) {
         // Collect notification data
         ReplyEntity replyEntity = notificationEvent.getReplyEntity();
@@ -62,24 +99,48 @@ public class NotificationService {
         UUID viewpointId = replyEntity.getViewpoint().getId();
         ViewpointEntity viewpointEntity = viewpointService.getViewpoint(viewpointId);
         UUID authorId = viewpointEntity.getAuthorId();
-        Long userId = userRepository.getIdByUid(authorId);
+        Long authorUserId = userRepository.getIdByUid(authorId);
         String title = viewpointEntity.getTitle();
         String body = replyEntity.getContent();
         String issueId = viewpointEntity.getIssue().getId().toString();
         String viewpointIdString = viewpointId.toString();
 
-        if (userSettingService.getUserSetting(userId).getNewReplyInMyViewpoint()) {
-            NotificationDto dto = NotificationFactory.createViewpointReplyNotification(
-                    title, body, issueId, viewpointIdString);
+        Set<FullUserEntity> needNotificationUsers = new HashSet<>();
 
-            userRepository.findUserEntityById(userId).ifPresent(user -> {
-                try {
-                    int sent = sendNotification(user, dto);
-                    log.info("Sent viewpoint reply notification to user: {}", user.getUsername());
-                } catch (NotificationDeliveryException e) {
-                    log.error("Failed to send notification to user: {}", user.getUsername(), e);
-                }
-            });
+        // 1. Notify the viewpoint author if they have `newReplyInMyViewpoint` enabled
+        if (userSettingService.getUserSetting(authorUserId).getNewReplyInMyViewpoint()) {
+            userRepository.findUserEntityById(authorUserId).ifPresent(needNotificationUsers::add);
+        }
+
+        // 2. Notify users who follow this issue and have `newEventInFollowedIssue` enabled
+        List<Long> issueFollowerIds = followService.getIssueFollowersById(viewpointEntity.getIssue().getId());
+        issueFollowerIds.forEach(userId ->
+                userRepository.findUserEntityById(userId).ifPresent(user -> {
+                    if (userSettingService.getUserSetting(userId).getNewEventInFollowedIssue()) {
+                        needNotificationUsers.add(user);
+                    }
+                })
+        );
+
+        // 3. Notify users who follow this viewpoint and have `newReplyInFollowedViewpoint` enabled
+        List<Long> viewpointFollowerIds = followService.getViewpointFollowersById(viewpointEntity.getId());
+        viewpointFollowerIds.forEach(userId ->
+                userRepository.findUserEntityById(userId).ifPresent(user -> {
+                    if (userSettingService.getUserSetting(userId).getNewReplyInFollowedViewpoint()) {
+                        needNotificationUsers.add(user);
+                    }
+                })
+        );
+
+        if (!needNotificationUsers.isEmpty()) {
+            try {
+                NotificationDto dto = NotificationFactory.createViewpointReplyNotification(
+                        title, body, issueId, viewpointIdString);
+                int sent = sendNotification(new ArrayList<>(needNotificationUsers), dto);
+                log.info("Sent viewpoint reply notification to {} users", sent);
+            } catch (NotificationDeliveryException e) {
+                log.error("Failed to send notification to users: {}", needNotificationUsers, e);
+            }
         }
     }
 
@@ -88,7 +149,7 @@ public class NotificationService {
         // Collect notification data
         List<QuoteReply> quotes = notificationEvent.getQuotes();
         ReplyEntity replyEntity = notificationEvent.getReplyEntity();
-        Long userId = notificationEvent.getUser().getId();
+        FullUserEntity user = notificationEvent.getUser();
 
         // Collect viewpoint data
         UUID viewpointId = replyEntity.getViewpoint().getId();
@@ -104,11 +165,11 @@ public class NotificationService {
         // 2. finds the associated ReplyEntity and FullUserEntity
         quotes.forEach(quote -> replyRepository.findById(quote.getReplyId())
                 // flatMap only executes the lambda if the optional is present
-                .flatMap(reply -> userRepository.findUserEntityById(userId)).ifPresent(user -> {
+                .flatMap(reply -> userRepository.findUserEntityById(user.getId())).ifPresent(u -> {
 
                     // 3. checks if the user has enabled notifications for new references
                     // 4. than adds the user to the needNotificationUser list if true
-                    if (userSettingService.getUserSetting(userId).getNewReferenceToMyReply()) {
+                    if (userSettingService.getUserSetting(user.getId()).getNewReferenceToMyReply()) {
                         needNotificationUser.add(user);
                     }
                 }));
@@ -152,14 +213,6 @@ public class NotificationService {
         } catch (NotificationDeliveryException e) {
             log.error("Failed to send notification to users: {}", needNotificationUser, e);
         }
-    }
-
-    public int sendNotification(FullUserEntity user, NotificationDto notificationDto) throws
-            NotificationDeliveryException {
-        return subscriptionService.sendNotification(user,
-                notificationDto.getTitle(),
-                notificationDto.getBody(),
-                notificationDto.getUrl());
     }
 
     public int sendNotification(List<FullUserEntity> users, NotificationDto notificationDto) throws
