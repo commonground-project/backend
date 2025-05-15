@@ -98,7 +98,7 @@ public class ReadService {
     }
 
     public void handleReplyCreatedEvent(ReplyCreatedEvent event) {
-        ReplyEntity reply = replyService.getReplyWithViewpointAndIssue(event.getReplyEntity().getId())  ;
+        ReplyEntity reply = replyService.getReplyWithViewpointAndIssue(event.getReplyEntity().getId());
         ViewpointEntity viewpoint = reply.getViewpoint();
         IssueEntity issue = viewpointService.getViewpointWithIssue(viewpoint.getId()).getIssue();
         // get the issue from the viewpoint entity (using getIssue() may fetch null)
