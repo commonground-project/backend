@@ -150,6 +150,7 @@ public class ReplyController {
         Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
         Boolean readStatus = readService.getReadStatus(user.getId(), replyEntity.getId(), ReadObjectType.REPLY);
 
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, readStatus, facts, replyEntities, quotes));
+        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, readStatus,
+                                                             facts, replyEntities, quotes));
     }
 }

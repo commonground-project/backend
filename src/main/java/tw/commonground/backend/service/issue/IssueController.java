@@ -47,7 +47,8 @@ public class IssueController {
     private final FollowService followService;
     private final ReadService readService;
 
-    public IssueController(IssueService issueService, FactService factService, FollowService followService, ReadService readService) {
+    public IssueController(IssueService issueService, FactService factService,
+                           FollowService followService, ReadService readService) {
         this.issueService = issueService;
         this.factService = factService;
         this.followService = followService;

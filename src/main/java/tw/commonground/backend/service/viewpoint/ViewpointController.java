@@ -170,8 +170,8 @@ public class ViewpointController {
                 .map(viewpointEntity ->
                         ViewpointMapper.toResponse(viewpointEntity,
                                 reactionsMap.getOrDefault(viewpointEntity.getId(), Reaction.NONE),
-                                factsMap.getOrDefault(viewpointEntity.getId(), List.of())
-                        , readService.getReadStatus(userId, viewpointEntity.getId(), ReadObjectType.VIEWPOINT)))
+                                factsMap.getOrDefault(viewpointEntity.getId(), List.of()),
+                                readService.getReadStatus(userId, viewpointEntity.getId(), ReadObjectType.VIEWPOINT)))
                 .toList();
 
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));
