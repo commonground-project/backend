@@ -20,6 +20,8 @@ public class InternalViewpointResponse {
     @JsonProperty("updated_at")
     private String updatedAt;
 
+    private String title;
+
     private String content;
 
     @JsonProperty("author_id")
