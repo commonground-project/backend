@@ -63,7 +63,7 @@ public class IssueController {
             @Valid PaginationRequest pagination) {
 
         Pageable pageable = paginationParser.parsePageable(pagination);
-        Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);;
+        Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
 
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()

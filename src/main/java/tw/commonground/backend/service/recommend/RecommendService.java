@@ -38,7 +38,7 @@ public class RecommendService {
 
         String key = String.format("recommendation:%s:%s", issueId, userId);
 
-        Set<String> recommendViewpointIds = stringRedisTemplate.opsForZSet().reverseRangeByScore(key, start, end);
+        Set<String> recommendViewpointIds = stringRedisTemplate.opsForZSet().reverseRange(key, start, end);
         if (recommendViewpointIds == null || recommendViewpointIds.isEmpty()) {
             return List.of();
         }
@@ -72,7 +72,7 @@ public class RecommendService {
 //
 //        String key = String.format("recommendation:%s", userId);
 //
-//        return stringRedisTemplate.opsForZSet().reverseRangeByScore(key, start, end).stream().toList();
+//        return stringRedisTemplate.opsForZSet().reverseRange(key, start, end).stream().toList();
 //    }
 //
 //    public int getIssuesCount(UUID userId) {
