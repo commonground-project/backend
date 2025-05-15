@@ -6,8 +6,6 @@ import org.springframework.context.event.EventListener;
 import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
-import tw.commonground.backend.service.read.dto.ReadMapper;
-import tw.commonground.backend.service.read.dto.ReadResponse;
 import tw.commonground.backend.service.read.entity.ReadEntity;
 import tw.commonground.backend.service.read.entity.ReadKey;
 import tw.commonground.backend.service.read.entity.ReadObjectType;
@@ -48,12 +46,12 @@ public class ReadService {
 
     public ReadEntity updateReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
         ReadEntity entity = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType)
-                .orElseGet(() -> getReadEntity(userId, objectId, objectType));
+                .orElseGet(() -> createReadEntity(userId, objectId, objectType));
         entity.setReadStatus(true);
         return readRepository.save(entity);
     }
 
-    private ReadEntity getReadEntity(Long userId, UUID objectId, ReadObjectType objectType) {
+    private ReadEntity createReadEntity(Long userId, UUID objectId, ReadObjectType objectType) {
         /*
         * if the read entity does not exist, create a new one
         * the read status is set to false for viewpoint and reply
@@ -83,13 +81,14 @@ public class ReadService {
         }
         ReadKey key = new ReadKey(userId, objectId, objectType);
         entity.setId(key);
+        readRepository.save(entity);
         return entity;
     }
 
-    public ReadResponse getReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
+    public Boolean getReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
         ReadEntity entity = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType)
-                .orElseGet(() -> getReadEntity(userId, objectId, objectType));
-        return ReadMapper.toResponse(entity);
+                .orElseGet(() -> createReadEntity(userId, objectId, objectType));
+        return entity.getReadStatus();
     }
 
     @EventListener

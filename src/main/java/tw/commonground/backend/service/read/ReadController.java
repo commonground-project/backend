@@ -37,7 +37,8 @@ public class ReadController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReadResponse> getReadIssue(@AuthenticationPrincipal FullUserEntity user,
                                                      @PathVariable UUID id) {
-        ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.ISSUE);
+        Boolean readStatus = readService.getReadStatus(user.getId(), id, ReadObjectType.ISSUE);
+        ReadResponse response = ReadMapper.toResponse(user.getId(), id, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -53,7 +54,25 @@ public class ReadController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReadResponse> getReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                          @PathVariable UUID id) {
-        ReadResponse response = readService.getReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
+        Boolean readStatus = readService.getReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
+        ReadResponse response = ReadMapper.toResponse(user.getId(), id, readStatus);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/read/reply/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ReadResponse> readReply(@AuthenticationPrincipal FullUserEntity user,
+                                                  @PathVariable UUID id) {
+        ReadEntity entity = readService.updateReadStatus(user.getId(), id, ReadObjectType.REPLY);
+        return ResponseEntity.ok(ReadMapper.toResponse(entity));
+    }
+
+    @GetMapping("/read/reply/{id}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<ReadResponse> getReadReply(@AuthenticationPrincipal FullUserEntity user,
+                                                     @PathVariable UUID id) {
+        Boolean readStatus = readService.getReadStatus(user.getId(), id, ReadObjectType.REPLY);
+        ReadResponse response = ReadMapper.toResponse(user.getId(), id, readStatus);
         return ResponseEntity.ok(response);
     }
 

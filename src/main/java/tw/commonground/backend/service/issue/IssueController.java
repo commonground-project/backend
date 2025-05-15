@@ -15,6 +15,8 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.dto.*;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.read.ReadService;
+import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
@@ -43,11 +45,13 @@ public class IssueController {
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
     private final FollowService followService;
+    private final ReadService readService;
 
-    public IssueController(IssueService issueService, FactService factService, FollowService followService) {
+    public IssueController(IssueService issueService, FactService factService, FollowService followService, ReadService readService) {
         this.issueService = issueService;
         this.factService = factService;
         this.followService = followService;
+        this.readService = readService;
     }
 
     @GetMapping("/issues")
@@ -78,7 +82,8 @@ public class IssueController {
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
+        Boolean readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -91,11 +96,13 @@ public class IssueController {
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = false;
+        Boolean readStatus = false;
         if (user != null) {
             follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
+            readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
         }
         Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -111,7 +118,8 @@ public class IssueController {
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(id);
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
+        Boolean readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
 
