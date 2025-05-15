@@ -98,9 +98,10 @@ public class ReadService {
     }
 
     public void handleReplyCreatedEvent(ReplyCreatedEvent event) {
-        ReplyEntity reply = event.getReplyEntity();
+        ReplyEntity reply = replyService.getReplyWithViewpointAndIssue(event.getReplyEntity().getId())  ;
         ViewpointEntity viewpoint = reply.getViewpoint();
-        IssueEntity issue = viewpoint.getIssue();
+        IssueEntity issue = viewpointService.getViewpointWithIssue(viewpoint.getId()).getIssue();
+        // get the issue from the viewpoint entity (using getIssue() may fetch null)
 
         // Create or update read status for issue for the followers of the viewpoint
         List<Long> viewpointFollowersId = followService.getViewpointFollowersById(viewpoint.getId());
