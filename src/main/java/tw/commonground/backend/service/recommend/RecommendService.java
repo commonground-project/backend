@@ -1,21 +1,14 @@
 package tw.commonground.backend.service.recommend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.service.issue.entity.IssueRepository;
-import tw.commonground.backend.service.issue.entity.SimpleIssueEntity;
-import tw.commonground.backend.service.recommend.dto.ObjectScore;
-import tw.commonground.backend.service.recommend.dto.RecommendCache;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class RecommendService {
@@ -39,94 +32,58 @@ public class RecommendService {
         this.objectMapper = objectMapper;
     }
 
-    public Optional<Page<ViewpointEntity>> getViewpoints(UUID userId, Pageable pageable) {
-        String key = "recommendations:" + userId;
-        String json = stringRedisTemplate.opsForValue().get(key);
-        if (json == null) {
-            return Optional.empty();
+    public List<ViewpointEntity> getIssueViewpoints(UUID userId, UUID issueId, Pageable pageable) {
+        int start = pageable.getPageNumber() * pageable.getPageSize();
+        int end = pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize() - 1;
+
+        String key = String.format("recommendation:%s:%s", issueId, userId);
+
+        Set<String> recommendViewpointIds = stringRedisTemplate.opsForZSet().reverseRangeByScore(key, start, end);
+        if (recommendViewpointIds == null || recommendViewpointIds.isEmpty()) {
+            return List.of();
         }
 
-        try {
-            RecommendCache recommendCache = objectMapper.readValue(json, RecommendCache.class);
+        List<UUID> viewpointIds = recommendViewpointIds.stream().map(UUID::fromString).toList();
 
-            List<ObjectScore> viewpoints = recommendCache.getViewpoints();
-            int start = pageable.getPageNumber() * pageable.getPageSize();
-            int end = Math.min(start + pageable.getPageSize(), viewpoints.size());
+        List<ViewpointEntity> viewpoints = viewpointRepository.findAllByIds(viewpointIds);
 
-            List<UUID> ids = viewpoints.stream()
-                    .map(ObjectScore::getObjectId)
-                    .toList();
-
-            List<ViewpointEntity> viewpointEntities = viewpointRepository.findAllByIds(ids);
-
-            List<ViewpointEntity> pageViewpoints = viewpointEntities.subList(start, end);
-
-            if (pageViewpoints.isEmpty()) {
-                return Optional.empty();
-            } else {
-                return Optional.of(new PageImpl<>(pageViewpoints, pageable, viewpoints.size()));
-            }
-        } catch (Exception e) {
-            return Optional.empty();
+        if (viewpoints.size() != pageable.getPageSize()) {
+            viewpoints.addAll(
+                    viewpointRepository
+                            .findExcludedBySize(viewpointIds, pageable.getPageSize() - viewpoints.size()
+                            ));
         }
+
+        return viewpoints;
     }
 
-    public Optional<Page<ViewpointEntity>> getIssueViewpoints(UUID userId, UUID issueId, Pageable pageable) {
-        String key = "recommendations:" + userId;
-        String json = stringRedisTemplate.opsForValue().get(key);
-        if (json == null) {
-            return Optional.empty();
+    public int getIssueViewpointsCount(UUID userId, UUID issueId) {
+        String key = String.format("recommendation:%s:%s", issueId, userId);
+        Long size = stringRedisTemplate.opsForZSet().size(key);
+        if (size == null) {
+            return 0;
         }
-
-        try {
-            RecommendCache recommendCache = objectMapper.readValue(json, RecommendCache.class);
-
-            List<ObjectScore> viewpoints = recommendCache.getViewpoints();
-            int start = pageable.getPageNumber() * pageable.getPageSize();
-            int end = Math.min(start + pageable.getPageSize(), viewpoints.size());
-
-            List<ObjectScore> pageViewpoints = viewpoints.subList(start, end);
-
-            List<UUID> ids = pageViewpoints.stream()
-                    .map(ObjectScore::getObjectId)
-                    .toList();
-
-            List<ViewpointEntity> viewpointEntities = viewpointRepository.findAllByIdsAndIssueId(ids, issueId);
-
-            if (pageViewpoints.isEmpty()) {
-                return Optional.empty();
-            } else {
-                return Optional.of(new PageImpl<>(viewpointEntities, pageable, viewpoints.size()));
-            }
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return size.intValue();
     }
 
-    public Optional<Page<SimpleIssueEntity>> getIssues(UUID userId, Pageable pageable) {
-        String key = "recommendations:" + userId;
-        String json = stringRedisTemplate.opsForValue().get(key);
-        if (json == null) {
-            return Optional.empty();
-        }
+//    public List<String> getIssues(UUID userId, Pageable pageable) {
+//        int start = pageable.getPageNumber() * pageable.getPageSize();
+//        int end = pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize() - 1;
+//
+//        String key = String.format("recommendation:%s", userId);
+//
+//        return stringRedisTemplate.opsForZSet().reverseRangeByScore(key, start, end).stream().toList();
+//    }
+//
+//    public int getIssuesCount(UUID userId) {
+//        String key = String.format("recommendation:%s", userId);
+//        Long size = stringRedisTemplate.opsForZSet().size(key);
+//        if (size == null) {
+//            return 0;
+//        }
+//        return size.intValue();
+//    }
 
-        try {
-            RecommendCache recommendCache = objectMapper.readValue(json, RecommendCache.class);
 
-            List<ObjectScore> issues = recommendCache.getIssues();
-            int start = pageable.getPageNumber() * pageable.getPageSize();
-            int end = Math.min(start + pageable.getPageSize(), issues.size());
-
-            var pageIssues = issues.subList(start, end);
-            List<UUID> ids = pageIssues.stream()
-                    .map(ObjectScore::getObjectId)
-                    .toList();
-            List<SimpleIssueEntity> issueEntities = issueRepository.findAllByIds(ids);
-
-            return Optional.of(new PageImpl<>(issueEntities, pageable, issues.size()));
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
 
 }

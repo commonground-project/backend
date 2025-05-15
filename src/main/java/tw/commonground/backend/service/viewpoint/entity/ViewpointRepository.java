@@ -21,6 +21,9 @@ public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID
     @Query("SELECT v FROM ViewpointEntity v WHERE v.id IN :ids AND v.issue.id = :issueId")
     List<ViewpointEntity> findAllByIdsAndIssueId(List<UUID> ids, UUID issueId);
 
+    @Query("SELECT v FROM ViewpointEntity v WHERE v.id NOT IN :ids ORDER BY v.createdAt DESC LIMIT :size")
+    List<ViewpointEntity> findExcludedBySize(List<UUID> ids, int size);
+
 }
 
 interface ViewpointRepositoryCustom {
