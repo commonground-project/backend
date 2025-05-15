@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.viewpoint.entity;
+package tw.commonground.backend.service.viewpoint.repository;
 
 import tw.commonground.backend.service.fact.entity.FactEntity;
 

@@ -65,8 +65,9 @@ public class ViewpointController {
         ViewpointEntity viewpointEntity = viewpointService.createIssueViewpoint(id, request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
         Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+        Integer replyCount = viewpointService.getReplyCountByViewpointId(viewpointEntity.getId());
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, replyCount);
         return ResponseEntity.ok(response);
     }
 
@@ -91,8 +92,9 @@ public class ViewpointController {
                                                              @RequestBody ViewpointRequest request) {
         ViewpointEntity viewpointEntity = viewpointService.createViewpoint(request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
+        Integer replyCount = viewpointService.getReplyCountByViewpointId(viewpointEntity.getId());
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE, facts, replyCount);
         return ResponseEntity.ok(response);
     }
 
@@ -107,7 +109,9 @@ public class ViewpointController {
             reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
         }
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
+        Integer replyCount = viewpointService.getReplyCountByViewpointId(viewpointEntity.getId());
+
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, replyCount);
         return ResponseEntity.ok(response);
     }
 
@@ -119,8 +123,10 @@ public class ViewpointController {
         ViewpointEntity viewpointEntity = viewpointService.updateViewpoint(id, updateRequest);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
         Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+        Integer replyCount = viewpointService.getReplyCountByViewpointId(viewpointEntity.getId());
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
+
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, replyCount);
         return ResponseEntity.ok(response);
     }
 
@@ -157,12 +163,16 @@ public class ViewpointController {
                 userId,
                 pageViewpoints.getContent().stream().map(ViewpointEntity::getId).toList());
 
+        Map<UUID, Integer> replyCountMap = viewpointService.getReplyCountForViewpoints(
+                pageViewpoints.getContent().stream().map(ViewpointEntity::getId).toList());
+
         List<ViewpointResponse> viewpointResponses = pageViewpoints.getContent()
                 .stream()
                 .map(viewpointEntity ->
                         ViewpointMapper.toResponse(viewpointEntity,
                                 reactionsMap.getOrDefault(viewpointEntity.getId(), Reaction.NONE),
-                                factsMap.getOrDefault(viewpointEntity.getId(), List.of())))
+                                factsMap.getOrDefault(viewpointEntity.getId(), List.of()),
+                                replyCountMap.getOrDefault(viewpointEntity.getId(), 0)))
                 .toList();
 
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));
@@ -174,11 +184,15 @@ public class ViewpointController {
         Map<UUID, List<FactEntity>> factsMap = viewpointService.getFactsForViewpoints(pageViewpoints.getContent()
                 .stream().map(ViewpointEntity::getId).toList());
 
+        Map<UUID, Integer> replyCountMap = viewpointService.getReplyCountForViewpoints(
+                pageViewpoints.getContent().stream().map(ViewpointEntity::getId).toList());
+
         List<ViewpointResponse> viewpointResponses = pageViewpoints.getContent()
                 .stream()
                 .map(viewpointEntity ->
                         ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE,
-                                factsMap.getOrDefault(viewpointEntity.getId(), List.of())))
+                                factsMap.getOrDefault(viewpointEntity.getId(), List.of()),
+                                replyCountMap.getOrDefault(viewpointEntity.getId(), 0)))
                 .toList();
 
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));

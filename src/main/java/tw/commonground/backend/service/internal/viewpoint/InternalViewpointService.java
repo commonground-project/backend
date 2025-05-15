@@ -9,7 +9,7 @@ import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointM
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointResponse;
 import tw.commonground.backend.service.reply.entity.ReplyRepository;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
+import tw.commonground.backend.service.viewpoint.repository.ViewpointRepository;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
