@@ -109,20 +109,11 @@ public class NotificationService {
 
         // 1. Notify the viewpoint author if they have `newReplyInMyViewpoint` enabled
         if (userSettingService.getUserSetting(authorUserId).getNewReplyInMyViewpoint()) {
+            // TODO: add check if the author follows or unfollows the viewpoint
             userRepository.findUserEntityById(authorUserId).ifPresent(needNotificationUsers::add);
         }
 
-        // 2. Notify users who follow this issue and have `newEventInFollowedIssue` enabled
-        List<Long> issueFollowerIds = followService.getIssueFollowersById(viewpointEntity.getIssue().getId());
-        issueFollowerIds.forEach(userId ->
-                userRepository.findUserEntityById(userId).ifPresent(user -> {
-                    if (userSettingService.getUserSetting(userId).getNewEventInFollowedIssue()) {
-                        needNotificationUsers.add(user);
-                    }
-                })
-        );
-
-        // 3. Notify users who follow this viewpoint and have `newReplyInFollowedViewpoint` enabled
+        // 2. Notify users who follow this viewpoint and have `newReplyInFollowedViewpoint` enabled
         List<Long> viewpointFollowerIds = followService.getViewpointFollowersById(viewpointEntity.getId());
         viewpointFollowerIds.forEach(userId ->
                 userRepository.findUserEntityById(userId).ifPresent(user -> {
@@ -131,6 +122,8 @@ public class NotificationService {
                     }
                 })
         );
+
+        log.info("Need notification users: {}", needNotificationUsers);
 
         if (!needNotificationUsers.isEmpty()) {
             try {
