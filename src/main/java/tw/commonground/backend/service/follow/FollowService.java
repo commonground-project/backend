@@ -88,11 +88,13 @@ public class FollowService {
                 orElse(Collections.emptyList());
     }
 
+    @Transactional
     @Cacheable(value = "follow", key = "'follow_'+#userId+'_'+#objectId+'_'+#objectType")
     public FollowEntity getFollowObject(Long userId, UUID objectId, RelatedObject objectType) {
         FollowKey key = new FollowKey(userId, objectId, objectType);
-        return followRepository.findById(key).orElseThrow(() ->
-                new EntityNotFoundException("Follow", "id", key.toString()));
+
+        return followRepository.findById(key).orElseGet(() ->
+                followObject(userId, objectId, false, objectType));
     }
 
     @Cacheable(value = "follow_list", key = "'followers_'+#id+'_ISSUE'")
