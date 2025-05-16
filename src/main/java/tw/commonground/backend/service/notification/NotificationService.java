@@ -107,9 +107,9 @@ public class NotificationService {
 
         Set<FullUserEntity> needNotificationUsers = new HashSet<>();
 
-        // 1. Notify the viewpoint author if they have `newReplyInMyViewpoint` enabled
-        if (userSettingService.getUserSetting(authorUserId).getNewReplyInMyViewpoint()) {
-            // TODO: add check if the author follows or unfollows the viewpoint
+        // 1. Notify the viewpoint author if they have `newReplyInMyViewpoint` enabled and follows the viewpoint
+        if (userSettingService.getUserSetting(authorUserId).getNewReplyInMyViewpoint() &&
+            followService.getViewpointFollowersById(viewpointId).contains(authorUserId)) {
             userRepository.findUserEntityById(authorUserId).ifPresent(needNotificationUsers::add);
         }
 
