@@ -1,15 +1,15 @@
 package tw.commonground.backend.service.recommend;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import tw.commonground.backend.service.issue.entity.IssueRepository;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
+import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
 
+@Traced
 @Service
 public class RecommendService {
 
@@ -17,19 +17,11 @@ public class RecommendService {
 
     private final ViewpointRepository viewpointRepository;
 
-    private final IssueRepository issueRepository;
-
-    private final ObjectMapper objectMapper;
-
     public RecommendService(RedisTemplate<String, String> stringRedisTemplate,
-                            ViewpointRepository viewpointRepository,
-                            IssueRepository issueRepository,
-                            ObjectMapper objectMapper) {
+                            ViewpointRepository viewpointRepository) {
 
         this.stringRedisTemplate = stringRedisTemplate;
         this.viewpointRepository = viewpointRepository;
-        this.issueRepository = issueRepository;
-        this.objectMapper = objectMapper;
     }
 
     public List<ViewpointEntity> getIssueViewpoints(UUID userId, UUID issueId, Pageable pageable) {

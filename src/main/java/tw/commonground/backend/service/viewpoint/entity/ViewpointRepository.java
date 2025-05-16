@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID>, ViewpointRepositoryCustom {
 
     Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
-  
+
     List<ViewpointEntity> findAllByIssueId(UUID issueId);
 
     @Query("SELECT v FROM ViewpointEntity v WHERE v.id IN :ids")
