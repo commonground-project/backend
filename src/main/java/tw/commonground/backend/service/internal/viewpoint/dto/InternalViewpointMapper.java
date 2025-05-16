@@ -27,6 +27,7 @@ public final class InternalViewpointMapper {
                 .viewpointId(viewpoint.getId())
                 .createdAt(DateTimeUtils.toIso8601String(viewpoint.getCreatedAt()))
                 .updatedAt(DateTimeUtils.toIso8601String(viewpoint.getUpdatedAt()))
+                .title(viewpoint.getTitle())
                 .content(viewpoint.getContent())
                 .authorId(viewpoint.getAuthorId())
                 .likeCount(viewpoint.getLikeCount())

@@ -3,7 +3,6 @@ package tw.commonground.backend.service.issue;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +19,6 @@ import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.tracing.Traced;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Traced
@@ -30,8 +28,6 @@ public class IssueService {
 
     private final IssueRepository issueRepository;
 
-    private final IssueFollowRepository issueFollowRepository;
-
     private final ManualFactRepository manualFactRepository;
 
     private final FactRepository factRepository;
@@ -39,30 +35,28 @@ public class IssueService {
     private final FactService factService;
 
     public IssueService(IssueRepository issueRepository,
-                        IssueFollowRepository issueFollowRepository,
                         ManualFactRepository manualFactRepository,
                         FactRepository factRepository,
                         FactService factService) {
         this.issueRepository = issueRepository;
-        this.issueFollowRepository = issueFollowRepository;
         this.manualFactRepository = manualFactRepository;
         this.factRepository = factRepository;
         this.factService = factService;
     }
 
-    @Cacheable("'allIssues'")
+    @Cacheable(key = "#pageable.pageNumber")
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
         return issueRepository.findAllIssueEntityBy(pageable);
     }
 
-    @Cacheable(key = "{#id, 'allIssues'}")
+    @Cacheable(key = "#id")
     public IssueEntity getIssue(UUID id) {
         return issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
         );
     }
 
-    @CacheEvict(key = "'allIssues'")
+    @CacheEvict(allEntries = true)
     public IssueEntity createIssue(IssueRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
 
@@ -81,7 +75,7 @@ public class IssueService {
         return issueRepository.save(issueEntity);
     }
 
-    @CacheEvict(key = "{#id, 'allIssues'}")
+    @CacheEvict(allEntries = true)
     public IssueEntity updateIssue(UUID id, IssueRequest issueRequest) {
         IssueEntity issueEntity = issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
@@ -105,13 +99,12 @@ public class IssueService {
         return issueRepository.save(issueEntity);
     }
 
-    @CacheEvict(key = "{#id, 'allIssues'}")
+    @CacheEvict(allEntries = true)
     public void deleteIssue(UUID id) {
 //        Todo: need to use soft delete
         issueRepository.deleteById(id);
     }
 
-    @Cacheable(value = {"fact", "issue"}, key = "#id")
     public Page<FactEntity> getIssueFacts(UUID id, Pageable pageable) {
         List<FactEntity> factEntities = new ArrayList<>();
         Page<ManualIssueFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);
@@ -124,10 +117,7 @@ public class IssueService {
         return new PageImpl<>(factEntities, pageable, manualFactEntities.getTotalElements());
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "issue", key = "#id"),
-            @CacheEvict(value = "issue", key = "'allIssues'")
-    })
+    @CacheEvict(allEntries = true)
     @Transactional
     public List<FactEntity> createManualFact(UUID id, List<UUID> factIds) {
         factService.throwIfFactsNotExist(factIds);
@@ -151,39 +141,6 @@ public class IssueService {
 
     public Integer getViewpointCount(UUID id) {
         return issueRepository.getViewpointCount(id);
-    }
-
-    @Caching(
-            evict = {
-                    @CacheEvict(value = "issue", key = "#issueId"),
-                    @CacheEvict(value = "issue", key = "'allIssues'"),
-                    @CacheEvict(value = "follow", allEntries = true)
-            }
-    )
-    @Transactional
-    public IssueFollowEntity followIssue(Long userId, UUID issueId, Boolean follow) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        if (issueFollowRepository.findById(id).isPresent()) {
-            issueFollowRepository.updateFollowById(id, follow);
-        } else {
-            issueFollowRepository.insertFollowById(id, follow);
-        }
-        IssueFollowEntity issueFollowEntity = new IssueFollowEntity();
-        issueFollowEntity.setId(id);
-        issueFollowEntity.setFollow(follow);
-        issueFollowEntity.setUpdatedAt(LocalDateTime.now());
-        return issueFollowEntity;
-    }
-
-    @Cacheable("follow")
-    public Boolean getFollowForIssue(Long userId, UUID issueId) {
-        IssueFollowKey id = new IssueFollowKey(userId, issueId);
-        return issueFollowRepository.findFollowById(id).orElse(false);
-    }
-
-    @Cacheable("follow")
-    public List<Long> getIssueFollowersById(UUID issueId) {
-        return issueFollowRepository.findUsersIdByIssueIdAndFollowTrue(issueId).orElse(Collections.emptyList());
     }
 
     public void throwIfIssueNotExist(UUID id) {
