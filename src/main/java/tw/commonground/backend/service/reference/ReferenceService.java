@@ -4,9 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import tw.commonground.backend.service.reference.dto.WebsiteInfoResponse;
+import org.springframework.web.client.RestTemplate;
+import tw.commonground.backend.service.reference.dto.*;
 import tw.commonground.backend.shared.tracing.Traced;
+import org.springframework.http.HttpHeaders;
+
 
 import java.io.IOException;
 import java.net.*;
@@ -22,6 +30,9 @@ import java.util.Set;
 public class ReferenceService {
 
     private final ReferenceRepository referenceRepository;
+
+    @Value("${crawler.url}")
+    private String crawlerApi;
 
     public ReferenceService(ReferenceRepository referenceRepository) {
         this.referenceRepository = referenceRepository;
@@ -60,13 +71,23 @@ public class ReferenceService {
 
     public WebsiteInfoResponse getWebsiteInfo(String urlString) {
         WebsiteInfoResponse websiteInfoResponse = new WebsiteInfoResponse();
-
         Document document;
         try {
             document = getDocument(urlString);
         } catch (Exception e) {
-            log.error("Error fetching website, type: {}, message: {}", e.getClass().getSimpleName(), e.getMessage());
-            throw new WebsiteFetchException();
+            log.error("Jsoup failed to fetch website, trying fallback API. Type: {}, Message: {}",
+                    e.getClass().getSimpleName(), e.getMessage());
+
+            // Use fallback API to fetch title
+            String title = fetchTitleFromFallback(urlString);
+            if (title != null) {
+                websiteInfoResponse.setTitle(title);
+            } else {
+                throw new WebsiteFetchException();
+            }
+
+            websiteInfoResponse.setIcon("");
+            return websiteInfoResponse;
         }
 
         try {
@@ -103,6 +124,52 @@ public class ReferenceService {
 
         return websiteInfoResponse;
     }
+
+    public String fetchContentFromFallback(String urlString) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            String apiUrl = crawlerApi + "content/" + URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            log.debug("API URL: {}", apiUrl);
+            ResponseEntity<ContentCrawlerResponse> response = restTemplate.exchange(
+                    apiUrl, HttpMethod.GET, entity, ContentCrawlerResponse.class
+            );
+            if (response.getBody() != null) {
+                return response.getBody().getContent();
+            }
+        } catch (Exception e) {
+            log.error("Fallback API for content failed, type: {}, message: {}",
+                    e.getClass().getSimpleName(), e.getMessage());
+        }
+        return "";
+    }
+
+    public String fetchTitleFromFallback(String urlString) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            String apiUrl = crawlerApi + "title/" +  URLEncoder.encode(urlString, StandardCharsets.UTF_8);
+            ResponseEntity<TitleCrawlerResponse> response = restTemplate.exchange(
+                    apiUrl, HttpMethod.GET, entity, TitleCrawlerResponse.class
+            );
+            if (response.getBody() != null) {
+                return  response.getBody().getTitle();
+            }
+        } catch (Exception e) {
+            log.error("Fallback API for title failed, type: {}, message: {}",
+                    e.getClass().getSimpleName(), e.getMessage());
+        }
+        return null;
+    }
+
 
     protected Document getDocument(String url) throws IOException {
         return Jsoup.connect(url).get();
