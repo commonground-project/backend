@@ -31,6 +31,17 @@ class ReferenceServiceTest {
     private ArgumentCaptor<List<ReferenceEntity>> captor;
 
     @Test
+    void testGetWebsiteInfo() {
+        String url = "https://www.ctee.com.tw/news/20221226700018-430705";
+        String expectedTitle = "歐洲｜移民難解德國缺工 - 國際 - 工商時報";
+        ReferenceService spyReferenceService = Mockito.spy(referenceService);
+        Mockito.when(spyReferenceService.fetchTitleFromFallback(url)).thenReturn(expectedTitle);
+
+        WebsiteInfoResponse websiteInfoResponse = spyReferenceService.getWebsiteInfo(url);
+
+        assertThat(websiteInfoResponse.getTitle()).isEqualTo(expectedTitle);
+    }
+    @Test
     void testParseReferenceEntity_withExistedUrl() {
 
         List<String> input = List.of("https://www.google.com");
@@ -133,6 +144,7 @@ class ReferenceServiceTest {
         when(spyReferenceService.getDocument("https://www.github.com")).thenReturn(mockDocument);
 
         WebsiteInfoResponse websiteInfoResponse = spyReferenceService.getWebsiteInfo("https://www.github.com");
+
         assertThat(websiteInfoResponse.getTitle()).isEqualTo("Github");
         assertThat(websiteInfoResponse.getIcon()).isEqualTo("https://www.github.com/favicon.ico");
     }
