@@ -72,7 +72,7 @@ public class NotificationService {
 
         followerIds.forEach(userId ->
                 userRepository.findUserEntityById(userId).ifPresent(user -> {
-                    if (userSettingService.getUserSetting(userId).getNewEventInFollowedIssue()) {
+                    if (userSettingService.getUserSetting(userId).getNewViewpointInFollowedIssue()) {
                         needNotificationUsers.add(user);
                     }
                 })

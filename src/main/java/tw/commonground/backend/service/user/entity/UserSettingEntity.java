@@ -32,7 +32,7 @@ public class UserSettingEntity {
     private Boolean newNodeOfTimelineToFollowedIssue;
 
     @ColumnDefault("true")
-    private Boolean newEventInFollowedIssue;
+    private Boolean newViewpointInFollowedIssue;
 
     @ColumnDefault("true")
     private Boolean newReplyInFollowedViewpoint;
