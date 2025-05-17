@@ -48,7 +48,7 @@ public class RecommendService {
 
         long viewpointCount = viewpointRepositoryContainer.count();
 
-        List<ViewpointEntity> viewpoints = viewpointRepositoryContainer.findAllByIds(viewpointIds);
+        List<ViewpointEntity> viewpoints = new ArrayList<>(viewpointRepositoryContainer.findAllByIds(viewpointIds));
 
         if (viewpoints.size() != pageable.getPageSize()) {
             int totalRecommendCount = Objects.requireNonNull(stringRedisTemplate.opsForZSet().zCard(key)).intValue();
@@ -58,14 +58,13 @@ public class RecommendService {
             }
             LocalDateTime lastUpdated = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME);
 
-            viewpoints.addAll(
-                    viewpointRepositoryContainer.findExcludedRecommend(
-                            viewpointIds,
-                            issueId,
-                            start + viewpoints.size() - totalRecommendCount,
-                            pageable.getPageSize() - viewpoints.size(),
-                            lastUpdated
-                    ));
+            viewpoints.addAll(viewpointRepositoryContainer.findExcludedRecommend(
+                    viewpointIds,
+                    issueId,
+                    start + viewpoints.size() - totalRecommendCount,
+                    pageable.getPageSize() - viewpoints.size(),
+                    lastUpdated
+            ));
         }
 
         return new PageImpl<>(viewpoints, pageable, viewpointCount);

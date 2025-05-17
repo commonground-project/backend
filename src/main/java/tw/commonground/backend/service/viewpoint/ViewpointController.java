@@ -77,7 +77,11 @@ public class ViewpointController {
         Integer replyCount = viewpointService.getReplyCountByViewpointId(viewpointEntity.getId());
         Boolean readStatus = readService.getReadStatus(user.getId(), viewpointEntity.getId(), ReadObjectType.VIEWPOINT);
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, replyCount, readStatus);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity,
+                reaction,
+                facts,
+                replyCount,
+                readStatus);
         return ResponseEntity.ok(response);
     }
 
