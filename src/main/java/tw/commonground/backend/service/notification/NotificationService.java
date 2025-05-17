@@ -75,8 +75,8 @@ public class NotificationService {
         log.debug("issue followerIds {}", followerIds);
         followerIds.forEach(userId ->
                 userRepository.findUserEntityById(userId).ifPresent(user -> {
-                    if (!Objects.equals(userId, authorUserId) &&
-                            userSettingService.getUserSetting(userId).getNewViewpointInFollowedIssue()) {
+                    if (!Objects.equals(userId, authorUserId)
+                            && userSettingService.getUserSetting(userId).getNewViewpointInFollowedIssue()) {
                         needNotificationUsers.add(user);
                     }
                 })
