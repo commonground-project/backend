@@ -38,7 +38,7 @@ public class InternalIssueController {
     public ResponseEntity<InternalIssueResponse> updateIssueInsight(@PathVariable UUID issueId,
                                                                     @RequestBody @Valid InternalIssueRequest request) {
         InternalIssueResponse updatedIssue = internalIssueService.updateIssueInsight(issueId, request);
-        return ResponseEntity.ok(updatedIssue); 
+        return ResponseEntity.ok(updatedIssue);
     }
 
     @GetMapping("/issue/detail/{issueId}")  // get issue with references which has description
