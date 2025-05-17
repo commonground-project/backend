@@ -25,6 +25,7 @@ import tw.commonground.backend.shared.event.user.UserCreatedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Traced
@@ -123,7 +124,8 @@ public class UserService {
             throw new UserAlreadySetupException(email);
         } else {
 
-            if (userRepository.existsByUsername(setupRequest.getUsername())) {
+            if (userRepository.existsByUsername(setupRequest.getUsername())
+                    && !Objects.equals(fullUser.getUsername(), setupRequest.getUsername())) {
                 throw new ValidationException("Username already exists");
             }
 
