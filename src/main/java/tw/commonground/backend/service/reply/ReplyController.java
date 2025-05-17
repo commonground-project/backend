@@ -57,7 +57,7 @@ public class ReplyController {
         Page<ReplyEntity> pageReplies = replyService.getViewpointReplies(id, pageable);
 
         if (user == null) {
-            return ResponseEntity.ok(getPaginationResponse(null, pageReplies));
+            return ResponseEntity.ok(getPaginationResponse(pageReplies));
         } else {
             return ResponseEntity.ok(getPaginationResponse(user.getId(), pageReplies));
         }
@@ -105,6 +105,30 @@ public class ReplyController {
         ReplyReactionEntity replyReactionEntity = replyService.reactToReply(userId, id, reactionRequest.getReaction());
 
         return ResponseEntity.ok(ReplyMapper.toReactionResponse(replyReactionEntity));
+    }
+
+    private WrappedPaginationResponse<List<ReplyResponse>> getPaginationResponse(
+            Page<ReplyEntity> pageReplies) {
+        Map<UUID, List<FactEntity>> factsMap = replyService.getFactsByReplies(pageReplies.getContent()
+                .stream().map(ReplyEntity::getId).toList());
+
+        Map<UUID, List<QuoteReply>> quotesMap = replyService.getQuoteByReplies(pageReplies.getContent()
+                .stream().map(ReplyEntity::getId).toList());
+
+
+        List<ReplyResponse> replyResponses = pageReplies.getContent()
+                .stream()
+                .map(replyEntity ->
+                        ReplyMapper.toReplyResponse(replyEntity,
+                                Reaction.NONE,
+                                true,
+                                factsMap.getOrDefault(replyEntity.getId(), List.of()),
+                                quotesMap.getOrDefault(replyEntity.getId(), List.of())
+                                        .stream().map(replyService::getReplyByQuote).toList(),
+                                quotesMap.getOrDefault(replyEntity.getId(), List.of())))
+                .toList();
+
+        return new WrappedPaginationResponse<>(replyResponses, PaginationMapper.toResponse(pageReplies));
     }
 
     private WrappedPaginationResponse<List<ReplyResponse>> getPaginationResponse(
