@@ -1,5 +1,7 @@
 package  tw.commonground.backend.service.internal.issue;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import tw.commonground.backend.exception.EntityNotFoundException;
@@ -7,6 +9,8 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.internal.issue.dto.InternalDetailIssueResponse;
 import tw.commonground.backend.service.issue.entity.ManualIssueFactEntity;
 import tw.commonground.backend.service.internal.issue.dto.InternalIssueMapper;
+import tw.commonground.backend.service.internal.issue.dto.InternalIssueRequest;
+import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.internal.reference.InternalReferenceService;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalDetailViewpointResponse;
 import tw.commonground.backend.service.internal.viewpoint.dto.InternalViewpointMapper;
@@ -15,6 +19,7 @@ import tw.commonground.backend.service.internal.issue.dto.InternalIssueResponse;
 import tw.commonground.backend.service.issue.entity.IssueRepository;
 import tw.commonground.backend.service.reference.ReferenceEntity;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
+import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
 import tw.commonground.backend.shared.tracing.Traced;
@@ -31,17 +36,20 @@ public class InternalIssueService {
 
     private final IssueRepository issueRepository;
     private final ViewpointService viewpointService;
+    private final IssueService issueService;
     private final ViewpointRepository viewpointRepository;
     private final InternalReferenceService internalReferenceService;
 
     public InternalIssueService(IssueRepository issueRepository,
                                 ViewpointService viewpointService,
                                 ViewpointRepository viewpointRepository,
-                                InternalReferenceService internalReferenceService) {
+                                InternalReferenceService internalReferenceService,
+                                IssueService issueService) {
         this.issueRepository = issueRepository;
         this.viewpointService = viewpointService;
         this.viewpointRepository = viewpointRepository;
         this.internalReferenceService = internalReferenceService;
+        this.issueService = issueService;
     }
 
     public List<InternalIssueResponse> getIssues() {
@@ -62,6 +70,34 @@ public class InternalIssueService {
         );
 
         int viewpointCount = viewpointService.getIssueViewpoints(issueId, Pageable.unpaged()).getContent().size();
+        return InternalIssueMapper.toResponse(issue, viewpointCount);
+    }
+
+
+    @Caching(evict = {
+            @CacheEvict(value = "issue", allEntries = true),
+            @CacheEvict(value = "fact", allEntries = true),
+    })
+    public InternalIssueResponse updateIssueInsight(UUID issueId, InternalIssueRequest request) {
+        IssueEntity issue = issueRepository.findById(issueId).orElseThrow(
+                () -> new EntityNotFoundException("InternalIssue", "issue id", issueId.toString())
+        );
+
+        String content = ContentParser.convertLinkIntToUuid(request.getInsight(), request.getFacts());
+        issue.setInsight(content);
+        issueRepository.save(issue);
+        List<UUID> facts = issue.getManualFacts().stream().map(
+                manualFact -> manualFact.getFact().getId()
+        ).toList();
+
+        List<UUID> newFacts = request.getFacts().stream().filter(
+                fact -> !facts.contains(fact)
+        ).toList();
+
+        issueService.createManualFact(issue.getId(), newFacts);
+
+        int viewpointCount =  viewpointService.getIssueViewpoints(issueId, Pageable.unpaged()).getContent().size();
+
         return InternalIssueMapper.toResponse(issue, viewpointCount);
     }
 
@@ -95,5 +131,4 @@ public class InternalIssueService {
         }
         return InternalIssueMapper.toDetailResponse(issueEntity, internalDetailViewpointResponses);
     }
-
 }

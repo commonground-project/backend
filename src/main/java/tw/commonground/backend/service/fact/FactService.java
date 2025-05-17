@@ -38,7 +38,7 @@ public class FactService {
     }
 
     public List<FactEntity> getFacts(List<UUID> ids) {
-        return factRepository.findAllById(ids);
+        return factRepository.findAllByIds(ids);
     }
 
 

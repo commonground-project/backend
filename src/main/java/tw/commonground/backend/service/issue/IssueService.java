@@ -96,6 +96,7 @@ public class IssueService {
 
         issueEntity.setTitle(issueRequest.getTitle());
         issueEntity.setDescription(issueRequest.getDescription());
+
         return issueRepository.save(issueEntity);
     }
 
