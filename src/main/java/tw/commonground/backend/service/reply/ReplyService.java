@@ -266,4 +266,8 @@ public class ReplyService {
         replyRepository.updateReplyReaction(replyId, reaction, delta);
     }
 
+    public ReplyEntity getReplyWithViewpointAndIssue(UUID replyId) {
+        return replyRepository.findByIdWithViewpointAndIssue(replyId)
+                .orElseThrow(() -> new IllegalArgumentException("Reply not found"));
+    }
 }

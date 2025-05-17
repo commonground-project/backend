@@ -20,7 +20,8 @@ public final class IssueMapper {
             IssueEntity entity,
             Boolean follow,
             List<FactEntity> factEntities,
-            Integer viewpointCount) {
+            Integer viewpointCount,
+            Boolean readStatus) {
 
         ContentContainFact insight = ContentParser.separateContentAndFacts(entity.getInsight(),
                 factEntities.stream().map(FactEntity::getId).toList());
@@ -37,11 +38,12 @@ public final class IssueMapper {
                 .authorAvatar(entity.getAuthorAvatar())
                 .userFollow(FollowResponse.builder().follow(follow).build())
                 .viewpointCount(viewpointCount)
+                .readStatus(readStatus)
                 .facts(factEntities.stream().map(FactMapper::toResponse).toList())
                 .build();
     }
 
-    public static SimpleIssueResponse toResponse(SimpleIssueEntity entity, Integer viewpointCount) {
+    public static SimpleIssueResponse toResponse(SimpleIssueEntity entity, Integer viewpointCount, Boolean readStatus) {
         return SimpleIssueResponse.builder()
                 .id(entity.getId().toString())
                 .createdAt(DateTimeUtils.toIso8601String(entity.getCreatedAt()))
@@ -49,6 +51,7 @@ public final class IssueMapper {
                 .title(entity.getTitle())
                 .description(entity.getDescription())
                 .viewpointCount(viewpointCount)
+                .readStatus(readStatus)
                 .build();
     }
 
