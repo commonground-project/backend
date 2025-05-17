@@ -88,6 +88,10 @@ public class ViewpointRepositoryContainer {
         return viewpointRepository.findAllByIssueId(issueId);
     }
 
+    public Optional<ViewpointEntity> findByIdWithIssue(UUID issueId) {
+        return viewpointRepository.findByIdWithIssue(issueId);
+    }
+
     public void insertReaction(ViewpointReactionKey id, String reaction) {
         viewpointReactionRepository.insertReaction(id, reaction);
     }

@@ -284,7 +284,7 @@ public class ViewpointService {
     }
 
     public ViewpointEntity getViewpointWithIssue(UUID id) {
-        return viewpointRepository.findByIdWithIssue(id).orElseThrow(
+        return viewpointRepositoryContainer.findByIdWithIssue(id).orElseThrow(
                 () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
     }
 
