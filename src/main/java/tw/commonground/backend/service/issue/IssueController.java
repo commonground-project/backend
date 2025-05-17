@@ -68,18 +68,23 @@ public class IssueController {
     public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(
             @AuthenticationPrincipal FullUserEntity user,
             @Valid PaginationRequest pagination) {
-
         Pageable pageable = paginationParser.parsePageable(pagination);
+
         Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
 
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()
                 .map(issue -> {
-                    Integer viewpointCount = issueService.getViewpointCount(issue.getId());
-                    return IssueMapper.toResponse(issue, viewpointCount);
+                            Integer viewpointCount = issueService.getViewpointCount(issue.getId());
+                            if (user != null) {
+                                Boolean readStatus = readService.getReadStatus(user.getId(),
+                                        issue.getId(), ReadObjectType.ISSUE);
+                                return IssueMapper.toResponse(issue, viewpointCount, readStatus);
+                            } else {
+                                return IssueMapper.toResponse(issue, viewpointCount, false);
+                            }
                 })
                 .toList();
-
         return new WrappedPaginationResponse<>(issueResponses, PaginationMapper.toResponse(pageIssues));
     }
 

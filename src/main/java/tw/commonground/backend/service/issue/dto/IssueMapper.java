@@ -43,7 +43,7 @@ public final class IssueMapper {
                 .build();
     }
 
-    public static SimpleIssueResponse toResponse(SimpleIssueEntity entity, Integer viewpointCount) {
+    public static SimpleIssueResponse toResponse(SimpleIssueEntity entity, Integer viewpointCount, Boolean readStatus) {
         return SimpleIssueResponse.builder()
                 .id(entity.getId().toString())
                 .createdAt(DateTimeUtils.toIso8601String(entity.getCreatedAt()))
@@ -51,6 +51,7 @@ public final class IssueMapper {
                 .title(entity.getTitle())
                 .description(entity.getDescription())
                 .viewpointCount(viewpointCount)
+                .readStatus(readStatus)
                 .build();
     }
 
