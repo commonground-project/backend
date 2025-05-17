@@ -67,7 +67,7 @@ public class ReplyService {
         this.lockService = lockService;
     }
 
-    @Cacheable(value = "viewpointReply", key = "{#id, #pageable.pageNumber}")
+    @Cacheable(value = "viewpointReply", key = "{#id, #pageable}")
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
         return replyRepository.findAllByViewpointId(id, pageable);
     }
