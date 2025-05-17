@@ -123,6 +123,7 @@ public class IssueController {
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(id);
         Boolean readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
+        issueService.createManualFact(issueEntity.getId(), contentContainFact.getFacts());
 
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);

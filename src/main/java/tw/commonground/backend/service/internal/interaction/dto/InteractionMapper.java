@@ -2,6 +2,7 @@ package tw.commonground.backend.service.internal.interaction.dto;
 
 import tw.commonground.backend.service.internal.interaction.entity.InteractionEntity;
 import tw.commonground.backend.service.internal.interaction.entity.InteractionType;
+import tw.commonground.backend.shared.entity.Preference;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.util.DateTimeUtils;
 
@@ -16,6 +17,14 @@ public final class InteractionMapper {
             case DISLIKE -> InteractionType.DISLIKE_COUNT;
             case REASONABLE -> InteractionType.REASONABLE_COUNT;
             default -> throw new IllegalArgumentException("Invalid reaction: " + reaction);
+        };
+    }
+
+    public static InteractionType toInteractionType(Preference preference) {
+        return switch (preference) {
+            case INTEREST -> InteractionType.INTEREST;
+            case DISINTEREST -> InteractionType.DISINTEREST;
+            default -> throw new IllegalArgumentException("Invalid preference: " + preference);
         };
     }
 

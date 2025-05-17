@@ -17,9 +17,11 @@ import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.lock.LockService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
+import tw.commonground.backend.service.viewpoint.dto.ViewpointPreferenceRequest;
 import tw.commonground.backend.service.viewpoint.dto.ViewpointRequest;
 import tw.commonground.backend.service.viewpoint.entity.*;
 import tw.commonground.backend.shared.content.ContentParser;
+import tw.commonground.backend.shared.event.preference.UserPreferToViewpointEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
@@ -65,19 +67,21 @@ public class ViewpointService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Cacheable(key = "'allViewpoints'")
+    @Cacheable(key = "{'allViewpoints', #pageable.pageNumber}")
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
         return viewpointRepository.findAll(pageable);
     }
 
-    @Cacheable(key = "'allViewpoints'")
+    @Cacheable(value = "issueViewpoint",  key = "{#issueId, #pageable.pageNumber}")
     public Page<ViewpointEntity> getIssueViewpoints(UUID issueId, Pageable pageable) {
         return viewpointRepository.findAllByIssueId(issueId, pageable);
     }
 
     @Caching(evict = {
             @CacheEvict(value = "viewpoint", allEntries = true),
-            @CacheEvict(value = "issue", key = "{#issueId, 'allIssues'}")
+            @CacheEvict(value = "issue", key = "#issueId"),
+            @CacheEvict(value = "issue", key = "'allIssues'"),
+            @CacheEvict(value = "issueViewpoint", allEntries = true)
     })
     @Transactional
     public ViewpointEntity createIssueViewpoint(UUID issueId, ViewpointRequest request, FullUserEntity user) {
@@ -109,7 +113,7 @@ public class ViewpointService {
                 () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
     }
 
-    @CacheEvict(key = "'allViewpoints'")
+    @CacheEvict(allEntries = true)
     @Transactional
     public ViewpointEntity createViewpoint(ViewpointRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -130,8 +134,8 @@ public class ViewpointService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "viewpoint", key = "#id"),
-            @CacheEvict(value = "viewpoint", key = "'allViewpoints'")
+            @CacheEvict(value = "viewpoint", allEntries = true),
+            @CacheEvict(value = "issueViewpoint", allEntries = true)
     })
     @Transactional
     public ViewpointEntity updateViewpoint(UUID id, ViewpointRequest request) {
@@ -152,14 +156,17 @@ public class ViewpointService {
         return viewpointEntity;
     }
 
-    @CacheEvict(key = "{#id, 'allViewpoints'}")
+    @Caching(evict = {
+            @CacheEvict(value = "viewpoint", allEntries = true),
+            @CacheEvict(value = "issueViewpoint", allEntries = true)
+    })
     public void deleteViewpoint(UUID id) {
         viewpointRepository.deleteById(id);
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "viewpoint", key = "#viewpointId"),
-            @CacheEvict(value = "viewpoint", key = "'allViewpoints'"),
+            @CacheEvict(value = "viewpoint", allEntries = true),
+            @CacheEvict(value = "issueViewpoint", allEntries = true),
             @CacheEvict(value = "reactionViewpoint", allEntries = true)
     })
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -268,4 +275,10 @@ public class ViewpointService {
                 () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
     }
 
+    public void setViewpointPreference(Long userId, ViewpointPreferenceRequest request) {
+        applicationEventPublisher.publishEvent(new UserPreferToViewpointEvent(this,
+                userId,
+                request.getId(),
+                request.getPreference()));
+    }
 }
