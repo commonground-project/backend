@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.read;
 
+import org.intellij.lang.annotations.MagicConstant;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +31,17 @@ import java.util.UUID;
 @Traced
 @Service
 public class ReadService {
+
     private final ReadRepository readRepository;
+
     private final FollowService followService;
+
     private final UserService userService;
+
     private final IssueService issueService;
+
     private final ViewpointService viewpointService;
+
     private final ReplyService replyService;
 
     public ReadService(ReadRepository readRepository, FollowService followService, UserService userService,
@@ -77,6 +84,7 @@ public class ReadService {
         } else {
             throw new IllegalArgumentException("Invalid object type for read status update");
         }
+
         ReadKey key = new ReadKey(userId, objectId, objectType);
         entity.setId(key);
         readRepository.save(entity);
@@ -110,26 +118,30 @@ public class ReadService {
         handleReplyCreatedEvent(event);
     }
 
+    @MagicConstant
     @Scheduled(cron = "0 0 0 */7 * *")
     @Transactional
     public void updateReadStatusForExpiredEntities() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
-        List<ReadEntity> expiredViewpoints = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.VIEWPOINT, sevenDaysAgo);
+        List<ReadEntity> expiredViewpoints = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.VIEWPOINT,
+                                                                                               sevenDaysAgo);
         expiredViewpoints.forEach(entity -> {
             entity.setReadStatus(true);
             entity.setTimestamp(LocalDateTime.now());
         });
         readRepository.saveAll(expiredViewpoints);
 
-        List<ReadEntity> expiredIssues = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.ISSUE, sevenDaysAgo);
+        List<ReadEntity> expiredIssues = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.ISSUE,
+                                                                                           sevenDaysAgo);
         expiredIssues.forEach(entity -> {
             entity.setReadStatus(true);
             entity.setTimestamp(LocalDateTime.now());
         });
         readRepository.saveAll(expiredIssues);
 
-        List<ReadEntity> expiredReplies = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.REPLY, sevenDaysAgo);
+        List<ReadEntity> expiredReplies = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.REPLY,
+                                                                                            sevenDaysAgo);
         expiredReplies.forEach(entity -> {
             entity.setReadStatus(true);
             entity.setTimestamp(LocalDateTime.now());
