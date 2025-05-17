@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.read.dto.ReadMapper;
 import tw.commonground.backend.service.read.dto.ReadResponse;
+import tw.commonground.backend.service.read.dto.SimpleReadResponse;
 import tw.commonground.backend.service.read.entity.ReadEntity;
 import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
@@ -28,17 +29,17 @@ public class ReadController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReadResponse> readIssue(@AuthenticationPrincipal FullUserEntity user,
                                                   @PathVariable UUID id) {
-        ReadEntity entity = readService.updateReadStatus(user.getId(), id, ReadObjectType.ISSUE);
+        ReadEntity entity = readService.readObject(user.getId(), id, ReadObjectType.ISSUE);
         return ResponseEntity.ok(ReadMapper.toResponse(entity));
     }
     // since the POST method is used to set the read status to TRUE, we don't need to pass the request body
 
     @GetMapping("/read/issue/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> getReadIssue(@AuthenticationPrincipal FullUserEntity user,
-                                                     @PathVariable UUID id) {
+    public ResponseEntity<SimpleReadResponse> getReadIssue(@AuthenticationPrincipal FullUserEntity user,
+                                                                        @PathVariable UUID id) {
         Boolean readStatus = readService.getReadStatus(user.getId(), id, ReadObjectType.ISSUE);
-        ReadResponse response = ReadMapper.toResponse(user.getId(), id, readStatus);
+        SimpleReadResponse response = ReadMapper.toSimpleResponse(user.getUuid(), id, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -46,16 +47,16 @@ public class ReadController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReadResponse> readViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                       @PathVariable UUID id) {
-        ReadEntity entity = readService.updateReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
+        ReadEntity entity = readService.readObject(user.getId(), id, ReadObjectType.VIEWPOINT);
         return ResponseEntity.ok(ReadMapper.toResponse(entity));
     }
 
     @GetMapping("/read/viewpoint/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> getReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<SimpleReadResponse> getReadViewpoint(@AuthenticationPrincipal FullUserEntity user,
                                                          @PathVariable UUID id) {
         Boolean readStatus = readService.getReadStatus(user.getId(), id, ReadObjectType.VIEWPOINT);
-        ReadResponse response = ReadMapper.toResponse(user.getId(), id, readStatus);
+        SimpleReadResponse response = ReadMapper.toSimpleResponse(user.getUuid(), id, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -63,16 +64,16 @@ public class ReadController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReadResponse> readReply(@AuthenticationPrincipal FullUserEntity user,
                                                   @PathVariable UUID id) {
-        ReadEntity entity = readService.updateReadStatus(user.getId(), id, ReadObjectType.REPLY);
+        ReadEntity entity = readService.readObject(user.getId(), id, ReadObjectType.REPLY);
         return ResponseEntity.ok(ReadMapper.toResponse(entity));
     }
 
     @GetMapping("/read/reply/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ReadResponse> getReadReply(@AuthenticationPrincipal FullUserEntity user,
+    public ResponseEntity<SimpleReadResponse> getReadReply(@AuthenticationPrincipal FullUserEntity user,
                                                      @PathVariable UUID id) {
         Boolean readStatus = readService.getReadStatus(user.getId(), id, ReadObjectType.REPLY);
-        ReadResponse response = ReadMapper.toResponse(user.getId(), id, readStatus);
+        SimpleReadResponse response = ReadMapper.toSimpleResponse(user.getUuid(), id, readStatus);
         return ResponseEntity.ok(response);
     }
 

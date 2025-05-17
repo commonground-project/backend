@@ -11,9 +11,8 @@ import java.util.UUID;
 @Setter
 @ToString
 @Builder
-public class ReadResponse {
+public class SimpleReadResponse {
     private UUID userId;
     private UUID objectId;
     private Boolean readStatus;
-    private String updatedAt;
 }

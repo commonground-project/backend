@@ -11,14 +11,15 @@ public final class ReadMapper {
 
     public static ReadResponse toResponse(ReadEntity readEntity) {
         return ReadResponse.builder()
-                .userId(readEntity.getUser().getId())
+                .userId(readEntity.getUser().getUuid())
                 .objectId(readEntity.getObjectId())
                 .readStatus(readEntity.getReadStatus())
+                .updatedAt(readEntity.getTimestamp().toString())
                 .build();
     }
 
-    public static ReadResponse toResponse(Long userId, UUID objectId, Boolean readStatus) {
-        return ReadResponse.builder()
+    public static SimpleReadResponse toSimpleResponse(UUID userId, UUID objectId, Boolean readStatus) {
+        return SimpleReadResponse.builder()
                 .userId(userId)
                 .objectId(objectId)
                 .readStatus(readStatus)

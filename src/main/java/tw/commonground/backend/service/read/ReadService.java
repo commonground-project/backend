@@ -1,5 +1,6 @@
 package tw.commonground.backend.service.read;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.event.EventListener;
@@ -20,6 +21,7 @@ import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,21 +46,15 @@ public class ReadService {
         this.replyService = replyService;
     }
 
-    public ReadEntity updateReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
+    public ReadEntity readObject(Long userId, UUID objectId, ReadObjectType objectType) {
         ReadEntity entity = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType)
                 .orElseGet(() -> createReadEntity(userId, objectId, objectType));
         entity.setReadStatus(true);
+        entity.setTimestamp(java.time.LocalDateTime.now());
         return readRepository.save(entity);
     }
 
     private ReadEntity createReadEntity(Long userId, UUID objectId, ReadObjectType objectType) {
-        /*
-        * if the read entity does not exist, create a new one
-        * the read status is set to false for viewpoint and reply
-        * since the new created viewpoint and reply are not read yet
-        * the read status is set to true for issue
-        * since the new created issue is read
-        * */
 
         ReadEntity entity = new ReadEntity();
         UserEntity user = userService.getUserEntityById(userId);
@@ -86,15 +82,57 @@ public class ReadService {
     }
 
     public Boolean getReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
-        ReadEntity entity = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType)
-                .orElseGet(() -> createReadEntity(userId, objectId, objectType));
-        return entity.getReadStatus();
+        /*
+         * if the read entity does not exist, we will not create it
+         * the read status would return false for viewpoint and reply
+         * since the new created viewpoint and reply are not read yet
+         * the read status would return to true for issue
+         * since the new created issue is read
+         * */
+        return readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId, objectId, objectType)
+                .map(ReadEntity::getReadStatus)
+                .orElseGet(() -> {
+                    if (objectType == ReadObjectType.ISSUE) {
+                        return true;
+                    } else if (objectType == ReadObjectType.VIEWPOINT || objectType == ReadObjectType.REPLY) {
+                        return false;
+                    } else {
+                        throw new IllegalArgumentException("Invalid object type for read status update");
+                    }
+                });
     }
 
     @EventListener
     @Transactional
     public void onReplyCreated(ReplyCreatedEvent event) {
         handleReplyCreatedEvent(event);
+    }
+
+    @Scheduled(cron = "0 0 0 */7 * *")
+    @Transactional
+    public void updateReadStatusForExpiredEntities() {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+
+        List<ReadEntity> expiredViewpoints = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.VIEWPOINT, sevenDaysAgo);
+        expiredViewpoints.forEach(entity -> {
+            entity.setReadStatus(true);
+            entity.setTimestamp(LocalDateTime.now());
+        });
+        readRepository.saveAll(expiredViewpoints);
+
+        List<ReadEntity> expiredIssues = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.ISSUE, sevenDaysAgo);
+        expiredIssues.forEach(entity -> {
+            entity.setReadStatus(true);
+            entity.setTimestamp(LocalDateTime.now());
+        });
+        readRepository.saveAll(expiredIssues);
+
+        List<ReadEntity> expiredReplies = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.REPLY, sevenDaysAgo);
+        expiredReplies.forEach(entity -> {
+            entity.setReadStatus(true);
+            entity.setTimestamp(LocalDateTime.now());
+        });
+        readRepository.saveAll(expiredReplies);
     }
 
     public void handleReplyCreatedEvent(ReplyCreatedEvent event) {
@@ -149,23 +187,8 @@ public class ReadService {
         if (existing.isPresent()) {
             ReadEntity read = existing.get();
             read.setReadStatus(false);
+            read.setTimestamp(java.time.LocalDateTime.now());
             readRepository.save(read);
-            return;
         }
-
-        ReadEntity read = new ReadEntity();
-        read.setId(new ReadKey(userId, objectId, objectType));
-        UserEntity user = userService.getUserEntityById(userId);
-        read.setUser(user);
-        read.setReadStatus(false);
-
-        switch (objectType) {
-            case ISSUE -> read.setIssue(issueService.getIssue(objectId));
-            case VIEWPOINT -> read.setViewpoint(viewpointService.getViewpoint(objectId));
-            case REPLY -> read.setReply(replyService.getReply(objectId));
-            default -> throw new IllegalArgumentException("Invalid object type for read status update");
-        }
-
-        readRepository.save(read);
     }
 }
