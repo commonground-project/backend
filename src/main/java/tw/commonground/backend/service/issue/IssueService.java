@@ -44,7 +44,7 @@ public class IssueService {
         this.factService = factService;
     }
 
-    @Cacheable(key = "#pageable.pageNumber")
+    @Cacheable(key = "#pageable")
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
         return issueRepository.findAllIssueEntityBy(pageable);
     }
