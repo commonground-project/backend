@@ -3,6 +3,7 @@ package tw.commonground.backend.service.follow;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tw.commonground.backend.exception.EntityNotFoundException;
@@ -10,8 +11,10 @@ import tw.commonground.backend.service.follow.entity.FollowEntity;
 import tw.commonground.backend.service.follow.entity.FollowKey;
 import tw.commonground.backend.service.follow.entity.FollowRepository;
 import tw.commonground.backend.service.issue.IssueService;
+import tw.commonground.backend.service.reply.ReplyCreatedEvent;
 import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.entity.UserEntity;
+import tw.commonground.backend.service.viewpoint.ViewpointCreatedEvent;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.tracing.Traced;
@@ -105,5 +108,27 @@ public class FollowService {
     public List<Long> getViewpointFollowersById(UUID id) {
         return followRepository.findUsersIdByObjectIdAndFollowTrue(id, RelatedObject.VIEWPOINT)
                 .orElse(Collections.emptyList());
+    }
+
+    @EventListener
+    @Transactional
+    public void onViewpointCreatedEventFollowViewpoint(ViewpointCreatedEvent event) {
+        this.followObject(
+                event.getUser().getId(),
+                event.getViewpointEntity().getId(),
+                true,
+                RelatedObject.VIEWPOINT
+        );
+    }
+
+    @EventListener
+    @Transactional
+    public void onReplyCreatedEventFollowViewpoint(ReplyCreatedEvent event) {
+        this.followObject(
+                event.getUser().getId(),
+                event.getReplyEntity().getViewpoint().getId(),
+                true,
+                RelatedObject.VIEWPOINT
+        );
     }
 }
