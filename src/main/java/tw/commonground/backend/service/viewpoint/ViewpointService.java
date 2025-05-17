@@ -99,6 +99,7 @@ public class ViewpointService {
             viewpointFactRepository.saveByViewpointIdAndFactId(viewpointEntity.getId(), factId);
         }
 
+        applicationEventPublisher.publishEvent(new ViewpointCreatedEvent(user, viewpointEntity));
         applicationEventPublisher.publishEvent(new UserViewpointCommentedEvent(this,
                 user.getId(), viewpointEntity.getId(), request.getContent()));
 
