@@ -2,6 +2,7 @@ package tw.commonground.backend.service.user;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,6 +14,7 @@ import tw.commonground.backend.service.user.dto.UpdateUserRequest;
 import tw.commonground.backend.service.user.dto.UserMapper;
 import tw.commonground.backend.service.user.dto.UserResponse;
 import tw.commonground.backend.service.user.dto.UserSetupRequest;
+import tw.commonground.backend.service.user.entity.ProfileEntity;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.shared.tracing.Traced;
@@ -46,7 +48,7 @@ public class UserController {
     @GetMapping("/user/username/{username}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponse> getUserByUsername(@PathVariable @NotBlank String username) {
-        FullUserEntity userEntity = userService.getUserByUsername(username).orElseThrow(
+        ProfileEntity userEntity = userService.getDetailedUserByUsername(username).orElseThrow(
                 () -> new EntityNotFoundException("User", "username", username));
 
         UserResponse response = UserMapper.toResponse(userEntity);
@@ -57,7 +59,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateUser(@PathVariable @NotBlank String username,
                                                    @Valid @RequestBody UpdateUserRequest updateRequest) {
-        FullUserEntity userEntity = userService.updateUser(username, updateRequest);
+        ProfileEntity userEntity = userService.updateUser(username, updateRequest);
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
@@ -69,16 +71,25 @@ public class UserController {
             throw new ServiceAccountUnsupportedOperationException("/user/me");
         }
 
-        UserResponse response = UserMapper.toResponse(user);
+        ProfileEntity userEntity = userService.getDetailedUserByUsername(user.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User", "username", user.getUsername()));
+
+        UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/user/setup")
     public ResponseEntity<UserResponse> userSetup(@Valid @RequestBody UserSetupRequest setupRequest,
                                                   @AuthenticationPrincipal FullUserEntity user) {
-        FullUserEntity userEntity = userService.completeSetup(setupRequest, user.getEmail());
+        ProfileEntity userEntity = userService.completeSetup(setupRequest, user.getEmail());
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("/user/complete-onboarding/me")
+    public void completeOnboarding(@AuthenticationPrincipal FullUserEntity user) {
+        userService.completeOnboarding(user.getEmail());
     }
 
     @GetMapping(value = "/user/avatar/{username}", produces = "image/png")

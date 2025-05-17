@@ -1,4 +1,4 @@
-package tw.commonground.backend.service.reply;
+package tw.commonground.backend.shared.event.reply;
 
 import lombok.Getter;
 import lombok.ToString;

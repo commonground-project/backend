@@ -98,16 +98,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Set up SSH
+      - name: Deploy
         run: |
-          mkdir -p ~/.ssh
-          echo '${{ secrets.DEV_DEPLOY_PRIVATE_KEY }}' >> ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: Deploy Dev
-        run: |
-          export MODE='Dev'
-          ssh -o StrictHostKeyChecking=no -o SendEnv=MODE -i ~/.ssh/id_rsa gh-runner@192.168.80.21
-
-      - name: Clear up
-        run: rm ~/.ssh/id_rsa
+          ~/deploy.sh "Dev"

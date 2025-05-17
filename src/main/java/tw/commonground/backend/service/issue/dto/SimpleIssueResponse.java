@@ -22,4 +22,6 @@ public class SimpleIssueResponse {
     private String description;
 
     private Integer viewpointCount;
+
+    private Boolean readStatus;
 }

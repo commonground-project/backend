@@ -27,7 +27,8 @@ public final class ViewpointMapper {
     }
 
     public static ViewpointResponse toResponse(ViewpointEntity viewpointEntity, Reaction reaction,
-                                               List<FactEntity> factEntities, Integer replyCount) {
+                                               List<FactEntity> factEntities, Integer replyCount,
+                                               Boolean readStatus) {
 
         ContentContainFact content = ContentParser.separateContentAndFacts(viewpointEntity.getContent(),
                 factEntities.stream().map(FactEntity::getId).toList());
@@ -47,6 +48,14 @@ public final class ViewpointMapper {
                 .replyCount(replyCount)
                 .userReaction(toReactionResponse(reaction))
                 .facts(factEntities.stream().map(FactMapper::toResponse).toList())
+                .readStatus(readStatus)
+                .build();
+    }
+
+    public static ViewpointPreferenceResponse toPreferenceResponse(ViewpointPreferenceRequest request) {
+        return ViewpointPreferenceResponse.builder()
+                .id(request.getId().toString())
+                .preference(request.getPreference())
                 .build();
     }
 }

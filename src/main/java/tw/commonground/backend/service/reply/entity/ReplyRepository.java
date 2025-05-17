@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import tw.commonground.backend.shared.entity.Reaction;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ReplyRepository extends JpaRepository<ReplyEntity, UUID>, ReplyRepositoryCustom {
@@ -21,6 +22,8 @@ public interface ReplyRepository extends JpaRepository<ReplyEntity, UUID>, Reply
 
     Page<ReplyEntity> findAllByViewpointId(UUID viewpointId, Pageable pageable);
 
+    @Query("SELECT r FROM ReplyEntity r JOIN FETCH r.viewpoint v JOIN FETCH v.issue WHERE r.id = :id")
+    Optional<ReplyEntity> findByIdWithViewpointAndIssue(@Param("id") UUID id);
 }
 
 interface ReplyRepositoryCustom {

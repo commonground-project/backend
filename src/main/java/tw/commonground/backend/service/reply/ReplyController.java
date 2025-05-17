@@ -9,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.service.read.ReadService;
+import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.reply.dto.*;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.service.reply.entity.ReplyEntity;
@@ -35,12 +37,15 @@ public class ReplyController {
 
     private final ReplyService replyService;
 
+    private final ReadService readService;
+
     private final Set<String> sortableColumn = Set.of("createdAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    public ReplyController(ReplyService replyService) {
+    public ReplyController(ReplyService replyService, ReadService readService) {
         this.replyService = replyService;
+        this.readService = readService;
     }
 
     @GetMapping("/viewpoint/{id}/replies")
@@ -52,7 +57,7 @@ public class ReplyController {
         Page<ReplyEntity> pageReplies = replyService.getViewpointReplies(id, pageable);
 
         if (user == null) {
-            return ResponseEntity.ok(getPaginationResponse(null, pageReplies));
+            return ResponseEntity.ok(getPaginationResponse(pageReplies));
         } else {
             return ResponseEntity.ok(getPaginationResponse(user.getId(), pageReplies));
         }
@@ -103,6 +108,30 @@ public class ReplyController {
     }
 
     private WrappedPaginationResponse<List<ReplyResponse>> getPaginationResponse(
+            Page<ReplyEntity> pageReplies) {
+        Map<UUID, List<FactEntity>> factsMap = replyService.getFactsByReplies(pageReplies.getContent()
+                .stream().map(ReplyEntity::getId).toList());
+
+        Map<UUID, List<QuoteReply>> quotesMap = replyService.getQuoteByReplies(pageReplies.getContent()
+                .stream().map(ReplyEntity::getId).toList());
+
+
+        List<ReplyResponse> replyResponses = pageReplies.getContent()
+                .stream()
+                .map(replyEntity ->
+                        ReplyMapper.toReplyResponse(replyEntity,
+                                Reaction.NONE,
+                                true,
+                                factsMap.getOrDefault(replyEntity.getId(), List.of()),
+                                quotesMap.getOrDefault(replyEntity.getId(), List.of())
+                                        .stream().map(replyService::getReplyByQuote).toList(),
+                                quotesMap.getOrDefault(replyEntity.getId(), List.of())))
+                .toList();
+
+        return new WrappedPaginationResponse<>(replyResponses, PaginationMapper.toResponse(pageReplies));
+    }
+
+    private WrappedPaginationResponse<List<ReplyResponse>> getPaginationResponse(
             Long userId,
             Page<ReplyEntity> pageReplies) {
 
@@ -121,6 +150,7 @@ public class ReplyController {
                 .map(replyEntity ->
                         ReplyMapper.toReplyResponse(replyEntity,
                                 reactionsMap.getOrDefault(replyEntity.getId(), Reaction.NONE),
+                                readService.getReadStatus(userId, replyEntity.getId(), ReadObjectType.REPLY),
                                 factsMap.getOrDefault(replyEntity.getId(), List.of()),
                                 quotesMap.getOrDefault(replyEntity.getId(), List.of())
                                         .stream().map(replyService::getReplyByQuote).toList(),
@@ -143,7 +173,9 @@ public class ReplyController {
         List<QuoteReply> quotes = replyService.getQuotesOfReply(replyEntity.getId());
         List<ReplyEntity> replyEntities = replyService.getRepliesByQuotes(quotes);
         Reaction reaction = replyService.getReactionForReply(user.getId(), replyEntity.getId());
+        Boolean readStatus = readService.getReadStatus(user.getId(), replyEntity.getId(), ReadObjectType.REPLY);
 
-        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, facts, replyEntities, quotes));
+        return ResponseEntity.ok(ReplyMapper.toReplyResponse(replyEntity, reaction, readStatus,
+                                                             facts, replyEntities, quotes));
     }
 }

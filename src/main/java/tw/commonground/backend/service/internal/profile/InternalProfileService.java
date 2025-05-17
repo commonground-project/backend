@@ -9,7 +9,7 @@ import tw.commonground.backend.service.internal.profile.dto.InternalProfileMappe
 import tw.commonground.backend.service.internal.profile.dto.InternalProfileResponse;
 import tw.commonground.backend.service.internal.profile.entity.InternalProfileEntity;
 import tw.commonground.backend.service.internal.profile.entity.InternalProfileRepository;
-import tw.commonground.backend.service.user.UserCreatedEvent;
+import tw.commonground.backend.shared.event.user.UserCreatedEvent;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.shared.tracing.Traced;
@@ -22,6 +22,7 @@ import java.util.UUID;
 @Service
 public class InternalProfileService {
     private final UserRepository userRepository;
+
     private final InternalProfileRepository internalProfileRepository;
 
     public InternalProfileService(UserRepository userRepository, InternalProfileRepository internalProfileRepository) {
@@ -30,8 +31,8 @@ public class InternalProfileService {
     }
 
     public List<InternalProfileResponse> getProfiles() {
-        List<InternalProfileEntity> internalProfileEntities = internalProfileRepository.findAll();
-        return InternalProfileMapper.toResponses(internalProfileEntities);
+        List<InternalProfileEntity> profileEntities = internalProfileRepository.findAll();
+        return InternalProfileMapper.toResponses(profileEntities);
     }
 
     public InternalProfileResponse getProfile(UUID userUuid) {
@@ -40,8 +41,6 @@ public class InternalProfileService {
                 .orElseGet(() -> {
                     InternalProfileEntity newProfileEntity = InternalProfileEntity.builder()
                             .uuid(userUuid)
-                            .gender("")
-                            .occupation("")
                             .location("")
                             .browsingTags(List.of())
                             .searchKeywords(List.of())
@@ -63,8 +62,6 @@ public class InternalProfileService {
         InternalProfileEntity newProfile = InternalProfileEntity.builder()
                 .uuid(user.getUuid())
                 .user(user)
-                .gender("")
-                .occupation("")
                 .location("")
                 .browsingTags(List.of())
                 .searchKeywords(List.of())

@@ -34,6 +34,8 @@ public class UserSettingService {
                             .newReplyInMyViewpoint(true)
                             .newReferenceToMyReply(true)
                             .newNodeOfTimelineToFollowedIssue(true)
+                            .newViewpointInFollowedIssue(true)
+                            .newReplyInFollowedViewpoint(true)
                             .user(user)
                             .build();
                     return userSettingRepository.save(newSetting);
@@ -52,6 +54,10 @@ public class UserSettingService {
                             .isNewReferenceToMyReply());
                     userSettingEntity.setNewNodeOfTimelineToFollowedIssue(userSettingDto.getNotification()
                             .isNewNodeOfTimelineToFollowedIssue());
+                    userSettingEntity.setNewViewpointInFollowedIssue(userSettingDto.getNotification()
+                            .isNewViewpointInFollowedIssue());
+                    userSettingEntity.setNewReplyInFollowedViewpoint(userSettingDto.getNotification()
+                            .isNewReplyInFollowedViewpoint());
                     userSettingRepository.save(userSettingEntity);
                 }, () -> {
                     UserSettingEntity newSetting = UserSettingEntity.builder()
@@ -59,6 +65,10 @@ public class UserSettingService {
                             .newReferenceToMyReply(userSettingDto.getNotification().isNewReferenceToMyReply())
                             .newNodeOfTimelineToFollowedIssue(userSettingDto
                                     .getNotification().isNewNodeOfTimelineToFollowedIssue())
+                            .newViewpointInFollowedIssue(userSettingDto
+                                    .getNotification().isNewViewpointInFollowedIssue())
+                            .newReplyInFollowedViewpoint(userSettingDto
+                                    .getNotification().isNewReplyInFollowedViewpoint())
                             .user(user)
                             .build();
                     userSettingRepository.save(newSetting);

@@ -6,14 +6,40 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import tw.commonground.backend.shared.entity.Reaction;
 
+import java.util.Optional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID>, ViewpointRepositoryCustom {
 
     Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
 
+    @Query("SELECT v FROM ViewpointEntity v JOIN FETCH v.issue WHERE v.id = :id")
+    Optional<ViewpointEntity> findByIdWithIssue(@Param("id") UUID id);
+
+    List<ViewpointEntity> findAllByIssueId(UUID issueId);
+
+    @Query("SELECT v FROM ViewpointEntity v WHERE v.id IN :ids")
+    List<ViewpointEntity> findAllByIds(List<UUID> ids);
+
+    @Query("SELECT v FROM ViewpointEntity v WHERE v.id IN :ids AND v.issue.id = :issueId")
+    List<ViewpointEntity> findAllByIdsAndIssueId(List<UUID> ids, UUID issueId);
+
+    @Query("SELECT v FROM ViewpointEntity v WHERE v.id NOT IN :ids "
+            + "AND v.createdAt > :lastRecommendAt "
+            + "AND v.issue.id = :issueId "
+            + "ORDER BY v.createdAt DESC LIMIT :size OFFSET :skip")
+    List<ViewpointEntity> findExcludedRecommend(List<UUID> ids,
+                                                UUID issueId,
+                                                int skip,
+                                                int size,
+                                                LocalDateTime lastRecommendAt);
 }
 
 interface ViewpointRepositoryCustom {

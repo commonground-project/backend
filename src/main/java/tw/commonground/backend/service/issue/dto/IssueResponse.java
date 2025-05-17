@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import tw.commonground.backend.service.fact.dto.FactResponse;
+import tw.commonground.backend.service.follow.dto.FollowResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,9 +34,11 @@ public class IssueResponse {
 
     private String authorAvatar;
 
-    private IssueFollowResponse userFollow;
+    private FollowResponse userFollow;
 
     private Integer viewpointCount;
+
+    private Boolean readStatus;
 
     private List<FactResponse> facts;
 }
