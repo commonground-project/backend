@@ -35,10 +35,11 @@ public class ViewpointController {
 
     private final ViewpointService viewpointService;
 
+    private final ReadService readService;
+
     private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
-    private final ReadService readService;
 
     public ViewpointController(ViewpointService viewpointService, ReadService readService) {
         this.viewpointService = viewpointService;
@@ -70,6 +71,7 @@ public class ViewpointController {
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
         Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
         Boolean readStatus = readService.getReadStatus(user.getId(), viewpointEntity.getId(), ReadObjectType.VIEWPOINT);
+
         ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, readStatus);
         return ResponseEntity.ok(response);
     }

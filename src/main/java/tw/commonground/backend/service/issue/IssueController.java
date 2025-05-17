@@ -40,12 +40,13 @@ public class IssueController {
 
     private final FactService factService;
 
+    private final FollowService followService;
+
+    private final ReadService readService;
+
     private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
-
-    private final FollowService followService;
-    private final ReadService readService;
 
     public IssueController(IssueService issueService, FactService factService,
                            FollowService followService, ReadService readService) {
@@ -84,6 +85,7 @@ public class IssueController {
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
         Boolean readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
+
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
@@ -94,6 +96,7 @@ public class IssueController {
         IssueEntity issueEntity = issueService.getIssue(id);
         ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
+        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = false;
@@ -102,7 +105,7 @@ public class IssueController {
             follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
             readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
         }
-        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
+
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
@@ -120,6 +123,7 @@ public class IssueController {
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(id);
         Boolean readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
+
         IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }

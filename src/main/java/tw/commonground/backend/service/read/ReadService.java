@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.event.EventListener;
+import tw.commonground.backend.exception.EntityNotFoundException;
 import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.IssueService;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
@@ -57,7 +58,8 @@ public class ReadService {
     private ReadEntity createReadEntity(Long userId, UUID objectId, ReadObjectType objectType) {
 
         ReadEntity entity = new ReadEntity();
-        UserEntity user = userService.getUserEntityById(userId);
+        UserEntity user = userService.getUserById(userId)
+                                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
         entity.setUser(user);
 
         if (objectType == ReadObjectType.ISSUE) {

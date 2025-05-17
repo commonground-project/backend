@@ -168,9 +168,4 @@ public class UserService {
             throw new EntityNotFoundException("User", "id", userId.toString());
         }
     }
-
-    public UserEntity getUserEntityById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User", "id", userId.toString()));
-    }
 }

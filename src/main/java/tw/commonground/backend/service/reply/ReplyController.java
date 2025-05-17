@@ -37,10 +37,11 @@ public class ReplyController {
 
     private final ReplyService replyService;
 
+    private final ReadService readService;
+
     private final Set<String> sortableColumn = Set.of("createdAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
-    private final ReadService readService;
 
     public ReplyController(ReplyService replyService, ReadService readService) {
         this.replyService = replyService;

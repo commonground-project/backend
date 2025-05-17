@@ -20,7 +20,7 @@ public interface ReplyRepository extends JpaRepository<ReplyEntity, UUID>, Reply
 
     Page<ReplyEntity> findAllByViewpointId(UUID viewpointId, Pageable pageable);
 
-    @Query("SELECT r FROM ReplyEntity r " + "JOIN FETCH r.viewpoint v " + "JOIN FETCH v.issue " + "WHERE r.id = :id")
+    @Query("SELECT r FROM ReplyEntity r JOIN FETCH r.viewpoint v JOIN FETCH v.issue WHERE r.id = :id")
     Optional<ReplyEntity> findByIdWithViewpointAndIssue(@Param("id") UUID id);
 }
 
