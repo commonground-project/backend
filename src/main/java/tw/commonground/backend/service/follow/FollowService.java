@@ -11,12 +11,12 @@ import tw.commonground.backend.service.follow.entity.FollowEntity;
 import tw.commonground.backend.service.follow.entity.FollowKey;
 import tw.commonground.backend.service.follow.entity.FollowRepository;
 import tw.commonground.backend.service.issue.IssueService;
-import tw.commonground.backend.service.reply.ReplyCreatedEvent;
 import tw.commonground.backend.service.user.UserService;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.viewpoint.ViewpointCreatedEvent;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.shared.entity.RelatedObject;
+import tw.commonground.backend.shared.event.reply.ReplyCreatedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.time.LocalDateTime;
