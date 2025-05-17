@@ -61,6 +61,8 @@ public class NotificationService {
 
         // Collect issue data
         String viewpointTitle = viewpointEntity.getTitle();
+        UUID authorId = viewpointEntity.getAuthorId();
+        Long authorUserId = userRepository.getIdByUid(authorId);
         IssueEntity issue = viewpointEntity.getIssue();
         String issueTitle = issue.getTitle();
         String issueId = issue.getId().toString();
@@ -70,16 +72,21 @@ public class NotificationService {
         List<Long> followerIds = followService.getIssueFollowersById(issue.getId());
         List<FullUserEntity> needNotificationUsers = new ArrayList<>();
 
+        log.debug("issue followerIds {}", followerIds);
         followerIds.forEach(userId ->
                 userRepository.findUserEntityById(userId).ifPresent(user -> {
-                    if (userSettingService.getUserSetting(userId).getNewViewpointInFollowedIssue()) {
+                    if (!Objects.equals(userId, authorUserId) &&
+                            userSettingService.getUserSetting(userId).getNewViewpointInFollowedIssue()) {
                         needNotificationUsers.add(user);
                     }
                 })
         );
 
+        log.debug("Need notification users: {}", needNotificationUsers);
         if (!needNotificationUsers.isEmpty()) {
             try {
+                log.debug("Send notification with issue {}", issueTitle);
+                log.debug("Send notification with viewpoint {}", viewpointTitle);
                 NotificationDto dto = NotificationFactory.createIssueViewpointNotification(
                         issueTitle, viewpointTitle, issueId, viewpointId);
                 int sent = sendNotification(needNotificationUsers, dto);
@@ -100,6 +107,8 @@ public class NotificationService {
         ViewpointEntity viewpointEntity = viewpointService.getViewpoint(viewpointId);
         UUID authorId = viewpointEntity.getAuthorId();
         Long authorUserId = userRepository.getIdByUid(authorId);
+        UUID replyAuthorId = replyEntity.getAuthorId();
+        Long replyAuthorUserId = userRepository.getIdByUid(replyAuthorId);
         String title = viewpointEntity.getTitle();
         String body = replyEntity.getContent();
         String issueId = viewpointEntity.getIssue().getId().toString();
@@ -108,7 +117,8 @@ public class NotificationService {
         Set<FullUserEntity> needNotificationUsers = new HashSet<>();
 
         // 1. Notify the viewpoint author if they have `newReplyInMyViewpoint` enabled and follows the viewpoint
-        if (userSettingService.getUserSetting(authorUserId).getNewReplyInMyViewpoint()
+        if (!Objects.equals(authorUserId, replyAuthorUserId)
+                && userSettingService.getUserSetting(authorUserId).getNewReplyInMyViewpoint()
                 && followService.getViewpointFollowersById(viewpointId).contains(authorUserId)) {
             userRepository.findUserEntityById(authorUserId).ifPresent(needNotificationUsers::add);
         }
@@ -117,13 +127,14 @@ public class NotificationService {
         List<Long> viewpointFollowerIds = followService.getViewpointFollowersById(viewpointEntity.getId());
         viewpointFollowerIds.forEach(userId ->
                 userRepository.findUserEntityById(userId).ifPresent(user -> {
-                    if (userSettingService.getUserSetting(userId).getNewReplyInFollowedViewpoint()) {
+                    if (!Objects.equals(userId, replyAuthorUserId)
+                            && userSettingService.getUserSetting(userId).getNewReplyInFollowedViewpoint()) {
                         needNotificationUsers.add(user);
                     }
                 })
         );
 
-        log.info("Need notification users: {}", needNotificationUsers);
+        log.debug("Need notification users: {}", needNotificationUsers);
 
         if (!needNotificationUsers.isEmpty()) {
             try {
