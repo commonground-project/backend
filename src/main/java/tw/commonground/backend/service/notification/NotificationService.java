@@ -82,7 +82,7 @@ public class NotificationService {
                 })
         );
 
-        log.debug("Need notification users: {}", needNotificationUsers);
+        log.debug("Need new viewpoint notification users: {}", needNotificationUsers);
         if (!needNotificationUsers.isEmpty()) {
             try {
                 log.debug("Send notification with issue {}", issueTitle);
@@ -134,7 +134,7 @@ public class NotificationService {
                 })
         );
 
-        log.debug("Need notification users: {}", needNotificationUsers);
+        log.debug("Need new reply notification users: {}", needNotificationUsers);
 
         if (!needNotificationUsers.isEmpty()) {
             try {
