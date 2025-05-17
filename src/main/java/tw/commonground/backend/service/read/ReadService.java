@@ -1,6 +1,5 @@
 package tw.commonground.backend.service.read;
 
-import org.intellij.lang.annotations.MagicConstant;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,7 +117,7 @@ public class ReadService {
         handleReplyCreatedEvent(event);
     }
 
-    @MagicConstant
+    @SuppressWarnings("MagicNumber")
     @Scheduled(cron = "0 0 0 */7 * *")
     @Transactional
     public void updateReadStatusForExpiredEntities() {
