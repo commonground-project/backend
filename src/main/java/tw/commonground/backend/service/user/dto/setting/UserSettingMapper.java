@@ -13,6 +13,8 @@ public final class UserSettingMapper {
                         .newReplyInMyViewpoint(entity.getNewReplyInMyViewpoint())
                         .newReferenceToMyReply(entity.getNewReferenceToMyReply())
                         .newNodeOfTimelineToFollowedIssue(entity.getNewNodeOfTimelineToFollowedIssue())
+                        .newViewpointInFollowedIssue(entity.getNewViewpointInFollowedIssue())
+                        .newReplyInFollowedViewpoint(entity.getNewReplyInFollowedViewpoint())
                         .build())
                 .build();
     }

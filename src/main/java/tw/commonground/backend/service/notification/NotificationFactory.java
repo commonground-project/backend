@@ -6,6 +6,12 @@ public final class NotificationFactory {
 
     private static final int MAX_CONTENT_LENGTH = 10;
 
+    private static final String ISSUE_VIEWPOINT_NOTIFICATION_TITLE_TEMPLATE = "%s 下有一則新的觀點！";
+
+    private static final String ISSUE_VIEWPOINT_NOTIFICATION_BODY_TEMPLATE = "「%s」";
+
+    private static final String ISSUE_VIEWPOINT_NOTIFICATION_URL_TEMPLATE = "/issues/%s/viewpoints/%s";
+
     private static final String VIEWPOINT_REPLY_NOTIFICATION_TITLE_TEMPLATE = "%s 下有一則新的回覆！";
 
     private static final String VIEWPOINT_REPLY_NOTIFICATION_BODY_TEMPLATE = "「%s」";
@@ -26,6 +32,19 @@ public final class NotificationFactory {
 
     private NotificationFactory() {
         // hide the constructor
+    }
+
+    public static NotificationDto createIssueViewpointNotification(String issueTitle, String viewpointTitle,
+                                                                   String issueId, String viewpointId) {
+
+        String content = viewpointTitle.length() > MAX_CONTENT_LENGTH
+                ? viewpointTitle.substring(0, MAX_CONTENT_LENGTH) + "..." : viewpointTitle;
+
+        NotificationDto dto = new NotificationDto();
+        dto.setTitle(String.format(ISSUE_VIEWPOINT_NOTIFICATION_TITLE_TEMPLATE, issueTitle));
+        dto.setBody(String.format(ISSUE_VIEWPOINT_NOTIFICATION_BODY_TEMPLATE, content));
+        dto.setUrl(String.format(ISSUE_VIEWPOINT_NOTIFICATION_URL_TEMPLATE, issueId, viewpointId));
+        return dto;
     }
 
     public static NotificationDto createViewpointReplyNotification(String viewpointTitle, String replyContent,
