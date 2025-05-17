@@ -39,6 +39,8 @@ public class ReplyResponse {
 
     private List<QuoteReplyResponse> quotes;
 
+    private Boolean readStatus;
+
     private List<FactResponse> facts;
 
 }

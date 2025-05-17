@@ -15,4 +15,10 @@ public final class FollowMapper {
                 .updatedAt(DateTimeUtils.toIso8601String(entity.getUpdatedAt()))
                 .build();
     }
+
+    public static SimpleFollowResponse toSimpleFollowResponse(Boolean follow) {
+        return SimpleFollowResponse.builder()
+                .follow(follow)
+                .build();
+    }
 }

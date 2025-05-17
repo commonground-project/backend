@@ -38,5 +38,7 @@ public class IssueResponse {
 
     private Integer viewpointCount;
 
+    private Boolean readStatus;
+
     private List<FactResponse> facts;
 }

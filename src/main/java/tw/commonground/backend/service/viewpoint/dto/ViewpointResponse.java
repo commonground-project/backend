@@ -39,5 +39,7 @@ public class ViewpointResponse {
 
     private ViewpointReactionResponse userReaction;
 
+    private Boolean readStatus;
+
     private List<FactResponse> facts;
 }
