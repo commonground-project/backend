@@ -9,7 +9,7 @@ import tw.commonground.backend.service.internal.profile.dto.InternalProfileMappe
 import tw.commonground.backend.service.internal.profile.dto.InternalProfileResponse;
 import tw.commonground.backend.service.internal.profile.entity.InternalProfileEntity;
 import tw.commonground.backend.service.internal.profile.entity.InternalProfileRepository;
-import tw.commonground.backend.service.user.UserCreatedEvent;
+import tw.commonground.backend.shared.event.user.UserCreatedEvent;
 import tw.commonground.backend.service.user.entity.UserEntity;
 import tw.commonground.backend.service.user.entity.UserRepository;
 import tw.commonground.backend.shared.tracing.Traced;
