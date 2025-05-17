@@ -18,7 +18,6 @@ import tw.commonground.backend.service.reference.ReferenceRepository;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Traced
@@ -104,7 +103,7 @@ public class SearchService {
                 .map(UUID::fromString)
                 .map(factService::getFact)
                 .map(FactMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
 
     }
 
