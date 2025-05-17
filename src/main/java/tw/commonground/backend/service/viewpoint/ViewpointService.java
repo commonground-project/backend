@@ -87,6 +87,7 @@ public class ViewpointService {
         issueService.throwIfIssueNotExist(issueId);
 
         String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String issueTitle = issueService.getIssue(issueId).getTitle();
 
         ViewpointEntity viewpointEntity = new ViewpointEntity();
         viewpointEntity.setTitle(request.getTitle());
@@ -99,7 +100,7 @@ public class ViewpointService {
             viewpointFactRepository.saveByViewpointIdAndFactId(viewpointEntity.getId(), factId);
         }
 
-        applicationEventPublisher.publishEvent(new ViewpointCreatedEvent(user, viewpointEntity));
+        applicationEventPublisher.publishEvent(new ViewpointCreatedEvent(user, viewpointEntity, issueTitle));
         applicationEventPublisher.publishEvent(new UserViewpointCommentedEvent(this,
                 user.getId(), viewpointEntity.getId(), request.getContent()));
 

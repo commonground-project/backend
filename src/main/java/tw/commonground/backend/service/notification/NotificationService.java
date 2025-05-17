@@ -64,8 +64,8 @@ public class NotificationService {
         UUID authorId = viewpointEntity.getAuthorId();
         Long authorUserId = userRepository.getIdByUid(authorId);
         IssueEntity issue = viewpointEntity.getIssue();
-        String issueTitle = issue.getTitle();
         String issueId = issue.getId().toString();
+        String issueTitle = notificationEvent.getIssueTitle();
         String viewpointId = viewpointEntity.getId().toString();
 
         // Collect the issue's followers
@@ -82,11 +82,11 @@ public class NotificationService {
                 })
         );
 
-        log.debug("Need new viewpoint notification users: {}", needNotificationUsers);
+        log.info("Need new viewpoint notification users: {}", needNotificationUsers);
         if (!needNotificationUsers.isEmpty()) {
             try {
-                log.debug("Send notification with issue {}", issueTitle);
-                log.debug("Send notification with viewpoint {}", viewpointTitle);
+                log.info("Send notification with issue {}", issueTitle);
+                log.info("Send notification with viewpoint {}", viewpointTitle);
                 NotificationDto dto = NotificationFactory.createIssueViewpointNotification(
                         issueTitle, viewpointTitle, issueId, viewpointId);
                 int sent = sendNotification(needNotificationUsers, dto);

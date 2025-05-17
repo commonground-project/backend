@@ -14,9 +14,12 @@ public class ViewpointCreatedEvent extends ApplicationEvent {
 
     private final ViewpointEntity viewpointEntity;
 
-    public ViewpointCreatedEvent(FullUserEntity user, ViewpointEntity viewpointEntity) {
+    private final String issueTitle;
+
+    public ViewpointCreatedEvent(FullUserEntity user, ViewpointEntity viewpointEntity, String issueTitle) {
         super(viewpointEntity);
         this.user = user;
         this.viewpointEntity = viewpointEntity;
+        this.issueTitle = issueTitle;
     }
 }
