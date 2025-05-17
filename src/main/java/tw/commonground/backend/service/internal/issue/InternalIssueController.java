@@ -34,7 +34,7 @@ public class InternalIssueController {
         return ResponseEntity.ok(issue);
     }
 
-    @PutMapping("/{issueId}/insight")
+    @PutMapping("/issues/{issueId}/insight")
     public ResponseEntity<InternalIssueResponse> updateIssueInsight(@PathVariable UUID issueId,
                                                                     @RequestBody @Valid InternalIssueRequest request) {
         InternalIssueResponse updatedIssue = internalIssueService.updateIssueInsight(issueId, request);
