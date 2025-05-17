@@ -61,6 +61,32 @@ public class ViewpointRepositoryContainer {
         return viewpointReactionRepository.findById(id);
     }
 
+    public List<ViewpointEntity> findAllByIds(List<UUID> ids) {
+        return viewpointRepository.findAllById(ids);
+    }
+
+    public Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable) {
+        return viewpointRepository.findAllByIssueId(issueId, pageable);
+    }
+
+    public long count() {
+        return viewpointRepository.count();
+    }
+
+    public List<ViewpointEntity> findExcludedRecommend(
+            List<UUID> viewpointIds,
+            UUID issueId,
+            int start,
+            int size,
+            LocalDateTime lastUpdated
+    ) {
+        return viewpointRepository.findExcludedRecommend(viewpointIds, issueId, start, size, lastUpdated);
+    }
+
+    public List<ViewpointEntity> findAllByIssueId(UUID issueId) {
+        return viewpointRepository.findAllByIssueId(issueId);
+    }
+
     public void insertReaction(ViewpointReactionKey id, String reaction) {
         viewpointReactionRepository.insertReaction(id, reaction);
     }
