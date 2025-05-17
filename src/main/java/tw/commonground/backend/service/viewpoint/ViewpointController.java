@@ -207,7 +207,7 @@ public class ViewpointController {
                 .stream()
                 .map(viewpointEntity ->
                         ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE,
-                                factsMap.getOrDefault(viewpointEntity.getId(), List.of()), false))
+                                factsMap.getOrDefault(viewpointEntity.getId(), List.of()), true))
                         // the read status is false is meaningless here, since the user is not logged in
                 .toList();
 

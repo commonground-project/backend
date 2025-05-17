@@ -9,8 +9,8 @@ import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
 import tw.commonground.backend.shared.tracing.Traced;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Traced
@@ -42,7 +42,7 @@ public class RecommendService {
             recommendViewpointIds = null;
         }
         if (recommendViewpointIds == null) {
-            return viewpointRepository.findAll(pageable);
+            return viewpointRepository.findAllByIssueId(issueId, pageable);
         }
         List<UUID> viewpointIds = recommendViewpointIds.stream().map(UUID::fromString).toList();
 
@@ -52,12 +52,19 @@ public class RecommendService {
 
         if (viewpoints.size() != pageable.getPageSize()) {
             int totalRecommendCount = Objects.requireNonNull(stringRedisTemplate.opsForZSet().zCard(key)).intValue();
+            String time = stringRedisTemplate.opsForValue().get("last_updated");
+            if (time == null) {
+                time = LocalDateTime.of(1, 1, 1, 1, 0, 0).format(DateTimeFormatter.ISO_DATE_TIME);
+            }
+            LocalDateTime lastUpdated = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME);
+
             viewpoints.addAll(
                     viewpointRepository.findExcludedRecommend(
                             viewpointIds,
+                            issueId,
                             start + viewpoints.size() - totalRecommendCount,
                             pageable.getPageSize() - viewpoints.size(),
-                            LocalDateTime.of(LocalDate.now(), LocalDateTime.MIN.toLocalTime())
+                            lastUpdated
                     ));
         }
 
