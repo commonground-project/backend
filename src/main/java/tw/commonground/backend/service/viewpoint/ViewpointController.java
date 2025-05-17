@@ -3,7 +3,6 @@ package tw.commonground.backend.service.viewpoint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,15 +54,7 @@ public class ViewpointController {
             Page<ViewpointEntity> pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
             return getPaginationResponse(pageViewpoints);
         } else {
-            List<ViewpointEntity> viewpointEntities = recommendService.getIssueViewpoints(user.getUuid(), id, pageable);
-            Page<ViewpointEntity> pageViewpoints;
-
-            if (viewpointEntities.isEmpty()) {
-                pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
-            } else {
-                pageViewpoints = new PageImpl<>(viewpointEntities, pageable, pageable.getPageSize());
-            }
-
+            Page<ViewpointEntity> pageViewpoints = recommendService.getIssueViewpoints(user.getUuid(), id, pageable);
             return getPaginationResponse(user.getId(), pageViewpoints);
         }
     }

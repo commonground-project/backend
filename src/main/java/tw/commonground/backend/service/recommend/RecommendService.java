@@ -1,5 +1,7 @@
 package tw.commonground.backend.service.recommend;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -7,6 +9,8 @@ import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
 import tw.commonground.backend.shared.tracing.Traced;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Traced
@@ -24,58 +28,39 @@ public class RecommendService {
         this.viewpointRepository = viewpointRepository;
     }
 
-    public List<ViewpointEntity> getIssueViewpoints(UUID userId, UUID issueId, Pageable pageable) {
+    public Page<ViewpointEntity> getIssueViewpoints(UUID userId, UUID issueId, Pageable pageable) {
         int start = pageable.getPageNumber() * pageable.getPageSize();
         int end = pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize() - 1;
 
         String key = String.format("recommendation:%s:%s", issueId, userId);
 
-        Set<String> recommendViewpointIds = stringRedisTemplate.opsForZSet().reverseRange(key, start, end);
-        if (recommendViewpointIds == null || recommendViewpointIds.isEmpty()) {
-            return List.of();
+        // Get the recommended viewpoint IDs from Redis
+        Set<String> recommendViewpointIds;
+        try {
+            recommendViewpointIds = stringRedisTemplate.opsForZSet().reverseRange(key, start, end);
+        } catch (Exception e) {
+            recommendViewpointIds = null;
         }
-
+        if (recommendViewpointIds == null) {
+            return viewpointRepository.findAll(pageable);
+        }
         List<UUID> viewpointIds = recommendViewpointIds.stream().map(UUID::fromString).toList();
+
+        long viewpointCount = viewpointRepository.count();
 
         List<ViewpointEntity> viewpoints = viewpointRepository.findAllByIds(viewpointIds);
 
         if (viewpoints.size() != pageable.getPageSize()) {
+            int totalRecommendCount = Objects.requireNonNull(stringRedisTemplate.opsForZSet().zCard(key)).intValue();
             viewpoints.addAll(
-                    viewpointRepository
-                            .findExcludedBySize(viewpointIds, pageable.getPageSize() - viewpoints.size()
-                            ));
+                    viewpointRepository.findExcludedRecommend(
+                            viewpointIds,
+                            start + viewpoints.size() - totalRecommendCount,
+                            pageable.getPageSize() - viewpoints.size(),
+                            LocalDateTime.of(LocalDate.now(), LocalDateTime.MIN.toLocalTime())
+                    ));
         }
 
-        return viewpoints;
+        return new PageImpl<>(viewpoints, pageable, viewpointCount);
     }
-
-    public int getIssueViewpointsCount(UUID userId, UUID issueId) {
-        String key = String.format("recommendation:%s:%s", issueId, userId);
-        Long size = stringRedisTemplate.opsForZSet().size(key);
-        if (size == null) {
-            return 0;
-        }
-        return size.intValue();
-    }
-
-//    public List<String> getIssues(UUID userId, Pageable pageable) {
-//        int start = pageable.getPageNumber() * pageable.getPageSize();
-//        int end = pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize() - 1;
-//
-//        String key = String.format("recommendation:%s", userId);
-//
-//        return stringRedisTemplate.opsForZSet().reverseRange(key, start, end).stream().toList();
-//    }
-//
-//    public int getIssuesCount(UUID userId) {
-//        String key = String.format("recommendation:%s", userId);
-//        Long size = stringRedisTemplate.opsForZSet().size(key);
-//        if (size == null) {
-//            return 0;
-//        }
-//        return size.intValue();
-//    }
-
-
-
 }
