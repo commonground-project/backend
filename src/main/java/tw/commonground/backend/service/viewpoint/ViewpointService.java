@@ -272,6 +272,11 @@ public class ViewpointService {
         return viewpointReactionRepository.findReactionById(id).orElse(Reaction.NONE);
     }
 
+    public ViewpointEntity getViewpointWithIssue(UUID id) {
+        return viewpointRepository.findByIdWithIssue(id).orElseThrow(
+                () -> new EntityNotFoundException(VIEWPOINT_KEY, "id", id.toString()));
+    }
+
     public void setViewpointPreference(Long userId, ViewpointPreferenceRequest request) {
         applicationEventPublisher.publishEvent(new UserPreferToViewpointEvent(this,
                 userId,

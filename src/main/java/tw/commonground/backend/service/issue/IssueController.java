@@ -15,6 +15,8 @@ import tw.commonground.backend.service.fact.entity.FactEntity;
 import tw.commonground.backend.service.follow.FollowService;
 import tw.commonground.backend.service.issue.dto.*;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
+import tw.commonground.backend.service.read.ReadService;
+import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.recommend.RecommendService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.entity.RelatedObject;
@@ -39,40 +41,50 @@ public class IssueController {
 
     private final FactService factService;
 
+    private final FollowService followService;
+
+    private final ReadService readService;
+
     private final RecommendService recommendService;
 
     private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    private final FollowService followService;
-
     public IssueController(IssueService issueService,
                            FactService factService,
                            RecommendService recommendService,
-                           FollowService followService) {
+                           FollowService followService,
+                           ReadService readService) {
+
         this.issueService = issueService;
         this.factService = factService;
         this.recommendService = recommendService;
         this.followService = followService;
+        this.readService = readService;
     }
 
     @GetMapping("/issues")
     public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(
             @AuthenticationPrincipal FullUserEntity user,
             @Valid PaginationRequest pagination) {
-
         Pageable pageable = paginationParser.parsePageable(pagination);
+
         Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
 
         List<SimpleIssueResponse> issueResponses = pageIssues.getContent()
                 .stream()
                 .map(issue -> {
-                    Integer viewpointCount = issueService.getViewpointCount(issue.getId());
-                    return IssueMapper.toResponse(issue, viewpointCount);
+                            Integer viewpointCount = issueService.getViewpointCount(issue.getId());
+                            if (user != null) {
+                                Boolean readStatus = readService.getReadStatus(user.getId(),
+                                        issue.getId(), ReadObjectType.ISSUE);
+                                return IssueMapper.toResponse(issue, viewpointCount, readStatus);
+                            } else {
+                                return IssueMapper.toResponse(issue, viewpointCount, false);
+                            }
                 })
                 .toList();
-
         return new WrappedPaginationResponse<>(issueResponses, PaginationMapper.toResponse(pageIssues));
     }
 
@@ -88,7 +100,9 @@ public class IssueController {
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
+        Boolean readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
+
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -98,14 +112,17 @@ public class IssueController {
         IssueEntity issueEntity = issueService.getIssue(id);
         ContentContainFact contentContainFact = ContentParser
                 .separateContentAndFacts(issueEntity.getInsight());
+        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
 
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = false;
+        Boolean readStatus = false;
         if (user != null) {
             follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
+            readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
         }
-        Integer viewpointCount = issueService.getViewpointCount(issueEntity.getId());
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
+
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -121,10 +138,10 @@ public class IssueController {
         List<FactEntity> factResponses = factService.getFacts(contentContainFact.getFacts());
         Boolean follow = followService.getFollow(user.getId(), issueEntity.getId(), RelatedObject.ISSUE);
         Integer viewpointCount = issueService.getViewpointCount(id);
-
+        Boolean readStatus = readService.getReadStatus(user.getId(), issueEntity.getId(), ReadObjectType.ISSUE);
         issueService.createManualFact(issueEntity.getId(), contentContainFact.getFacts());
 
-        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount);
+        IssueResponse response = IssueMapper.toResponse(issueEntity, follow, factResponses, viewpointCount, readStatus);
         return ResponseEntity.ok(response);
     }
 

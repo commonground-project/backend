@@ -9,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.service.read.ReadService;
+import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.recommend.RecommendService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.*;
@@ -31,14 +33,19 @@ public class ViewpointController {
 
     private final ViewpointService viewpointService;
 
+    private final ReadService readService;
+
     private final RecommendService recommendService;
 
     private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    public ViewpointController(ViewpointService viewpointService, RecommendService recommendService) {
+    public ViewpointController(ViewpointService viewpointService,
+                               ReadService readService,
+                               RecommendService recommendService) {
         this.viewpointService = viewpointService;
+        this.readService = readService;
         this.recommendService = recommendService;
     }
 
@@ -67,8 +74,9 @@ public class ViewpointController {
         ViewpointEntity viewpointEntity = viewpointService.createIssueViewpoint(id, request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
         Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+        Boolean readStatus = readService.getReadStatus(user.getId(), viewpointEntity.getId(), ReadObjectType.VIEWPOINT);
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -93,8 +101,9 @@ public class ViewpointController {
                                                              @RequestBody ViewpointRequest request) {
         ViewpointEntity viewpointEntity = viewpointService.createViewpoint(request, user);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
+        Boolean readStatus = readService.getReadStatus(user.getId(), viewpointEntity.getId(), ReadObjectType.VIEWPOINT);
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE, facts, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -105,11 +114,13 @@ public class ViewpointController {
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
 
         Reaction reaction = Reaction.NONE;
+        Boolean readStatus = false;
         if (user != null) {
             reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+            readStatus = readService.getReadStatus(user.getId(), viewpointEntity.getId(), ReadObjectType.VIEWPOINT);
         }
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -121,8 +132,9 @@ public class ViewpointController {
         ViewpointEntity viewpointEntity = viewpointService.updateViewpoint(id, updateRequest);
         List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpointEntity.getId());
         Reaction reaction = viewpointService.getReactionForViewpoint(user.getId(), viewpointEntity.getId());
+        Boolean readStatus = readService.getReadStatus(user.getId(), viewpointEntity.getId(), ReadObjectType.VIEWPOINT);
 
-        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts);
+        ViewpointResponse response = ViewpointMapper.toResponse(viewpointEntity, reaction, facts, readStatus);
         return ResponseEntity.ok(response);
     }
 
@@ -178,7 +190,8 @@ public class ViewpointController {
                 .map(viewpointEntity ->
                         ViewpointMapper.toResponse(viewpointEntity,
                                 reactionsMap.getOrDefault(viewpointEntity.getId(), Reaction.NONE),
-                                factsMap.getOrDefault(viewpointEntity.getId(), List.of())))
+                                factsMap.getOrDefault(viewpointEntity.getId(), List.of()),
+                                readService.getReadStatus(userId, viewpointEntity.getId(), ReadObjectType.VIEWPOINT)))
                 .toList();
 
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));
@@ -194,7 +207,8 @@ public class ViewpointController {
                 .stream()
                 .map(viewpointEntity ->
                         ViewpointMapper.toResponse(viewpointEntity, Reaction.NONE,
-                                factsMap.getOrDefault(viewpointEntity.getId(), List.of())))
+                                factsMap.getOrDefault(viewpointEntity.getId(), List.of()), false))
+                        // the read status is false is meaningless here, since the user is not logged in
                 .toList();
 
         return new WrappedPaginationResponse<>(viewpointResponses, PaginationMapper.toResponse(pageViewpoints));

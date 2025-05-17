@@ -38,6 +38,7 @@ public final class ReplyMapper {
 
     public static ReplyResponse toReplyResponse(ReplyEntity replyEntity,
                                                 Reaction reaction,
+                                                Boolean readStatus,
                                                 List<FactEntity> factEntities,
                                                 List<ReplyEntity> replyEntities,
                                                 List<QuoteReply> quoteReplies) {
@@ -67,6 +68,7 @@ public final class ReplyMapper {
                 .reasonableCount(replyEntity.getReasonableCount())
                 .dislikeCount(replyEntity.getDislikeCount())
                 .quotes(quotes)
+                .readStatus(readStatus)
                 .facts(facts)
                 .build();
     }
