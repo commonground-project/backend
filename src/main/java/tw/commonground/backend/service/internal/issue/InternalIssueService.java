@@ -43,7 +43,7 @@ public class InternalIssueService {
     public InternalIssueService(IssueRepository issueRepository,
                                 ViewpointService viewpointService,
                                 ViewpointRepository viewpointRepository,
-                                InternalReferenceService internalReferenceService
+                                InternalReferenceService internalReferenceService,
                                 IssueService issueService) {
         this.issueRepository = issueRepository;
         this.viewpointService = viewpointService;
