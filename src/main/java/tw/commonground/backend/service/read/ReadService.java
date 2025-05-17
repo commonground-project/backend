@@ -91,6 +91,7 @@ public class ReadService {
         return entity;
     }
 
+    @SuppressWarnings("MagicNumber")
     public Boolean getReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
         /*
          * if the read entity does not exist, we will not create it
@@ -108,7 +109,7 @@ public class ReadService {
                     } else if (objectType == ReadObjectType.VIEWPOINT) {
                         LocalDateTime createdAt = viewpointService.getViewpoint(objectId).getCreatedAt();
                         return createdAt.isBefore(LocalDateTime.now().minusDays(7));
-                    } else if(objectType == ReadObjectType.REPLY) {
+                    } else if (objectType == ReadObjectType.REPLY) {
                         LocalDateTime createdAt = replyService.getReply(objectId).getCreatedAt();
                         return createdAt.isBefore(LocalDateTime.now().minusDays(7));
                     } else {

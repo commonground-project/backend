@@ -54,7 +54,7 @@ public class IssueController {
     public IssueController(IssueService issueService,
                            FactService factService,
                            RecommendService recommendService,
-                           FollowService followService, 
+                           FollowService followService,
                            ReadService readService) {
 
         this.issueService = issueService;

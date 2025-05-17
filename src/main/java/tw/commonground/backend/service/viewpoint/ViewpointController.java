@@ -41,7 +41,7 @@ public class ViewpointController {
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    public ViewpointController(ViewpointService viewpointService, 
+    public ViewpointController(ViewpointService viewpointService,
                                ReadService readService,
                                RecommendService recommendService) {
         this.viewpointService = viewpointService;

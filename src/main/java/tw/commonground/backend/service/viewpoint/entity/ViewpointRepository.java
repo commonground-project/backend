@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import tw.commonground.backend.shared.entity.Reaction;
 
 import java.util.Optional;
-import tw.commonground.backend.shared.entity.Reaction;
 
 import java.time.LocalDateTime;
 import java.util.List;
