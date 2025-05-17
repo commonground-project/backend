@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tw.commonground.backend.service.fact.entity.FactEntity;
+import tw.commonground.backend.service.recommend.RecommendService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.service.viewpoint.dto.*;
 import tw.commonground.backend.shared.entity.Reaction;
@@ -20,10 +21,7 @@ import tw.commonground.backend.shared.pagination.PaginationRequest;
 import tw.commonground.backend.shared.pagination.WrappedPaginationResponse;
 import tw.commonground.backend.shared.tracing.Traced;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Traced
 @RestController
@@ -33,12 +31,15 @@ public class ViewpointController {
 
     private final ViewpointService viewpointService;
 
+    private final RecommendService recommendService;
+
     private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    public ViewpointController(ViewpointService viewpointService) {
+    public ViewpointController(ViewpointService viewpointService, RecommendService recommendService) {
         this.viewpointService = viewpointService;
+        this.recommendService = recommendService;
     }
 
     @GetMapping("/issue/{id}/viewpoints")
@@ -48,11 +49,12 @@ public class ViewpointController {
             @Valid PaginationRequest request) {
 
         Pageable pageable = paginationParser.parsePageable(request);
-        Page<ViewpointEntity> pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
 
         if (user == null) {
+            Page<ViewpointEntity> pageViewpoints = viewpointService.getIssueViewpoints(id, pageable);
             return getPaginationResponse(pageViewpoints);
         } else {
+            Page<ViewpointEntity> pageViewpoints = recommendService.getIssueViewpoints(user.getUuid(), id, pageable);
             return getPaginationResponse(user.getId(), pageViewpoints);
         }
     }
