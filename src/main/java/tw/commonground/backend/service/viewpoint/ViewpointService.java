@@ -67,12 +67,12 @@ public class ViewpointService {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Cacheable(key = "{'allViewpoints', #pageable.pageNumber}")
+    @Cacheable(key = "{'allViewpoints', #pageable}")
     public Page<ViewpointEntity> getViewpoints(Pageable pageable) {
         return viewpointRepository.findAll(pageable);
     }
 
-    @Cacheable(value = "issueViewpoint",  key = "{#issueId, #pageable.pageNumber}")
+    @Cacheable(value = "issueViewpoint",  key = "{#issueId, #pageable}")
     public Page<ViewpointEntity> getIssueViewpoints(UUID issueId, Pageable pageable) {
         return viewpointRepository.findAllByIssueId(issueId, pageable);
     }
@@ -89,6 +89,7 @@ public class ViewpointService {
         issueService.throwIfIssueNotExist(issueId);
 
         String content = ContentParser.convertLinkIntToUuid(request.getContent(), request.getFacts());
+        String issueTitle = issueService.getIssue(issueId).getTitle();
 
         ViewpointEntity viewpointEntity = new ViewpointEntity();
         viewpointEntity.setTitle(request.getTitle());
@@ -101,6 +102,7 @@ public class ViewpointService {
             viewpointFactRepository.saveByViewpointIdAndFactId(viewpointEntity.getId(), factId);
         }
 
+        applicationEventPublisher.publishEvent(new ViewpointCreatedEvent(user, viewpointEntity, issueTitle));
         applicationEventPublisher.publishEvent(new UserViewpointCommentedEvent(this,
                 user.getId(), viewpointEntity.getId(), request.getContent()));
 

@@ -44,7 +44,7 @@ public class IssueService {
         this.factService = factService;
     }
 
-    @Cacheable(key = "#pageable.pageNumber")
+    @Cacheable(key = "#pageable")
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
         return issueRepository.findAllIssueEntityBy(pageable);
     }
@@ -106,6 +106,7 @@ public class IssueService {
         issueRepository.deleteById(id);
     }
 
+    @Cacheable(value = {"fact", "issue"}, key = "#id")
     public Page<FactEntity> getIssueFacts(UUID id, Pageable pageable) {
         List<FactEntity> factEntities = new ArrayList<>();
         Page<ManualIssueFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);

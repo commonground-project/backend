@@ -32,7 +32,7 @@ public class FactService {
         this.referenceService = referenceService;
     }
 
-    @Cacheable(key = "#pageable.pageNumber")
+    @Cacheable(key = "#pageable")
     public Page<FactEntity> getFacts(Pageable pageable) {
         return factRepository.findAll(pageable);
     }

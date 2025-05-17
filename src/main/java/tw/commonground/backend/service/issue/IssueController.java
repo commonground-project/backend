@@ -17,6 +17,7 @@ import tw.commonground.backend.service.issue.dto.*;
 import tw.commonground.backend.service.issue.entity.IssueEntity;
 import tw.commonground.backend.service.read.ReadService;
 import tw.commonground.backend.service.read.entity.ReadObjectType;
+import tw.commonground.backend.service.recommend.RecommendService;
 import tw.commonground.backend.service.user.entity.FullUserEntity;
 import tw.commonground.backend.shared.entity.RelatedObject;
 import tw.commonground.backend.shared.pagination.PaginationMapper;
@@ -44,20 +45,30 @@ public class IssueController {
 
     private final ReadService readService;
 
+    private final RecommendService recommendService;
+
     private final Set<String> sortableColumn = Set.of("title", "createdAt", "updatedAt");
 
     private final PaginationParser paginationParser = new PaginationParser(sortableColumn, MAX_SIZE);
 
-    public IssueController(IssueService issueService, FactService factService,
-                           FollowService followService, ReadService readService) {
+    public IssueController(IssueService issueService,
+                           FactService factService,
+                           RecommendService recommendService,
+                           FollowService followService, 
+                           ReadService readService) {
+
         this.issueService = issueService;
         this.factService = factService;
+        this.recommendService = recommendService;
         this.followService = followService;
         this.readService = readService;
     }
 
     @GetMapping("/issues")
-    public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(@Valid PaginationRequest pagination) {
+    public WrappedPaginationResponse<List<SimpleIssueResponse>> listIssues(
+            @AuthenticationPrincipal FullUserEntity user,
+            @Valid PaginationRequest pagination) {
+
         Pageable pageable = paginationParser.parsePageable(pagination);
         Page<SimpleIssueEntity> pageIssues = issueService.getIssues(pageable);
 
