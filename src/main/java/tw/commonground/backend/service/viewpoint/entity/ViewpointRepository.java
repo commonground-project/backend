@@ -7,12 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import tw.commonground.backend.shared.entity.Reaction;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ViewpointRepository extends JpaRepository<ViewpointEntity, UUID>, ViewpointRepositoryCustom {
 
     Page<ViewpointEntity> findAllByIssueId(UUID issueId, Pageable pageable);
 
+    List<ViewpointEntity> findAllByIssueId(UUID issueId);
 }
 
 interface ViewpointRepositoryCustom {
