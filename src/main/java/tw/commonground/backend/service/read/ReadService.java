@@ -12,7 +12,7 @@ import tw.commonground.backend.service.read.entity.ReadEntity;
 import tw.commonground.backend.service.read.entity.ReadKey;
 import tw.commonground.backend.service.read.entity.ReadObjectType;
 import tw.commonground.backend.service.read.entity.ReadRepository;
-import tw.commonground.backend.service.reply.ReplyCreatedEvent;
+import tw.commonground.backend.shared.event.reply.ReplyCreatedEvent;
 import tw.commonground.backend.service.reply.ReplyService;
 import tw.commonground.backend.service.reply.entity.ReplyEntity;
 import tw.commonground.backend.service.user.UserService;
