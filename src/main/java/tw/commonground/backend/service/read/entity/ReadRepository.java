@@ -13,8 +13,10 @@ public interface ReadRepository extends JpaRepository<ReadEntity, ReadKey> {
     Optional<ReadEntity> findByIdUserIdAndIdObjectIdAndIdObjectType(
             Long userId, UUID objectId, ReadObjectType objectType);
 
-
     @Query("SELECT r FROM ReadEntity r WHERE r.id.objectType = :objectType AND r.timestamp < :timestamp")
     List<ReadEntity> findByObjectTypeAndTimestampBefore(@Param("objectType") ReadObjectType objectType,
                                                         @Param("timestamp") LocalDateTime timestamp);
+    @Query("SELECT r FROM ReadEntity r WHERE r.id.objectId = :objectId AND r.id.objectType = :objectType")
+    List<ReadEntity> findAllUserByObjectIdAndObjectType(@Param("objectId") UUID objectId,
+                                                        @Param("objectType") ReadObjectType readObjectType);
 }

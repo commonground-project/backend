@@ -23,6 +23,7 @@ import tw.commonground.backend.shared.event.comment.UserViewpointCommentedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -93,6 +94,7 @@ public class ReadService {
     public Boolean getReadStatus(Long userId, UUID objectId, ReadObjectType objectType) {
         /*
          * if the read entity does not exist, we will not create it
+         * we will return true if the object is created before 7 days
          * the read status would return false for viewpoint and reply
          * since the new created viewpoint and reply are not read yet
          * the read status would return to true for issue
@@ -103,8 +105,12 @@ public class ReadService {
                 .orElseGet(() -> {
                     if (objectType == ReadObjectType.ISSUE) {
                         return true;
-                    } else if (objectType == ReadObjectType.VIEWPOINT || objectType == ReadObjectType.REPLY) {
-                        return false;
+                    } else if (objectType == ReadObjectType.VIEWPOINT) {
+                        LocalDateTime createdAt = viewpointService.getViewpoint(objectId).getCreatedAt();
+                        return createdAt.isBefore(LocalDateTime.now().minusDays(7));
+                    } else if(objectType == ReadObjectType.REPLY) {
+                        LocalDateTime createdAt = replyService.getReply(objectId).getCreatedAt();
+                        return createdAt.isBefore(LocalDateTime.now().minusDays(7));
                     } else {
                         throw new IllegalArgumentException("Invalid object type for read status update");
                     }
@@ -123,29 +129,14 @@ public class ReadService {
     public void updateReadStatusForExpiredEntities() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
-        List<ReadEntity> expiredViewpoints = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.VIEWPOINT,
-                                                                                               sevenDaysAgo);
-        expiredViewpoints.forEach(entity -> {
-            entity.setReadStatus(true);
-            entity.setTimestamp(LocalDateTime.now());
-        });
-        readRepository.saveAll(expiredViewpoints);
+        List<ReadEntity> expiredReads = new ArrayList<>();
 
-        List<ReadEntity> expiredIssues = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.ISSUE,
-                                                                                           sevenDaysAgo);
-        expiredIssues.forEach(entity -> {
-            entity.setReadStatus(true);
-            entity.setTimestamp(LocalDateTime.now());
-        });
-        readRepository.saveAll(expiredIssues);
+        expiredReads.addAll(readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.VIEWPOINT, sevenDaysAgo));
+        expiredReads.addAll(readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.ISSUE, sevenDaysAgo));
+        expiredReads.addAll(readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.REPLY, sevenDaysAgo));
 
-        List<ReadEntity> expiredReplies = readRepository.findByObjectTypeAndTimestampBefore(ReadObjectType.REPLY,
-                                                                                            sevenDaysAgo);
-        expiredReplies.forEach(entity -> {
-            entity.setReadStatus(true);
-            entity.setTimestamp(LocalDateTime.now());
-        });
-        readRepository.saveAll(expiredReplies);
+        readRepository.deleteAll(expiredReads);
+        readRepository.flush();
     }
 
     public void handleReplyCreatedEvent(ReplyCreatedEvent event) {
@@ -188,7 +179,8 @@ public class ReadService {
 
 
     private void unreadAllUser(UUID objectId, ReadObjectType readObjectType) {
-        List<Long> userIds = userService.getUsers().stream().map(UserEntity::getId).toList();
+        List<Long> userIds = readRepository.findAllUserByObjectIdAndObjectType(objectId, readObjectType).stream()
+                .map(readEntity -> readEntity.getId().getUserId()).toList();
         for (Long userId : userIds) {
             unread(userId, objectId, readObjectType);
         }
@@ -196,12 +188,17 @@ public class ReadService {
 
     private void unread(Long userId, UUID objectId, ReadObjectType objectType) {
         Optional<ReadEntity> existing = readRepository.findByIdUserIdAndIdObjectIdAndIdObjectType(userId,
-                                                                                                  objectId, objectType);
+                                                                                                objectId, objectType);
         if (existing.isPresent()) {
             ReadEntity read = existing.get();
             read.setReadStatus(false);
             read.setTimestamp(java.time.LocalDateTime.now());
             readRepository.save(read);
+            return;
         }
+        ReadEntity readEntity = createReadEntity(userId, objectId, objectType);
+        readEntity.setReadStatus(false);
+        readEntity.setTimestamp(java.time.LocalDateTime.now());
+        readRepository.save(readEntity);
     }
 }
