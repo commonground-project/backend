@@ -3,7 +3,6 @@ package tw.commonground.backend.service.internal.fact;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +23,6 @@ public class InternalFactController {
 
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<FactResponse> createFact(@Valid @RequestBody FactRequest factRequest) {
         return ResponseEntity.ok(FactMapper.toResponse(internalFactService.createFact(factRequest)));
     }
