@@ -49,4 +49,11 @@ public final class ViewpointMapper {
                 .readStatus(readStatus)
                 .build();
     }
+
+    public static ViewpointPreferenceResponse toPreferenceResponse(ViewpointPreferenceRequest request) {
+        return ViewpointPreferenceResponse.builder()
+                .id(request.getId().toString())
+                .preference(request.getPreference())
+                .build();
+    }
 }

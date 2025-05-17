@@ -15,5 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Close
+        env:
+          title: "${{ github.event.pull_request.title }}"
         run: |
-          ~/deploy.sh "Close" "${{ github.event.number }}"
+          ~/deploy.sh "Close" "${{ github.event.number }}" "${{ env.title }}"

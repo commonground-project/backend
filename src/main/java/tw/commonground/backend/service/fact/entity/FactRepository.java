@@ -10,4 +10,7 @@ import java.util.UUID;
 public interface FactRepository extends JpaRepository<FactEntity, UUID> {
     @Query("SELECT f.id FROM FactEntity f WHERE f.id IN :ids")
     List<UUID> findExistingIdsByIds(@Param("ids") List<UUID> ids);
+
+    @Query("SELECT f FROM FactEntity f WHERE f.id IN :ids")
+    List<FactEntity> findAllByIds(@Param("ids") List<UUID> ids);
 }

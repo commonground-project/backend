@@ -3,6 +3,7 @@ package tw.commonground.backend.service.reply;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import tw.commonground.backend.service.viewpoint.ViewpointService;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.shared.content.ContentReply;
+import tw.commonground.backend.shared.event.reply.ReplyCreatedEvent;
 import tw.commonground.backend.shared.tracing.Traced;
 import tw.commonground.backend.shared.entity.Reaction;
 import tw.commonground.backend.shared.event.comment.UserReplyCommentedEvent;
@@ -65,12 +67,12 @@ public class ReplyService {
         this.lockService = lockService;
     }
 
-    @Cacheable
+    @Cacheable(value = "viewpointReply", key = "{#id, #pageable.pageNumber}")
     public Page<ReplyEntity> getViewpointReplies(UUID id, Pageable pageable) {
         return replyRepository.findAllByViewpointId(id, pageable);
     }
 
-    @CacheEvict(allEntries = true)
+    @CacheEvict(value = "viewpointReply", allEntries = true)
     @Transactional
     public ReplyEntity createViewpointReply(UUID viewpointId, FullUserEntity user, ReplyRequest request) {
         factService.throwIfFactsNotExist(request.getFacts());
@@ -100,14 +102,17 @@ public class ReplyService {
         return replyEntity;
     }
 
-    @Cacheable
+    @Cacheable(key = "#id")
     public ReplyEntity getReply(UUID id) {
         return replyRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Reply", "id", id.toString())
         );
     }
 
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "'viewpointReply'", allEntries = true),
+            @CacheEvict(value = "reply", key = "#id")
+    })
     @Transactional
     public ReplyEntity updateReply(UUID id, ReplyRequest request) {
         ReplyEntity replyEntity = replyRepository.findById(id).orElseThrow(
@@ -131,7 +136,10 @@ public class ReplyService {
         return replyEntity;
     }
 
-    @CacheEvict(allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "viewpointReply", allEntries = true),
+            @CacheEvict(value = "reply", key = "#id")
+    })
     public void deleteReply(UUID id) {
         replyRepository.deleteById(id);
     }

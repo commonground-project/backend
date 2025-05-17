@@ -15,6 +15,7 @@ public interface ManualFactRepository extends JpaRepository<ManualIssueFactEntit
     Page<ManualIssueFactEntity> findAllByKey_FactId(UUID factId, Pageable pageable);
 
     @Modifying
-    @Query(value = "INSERT INTO issue_fact_entity (issue_id, fact_id) VALUES (?1, ?2)", nativeQuery = true)
+    @Query(value = "INSERT INTO issue_fact_entity (issue_id, fact_id, created_at, updated_at) "
+            + "VALUES (?1, ?2, now(), now())", nativeQuery = true)
     void saveByIssueIdAndFactId(UUID issueId, UUID factId);
 }

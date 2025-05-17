@@ -3,7 +3,6 @@ package tw.commonground.backend.service.issue;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -45,19 +44,19 @@ public class IssueService {
         this.factService = factService;
     }
 
-    @Cacheable("'allIssues'")
+    @Cacheable(key = "#pageable.pageNumber")
     public Page<SimpleIssueEntity> getIssues(Pageable pageable) {
         return issueRepository.findAllIssueEntityBy(pageable);
     }
 
-    @Cacheable(key = "{#id, 'allIssues'}")
+    @Cacheable(key = "#id")
     public IssueEntity getIssue(UUID id) {
         return issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
         );
     }
 
-    @CacheEvict(key = "'allIssues'")
+    @CacheEvict(allEntries = true)
     public IssueEntity createIssue(IssueRequest request, FullUserEntity user) {
         factService.throwIfFactsNotExist(request.getFacts());
 
@@ -76,7 +75,7 @@ public class IssueService {
         return issueRepository.save(issueEntity);
     }
 
-    @CacheEvict(key = "{#id, 'allIssues'}")
+    @CacheEvict(allEntries = true)
     public IssueEntity updateIssue(UUID id, IssueRequest issueRequest) {
         IssueEntity issueEntity = issueRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Issue", "id", id.toString())
@@ -97,16 +96,16 @@ public class IssueService {
 
         issueEntity.setTitle(issueRequest.getTitle());
         issueEntity.setDescription(issueRequest.getDescription());
+
         return issueRepository.save(issueEntity);
     }
 
-    @CacheEvict(key = "{#id, 'allIssues'}")
+    @CacheEvict(allEntries = true)
     public void deleteIssue(UUID id) {
 //        Todo: need to use soft delete
         issueRepository.deleteById(id);
     }
 
-    @Cacheable(value = {"fact", "issue"}, key = "#id")
     public Page<FactEntity> getIssueFacts(UUID id, Pageable pageable) {
         List<FactEntity> factEntities = new ArrayList<>();
         Page<ManualIssueFactEntity> manualFactEntities = manualFactRepository.findAllByKey_IssueId(id, pageable);
@@ -119,10 +118,7 @@ public class IssueService {
         return new PageImpl<>(factEntities, pageable, manualFactEntities.getTotalElements());
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "issue", key = "#id"),
-            @CacheEvict(value = "issue", key = "'allIssues'")
-    })
+    @CacheEvict(allEntries = true)
     @Transactional
     public List<FactEntity> createManualFact(UUID id, List<UUID> factIds) {
         factService.throwIfFactsNotExist(factIds);

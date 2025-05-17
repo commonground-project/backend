@@ -31,6 +31,7 @@ public class InteractionEntity {
     @Enumerated(EnumType.STRING)
     private RelatedObjectType objectType;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
 }

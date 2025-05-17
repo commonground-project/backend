@@ -2,6 +2,7 @@ package tw.commonground.backend.service.user;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -83,6 +84,12 @@ public class UserController {
         ProfileEntity userEntity = userService.completeSetup(setupRequest, user.getEmail());
         UserResponse response = UserMapper.toResponse(userEntity);
         return ResponseEntity.ok(response);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("/user/complete-onboarding/me")
+    public void completeOnboarding(@AuthenticationPrincipal FullUserEntity user) {
+        userService.completeOnboarding(user.getEmail());
     }
 
     @GetMapping(value = "/user/avatar/{username}", produces = "image/png")
