@@ -44,3 +44,6 @@ out/
 
 ### Linters ###
 megalinter-reports/
+
+### Scripts ###
+/script/.env

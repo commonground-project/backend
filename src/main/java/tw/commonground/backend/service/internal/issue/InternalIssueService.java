@@ -19,9 +19,9 @@ import tw.commonground.backend.service.internal.issue.dto.InternalIssueResponse;
 import tw.commonground.backend.service.issue.entity.IssueRepository;
 import tw.commonground.backend.service.reference.ReferenceEntity;
 import tw.commonground.backend.service.viewpoint.ViewpointService;
+import tw.commonground.backend.service.viewpoint.repository.ViewpointRepositoryContainer;
 import tw.commonground.backend.shared.content.ContentParser;
 import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
-import tw.commonground.backend.service.viewpoint.entity.ViewpointRepository;
 import tw.commonground.backend.shared.tracing.Traced;
 
 import java.util.ArrayList;
@@ -37,17 +37,17 @@ public class InternalIssueService {
     private final IssueRepository issueRepository;
     private final ViewpointService viewpointService;
     private final IssueService issueService;
-    private final ViewpointRepository viewpointRepository;
+    private final ViewpointRepositoryContainer viewpointRepositoryContainer;
     private final InternalReferenceService internalReferenceService;
 
     public InternalIssueService(IssueRepository issueRepository,
                                 ViewpointService viewpointService,
-                                ViewpointRepository viewpointRepository,
+                                ViewpointRepositoryContainer viewpointRepositoryContainer,
                                 InternalReferenceService internalReferenceService,
                                 IssueService issueService) {
         this.issueRepository = issueRepository;
         this.viewpointService = viewpointService;
-        this.viewpointRepository = viewpointRepository;
+        this.viewpointRepositoryContainer = viewpointRepositoryContainer;
         this.internalReferenceService = internalReferenceService;
         this.issueService = issueService;
     }
@@ -105,7 +105,7 @@ public class InternalIssueService {
         IssueEntity issueEntity = issueRepository.findById(issueId).orElseThrow(
                 () -> new EntityNotFoundException("InternalIssue", "id", issueId.toString())
         );
-        List<ViewpointEntity> viewpoints = viewpointRepository.findAllByIssueId(issueId);
+        List<ViewpointEntity> viewpoints = viewpointRepositoryContainer.findAllByIssueId(issueId);
         List<InternalDetailViewpointResponse> internalDetailViewpointResponses = new ArrayList<>();
         for (ViewpointEntity viewpoint : viewpoints) {
             List<FactEntity> facts = viewpointService.getFactsOfViewpoint(viewpoint.getId());

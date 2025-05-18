@@ -1,10 +1,11 @@
-package tw.commonground.backend.service.viewpoint.entity;
+package tw.commonground.backend.service.viewpoint.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import tw.commonground.backend.service.viewpoint.entity.ViewpointEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import tw.commonground.backend.shared.entity.Reaction;

@@ -18,6 +18,8 @@ public interface ReplyRepository extends JpaRepository<ReplyEntity, UUID>, Reply
     @Query("SELECT r FROM ReplyEntity r WHERE r.id IN :ids")
     List<ReplyEntity> findAllByIds(@Param("ids") List<UUID> ids);
 
+    Integer countByViewpointId(UUID viewpointId);
+
     Page<ReplyEntity> findAllByViewpointId(UUID viewpointId, Pageable pageable);
 
     @Query("SELECT r FROM ReplyEntity r JOIN FETCH r.viewpoint v JOIN FETCH v.issue WHERE r.id = :id")
